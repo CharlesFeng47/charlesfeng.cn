@@ -1,23 +1,23 @@
 const config = {
-  siteTitle: 'Tania Rascia',
-  siteTitleShort: 'Tania Rascia',
-  siteTitleAlt: 'Tania Rascia',
+  siteTitle: 'Charles Feng',
+  siteTitleShort: 'Charles Feng',
+  siteTitleAlt: 'Charles Feng',
   siteLogo: '/logos/logo-1024.png',
-  siteUrl: 'https://www.taniarascia.com',
-  repo: 'https://github.com/taniarascia/taniarascia.com',
+  siteUrl: 'https://charlesfeng.cn',
+  repo: 'https://github.com/CharlesFeng47/charlesfeng.cn',
   pathPrefix: '',
-  dateFromFormat: 'YYYY-MM-DD',
-  dateFormat: 'MMMM Do, YYYY',
+  // dateFromFormat: 'YYYY-MM-DD',
+  dateFormat: 'YYYY-MM-DD',
   siteDescription:
-    'Tania Rascia is a full stack software developer specializing in modern JavaScript.',
+    'Hello, this\'s Charles Feng.',
   siteRss: '/rss.xml',
-  googleAnalyticsID: 'UA-42068444-1',
+  // googleAnalyticsID: '',
   postDefaultCategoryID: 'Tech',
-  newsletter: 'https://taniarascia.substack.com',
-  newsletterEmbed: 'https://taniarascia.substack.com/embed',
-  userName: 'Tania',
-  userEmail: 'hello@taniarascia.com',
-  userTwitter: 'taniarascia',
+  // newsletter: 'https://taniarascia.substack.com',
+  // newsletterEmbed: 'https://taniarascia.substack.com/embed',
+  // userName: 'Charles',
+  // userEmail: '',
+  // userTwitter: '',
   menuLinks: [
     {
       name: 'About me',
@@ -26,6 +26,14 @@ const config = {
     {
       name: 'Articles',
       link: '/blog/',
+    },
+    // {
+    //   name: 'Categories',
+    //   link: '/categories/',
+    // },
+    {
+      name: 'Tags',
+      link: '/tags/',
     },
     {
       name: 'Contact',

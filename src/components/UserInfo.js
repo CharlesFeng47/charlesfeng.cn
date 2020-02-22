@@ -22,7 +22,7 @@ export default class UserInfo extends Component {
                 </strong>
               </p>
 
-              <div className="flex">
+              {/* <div className="flex">
                 <a
                   href="https://ko-fi.com/taniarascia"
                   className="donate-button"
@@ -40,7 +40,7 @@ export default class UserInfo extends Component {
                 >
                   <img src={patreon} height="50" width="50" alt="Patreon" /> Become a Patron
                 </a>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

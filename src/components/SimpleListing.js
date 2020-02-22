@@ -6,8 +6,8 @@ export default class SimpleListing extends Component {
 
     return (
       <section className="simple-posts">
-        {data.map(post => {
-          return (
+        {
+          data.map(post => (
             <a href={post.path} key={post.title} target="_blank" rel="noopener noreferrer">
               <div className="each">
                 <h2>
@@ -16,8 +16,8 @@ export default class SimpleListing extends Component {
                 </h2>
               </div>
             </a>
-          )
-        })}
+          ))
+        }
       </section>
     )
   }

@@ -9,9 +9,7 @@ import SimpleListing from '../components/SimpleListing'
 import SEO from '../components/SEO'
 import config from '../../data/SiteConfig'
 import projects from '../../data/projects'
-import speaking from '../../data/speaking'
 import podcasts from '../../data/podcasts'
-import quotes from '../../data/quotes'
 import tania from '../../content/images/profile.jpg'
 
 export default class Index extends Component {
@@ -28,7 +26,7 @@ export default class Index extends Component {
         <div className="container">
           <div className="lead">
             <div className="elevator">
-              <h1>{`Hey, I'm Tania`}</h1>
+              <h1>{`Hey, I'm Charles`}</h1>
               <p>
                 I'm a full stack software developer creating{' '}
                 <a href="https://github.com/taniarascia" target="_blank" rel="noopener noreferrer">
@@ -97,25 +95,8 @@ export default class Index extends Component {
           </section>
 
           <section className="section">
-            <h2>Interviews</h2>
-            <SimpleListing simple data={podcasts} />
-          </section>
-
-          <section className="section">
-            <h2>Talks</h2>
-            <SimpleListing simple data={speaking} />
-          </section>
-
-          <section className="section">
-            <h2>{`Other People's Opinions`}</h2>
-            <div className="quotations">
-              {quotes.map(quote => (
-                <blockquote className="quotation" key={quote.name}>
-                  <p>{quote.quote}</p>
-                  <cite>— {quote.name}</cite>
-                </blockquote>
-              ))}
-            </div>
+            <h2>Brodcasts</h2>
+            <SimpleListing data={podcasts} />
           </section>
         </div>
       </Layout>

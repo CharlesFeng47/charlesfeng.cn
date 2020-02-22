@@ -28,38 +28,40 @@ export default class PostListing extends Component {
 
     return (
       <section className={`posts ${simple ? 'simple' : ''}`}>
-        {postList.map(post => {
-          let thumbnail
-          if (post.thumbnail) {
-            thumbnail = post.thumbnail.childImageSharp.fixed
-          }
+        {
+          postList.map(post => {
+            let thumbnail
+            if (post.thumbnail) {
+              thumbnail = post.thumbnail.childImageSharp.fixed
+            }
 
-          const popular = post.categories.includes('Popular')
-          const date = formatDate(post.date)
-          const newest = moment(post.date) > moment().subtract(1, 'months')
+            const popular = post.categories.includes('Popular')
+            const date = formatDate(post.date)
+            const newest = moment(post.date) > moment().subtract(1, 'months')
 
-          return (
-            <Link to={post.path} key={post.title}>
-              <div className="each">
-                {thumbnail ? <Img fixed={thumbnail} /> : <div />}
-                <div className="each-list-item">
-                  <h2>{post.title}</h2>
-                  {!simple && <div className="excerpt">{date}</div>}
+            return (
+              <Link to={post.path} key={post.title}>
+                <div className="each">
+                  {thumbnail ? <Img fixed={thumbnail} /> : <div />}
+                  <div className="each-list-item">
+                    <h2>{post.title}</h2>
+                    {!simple && <div className="excerpt">{date}</div>}
+                  </div>
+                  {newest && (
+                    <div className="alert">
+                      <div className="new">New!</div>
+                    </div>
+                  )}
+                  {popular && !simple && !newest && (
+                    <div className="alert">
+                      <div className="popular">Popular</div>
+                    </div>
+                  )}
                 </div>
-                {newest && (
-                  <div className="alert">
-                    <div className="new">New!</div>
-                  </div>
-                )}
-                {popular && !simple && !newest && (
-                  <div className="alert">
-                    <div className="popular">Popular</div>
-                  </div>
-                )}
-              </div>
-            </Link>
-          )
-        })}
+              </Link>
+            )
+          })
+        }
       </section>
     )
   }

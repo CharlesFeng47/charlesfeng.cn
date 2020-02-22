@@ -8,7 +8,6 @@ import PostTags from '../components/PostTags'
 import SEO from '../components/SEO'
 import config from '../../data/SiteConfig'
 import { formatDate, editOnGithub } from '../utils/global'
-import NewsletterForm from '../components/NewsletterForm'
 
 export default class PostTemplate extends Component {
   constructor(props) {
@@ -41,9 +40,8 @@ export default class PostTemplate extends Component {
 
     const date = formatDate(post.date)
     const githubLink = editOnGithub(post)
-    const twitterShare = `http://twitter.com/share?text=${encodeURIComponent(post.title)}&url=${
-      config.siteUrl
-    }/${post.slug}/&via=taniarascia`
+    const twitterShare = `http://twitter.com/share?text=${encodeURIComponent(post.title)}
+    &url=${config.siteUrl}/${post.slug}/&via=taniarascia`
 
     return (
       <Layout>
@@ -53,7 +51,9 @@ export default class PostTemplate extends Component {
         <SEO postPath={slug} postNode={postNode} postSEO />
         <article className="single container">
           <header className={`single-header ${!thumbnail ? 'no-thumbnail' : ''}`}>
-            {thumbnail && <Img fixed={post.thumbnail.childImageSharp.fixed} />}
+            {
+              thumbnail && <Img fixed={post.thumbnail.childImageSharp.fixed} />
+            }
             <div className="flex">
               <h1>{post.title}</h1>
               <div className="post-meta">
