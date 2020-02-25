@@ -52,7 +52,8 @@ export default class PostTemplate extends Component {
         <article className="single container">
           <header className={`single-header ${!thumbnail ? 'no-thumbnail' : ''}`}>
             {
-              thumbnail && <Img fixed={post.thumbnail.childImageSharp.fixed} />
+              thumbnail && 
+              <Img fixed={post.thumbnail.childImageSharp.fixed} className={post.thumbnailRound ? 'round' : ''} />
             }
             <div className="flex">
               <h1>{post.title}</h1>
@@ -104,6 +105,7 @@ export const pageQuery = graphql`
             }
           }
         }
+        thumbnailRound
         slug
         date
         categories

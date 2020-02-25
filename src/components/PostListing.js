@@ -12,6 +12,7 @@ export default class PostListing extends Component {
         path: postEdge.node.fields.slug,
         tags: postEdge.node.frontmatter.tags,
         thumbnail: postEdge.node.frontmatter.thumbnail,
+        thumbnailRound: postEdge.node.frontmatter.thumbnailRound,
         title: postEdge.node.frontmatter.title,
         date: postEdge.node.fields.date,
         excerpt: postEdge.node.excerpt,
@@ -23,6 +24,7 @@ export default class PostListing extends Component {
   }
 
   render() {
+    // only display title without date
     const { simple } = this.props
     const postList = this.getPostList()
 
@@ -42,7 +44,11 @@ export default class PostListing extends Component {
             return (
               <Link to={post.path} key={post.title}>
                 <div className="each">
-                  {thumbnail ? <Img fixed={thumbnail} /> : <div />}
+                  {
+                    thumbnail
+                      ? <Img fixed={thumbnail} className={post.thumbnailRound ? 'round' : ''} />
+                      : <div />
+                  }
                   <div className="each-list-item">
                     <h2>{post.title}</h2>
                     {!simple && <div className="excerpt">{date}</div>}
