@@ -9,9 +9,21 @@ export default class Footer extends Component {
     return (
       <footer className="footer container">
         <div>
-          {/* <Link to="/newsletter">Newsletter</Link>
-          <a href="https://www.taniarascia.com/rss.xml" target="_blank" rel="noopener noreferrer">
-            RSS
+          {/* <Link to="/newsletter">Newsletter</Link> */}
+          <a href="https://weibo.com/u/5708997053" target="_blank" rel="noopener noreferrer">
+            Weibo
+          </a>
+          <a href="https://music.apple.com/cn/playlist/charles-fengs-favorites/pl.u-6mo414WcBZVzxD8" target="_blank" rel="noopener noreferrer">
+            Apple Music Playlist
+          </a>
+          {/* <a href="https://space.bilibili.com/8298364/" target="_blank" rel="noopener noreferrer">
+            bilibili
+          </a> */}
+          {/* <a href="http://www.dianping.com/member/853628010" target="_blank" rel="noopener noreferrer">
+            dianping
+          </a> */}
+          {/* <a href="https://www.instagram.com/charlesfeng47" target="_blank" rel="noopener noreferrer">
+            Instagram
           </a> */}
         </div>
         <div>

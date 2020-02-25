@@ -13,16 +13,10 @@ const config = {
   siteRss: '/rss.xml',
   // googleAnalyticsID: '',
   postDefaultCategoryID: 'Tech',
-  // newsletter: 'https://taniarascia.substack.com',
-  // newsletterEmbed: 'https://taniarascia.substack.com/embed',
   // userName: 'Charles',
   // userEmail: '',
   // userTwitter: '',
   menuLinks: [
-    {
-      name: 'About me',
-      link: '/me/',
-    },
     {
       name: 'Articles',
       link: '/blog/',
@@ -36,8 +30,8 @@ const config = {
       link: '/tags/',
     },
     {
-      name: 'Contact',
-      link: '/contact/',
+      name: 'About me',
+      link: '/me/',
     },
   ],
   themeColor: '#3F80FF', // Used for setting manifest and progress theme colors.

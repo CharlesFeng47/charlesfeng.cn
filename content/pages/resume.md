@@ -1,110 +1,49 @@
 ---
-title: Tania Rascia
+title: 冯俊杰
 slug: resume
 template: page
 ---
 
-### Front End Software Developer
+### 基本信息
 
-- [taniarascia.com](https://www.taniarascia.com)
-- [hello@taniarascia.com](mailto:hello@taniarascia.com)
-- Chicago, IL
++ 冯俊杰，男性，出生于 1997 年 4 月 7 日
++ 南京大学软件学院 15 级本科毕业
++ 南京大学软件学院 19 级研究生在读
++ GPA：4.40 / 5.0，排名：21 / 212
++ GitHub：[https://github.com/CharlesFeng47](https://github.com/CharlesFeng47)
++ 手机：15205153110，Email：fdfengjunjie970407@gmail.com
 
-## Technical Skills
+### 个人作品 
 
-### Languages
++ 「[Quantour](https://github.com/NJUASI/Quantour)」：（2017 年春）使用 J2EE 框架 SSH 写成的股票查看、比较、量化系统，实现了股票的量化回测及结果可视化分析。通过将回测功能分解为**形成指标**形成和**筛选条件**排序两步，实现了类似果仁网的回测功能，并保证了结果的一致性、正确性。
++ 「[Marvel Note](https://github.com/CharlesFeng47/MarvelNote)」：（2017 年秋）使用 Node.js 框架 Express 在十天内完成的笔记管理应用。
++ 「[Marvel Ticket](https://github.com/CharlesFeng47/MarvelTicket)」：（2018 年春）使用 Vue.js 模版实现的课程大作业购票系统前端，后用于人机交互课程实践修改。
++ 「[TicketsManagementSystem](https://github.com/CharlesFeng47/TicketsManagementSystem)」：（2018 年春）使用 J2EE 框架 SSH 写成的课程大作业购票系统后端，为前端提供 RESTful api，后修改为 SpringBoot 项目。
++ 「[Expression](https://expression.iselab.cn)」：（2019 年 3 月 - 9 月）通过语音输入，以朗读、转述、叙述三种表达方式对人类的表达力进行评测。整个项目包含前端项目、后端项目和 Docker 项目三个部分，均部署在百度云上。前后端分离解耦，通过 RESTful API 进行调用。前端使用基于 Vue.js 的模版 d2admin，后端使用 Flask 框架，调用了百度云、讯飞语音识别的接口。为增强并发处理音频大文件的能力，使用了 Celery 队列专门处理语音的识别部分，即后端将请求放进 Celery 队列，Docker 项目轮询队列处理。为了减少语音音频传输消耗的带宽，使用了百度云对象存储服务 BOS。
 
-JavaScript (ES6), TypeScript, HTML5, CSS3, SQL, PHP, Bash
+### 奖励情况
 
-### Tools/Environment
++ 2019 "南京大学-vivo"软件开发马拉松（Hackathon）三等奖（2019.5.27）
++ 2018 南京大学人民奖学金二等奖（2018校级）
++ 2018 第四届阿⾥中间件性能挑战赛第⼀赛季第 100 / 3101 名（2018.7.12）
++ 2017 南京大学人民奖学金一等奖（2017.12.28校级）
++ 2016 南京大学人民奖学金二等奖（2016.12.22校级）
++ 2016-2017 南京大学软件学院优秀学生（2018.1.10院级）
++ 2016-2017 南京大学软件学院新媒体中心优秀部长（2017.6院级）
++ 2017 第三届万科“万创奔腾杯”南京高校创业大赛第一名（2017.5.10市区级（雨花台区））
++ 2016-2017 南京大学 iNJUers 南青策划之星（2017.5.4校级）
 
-React, Vue, Node, Express, Git, VSC, Jest, Selenium, Webpack, DevTools, Jira, AWS, Bootstrap, Sass, GraphQL
+### 语言能力
 
-### Concepts
++ CET4：579，CET6：507
 
-RESTful API Design, CI/CD, Agile Methodology, MVC Architecture, Secure Authentication, ADA, Testing (unit, integration, end-to-end) Databases (MySQL, PostgreSQL)
+### 校园生活
 
-## Experience
++ 南京大学软件学院新媒体中心设计部部员（2015）
++ 南京大学软件学院新媒体中心策划部部长（2016）
 
-### Front End Software Engineer
+### 实习经历
 
-**Dais Technology, Inc** - _2018 - Present | Chicago, IL_
-
-- Architected a platform that implements secure authentication and routing used in several production applications
-- Developed the internal user management and agent/carrier onboarding system
-- Worked in small teams as front end lead to create intuitive UIs
-
-### Technical Writer - JavaScript
-
-**DigitalOcean** - _2017 - 2019 | Remote_
-
-- Wrote the Understanding the DOM and How to Code JavaScript tutorial series
-- Shaped the content of the JavaScript curriculum by collaborating with the in-house team
-
-### Web Developer
-
-**RateYourSeats.com** - _2018 | Chicago, IL_
-
-- Designed an API for data reuse across multiple front ends
-- Integrated Git version control into the company codebase
-- Created interactive SVGs for arenas and stadiums
-
-### Web Developer/Designer
-
-**Lettuce Entertain You Enterprises, Inc.** - _June 2015 - June 2017 | Chicago, IL_
-
-- Developed, designed, and maintained custom websites
-- Took ownership of Amazon Web Services infrastructure and Linux administration tasks
-- Established company conventions/standards and documented all internal processes
-
-## Open Source Projects
-
-### TakeNote
-
-**Web-based Markdown Note-taking App** - [Source](https://github.com/taniarascia/takenote) - _2019_
-
-A simple, Markdown-based note-taking app for the web, written in TypeScript and functional React.
-
-### Chip8.js
-
-**Retro Game Emulator** - [Source](https://github.com/taniarascia/chip8) - _2018 - 2019_
-
-An emulator for Chip-8 games implementing browser, terminal, and graphical front ends.
-
-### Laconia
-
-**MVC Authentication Framework** - [Source](https://github.com/taniarascia/laconia) - _2018_
-
-An MVC framework used as a helpful starting point for implementing authentication, object-oriented architecture, MVC concepts, routing and databases.
-
-### Primitive
-
-**Front End Toolkit** - [Source](https://github.com/taniarascia/primitive)
-
-A minimalist front-end design toolkit built with Sass for developing responsive, browser-consistent web apps.
-
-## Speaking
-
-### An Introduction to Vue
-
-**JavaScript Chicago** - _2019 | Chicago, IL_
-
-### An Introduction to React
-
-**JavaScript Chicago** - _2019 | Chicago, IL_
-
-### Developing a WordPress Theme From Scratch
-
-**WordCamp Chicago** - _2017 | Chicago, IL_
-
-## Education
-
-### B.A. in Professional Studies
-
-**Robert Morris University** - _2007 - 2010 | Chicago, IL_
-
-## Accomplishments
-
-- Getting Started With React article featured in official React documentation as React For Beginners. [Source](https://reactjs.org/docs/getting-started.html)
-- Interviewed in the Egghead.io Podcast in Switching Careers and Learning in Public with Joel Hooks. [Source](https://egghead.io/podcasts/switching-careers-and-learning-in-public-with-tania-rascia)
-- Wrote published articles for DigitalOcean, Envato Tuts+, SitePoint, LogRocket, Codrops, and Progress. [Source](https://www.taniarascia.com/publications)
++ 华为技术有限公司南京研究所（2018年7月 ~ 2018年12月）：在 CBG 应用市场部承担后端职责。
+  + 华为海外应用市场**支付模块**兼容替代 Google Play。
+  + 原华为应用市场后台**审核应用模块**更新为**微服务架构**。

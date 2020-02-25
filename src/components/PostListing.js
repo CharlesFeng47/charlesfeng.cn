@@ -51,18 +51,24 @@ export default class PostListing extends Component {
                   }
                   <div className="each-list-item">
                     <h2>{post.title}</h2>
-                    {!simple && <div className="excerpt">{date}</div>}
+                    {
+                      !simple && <div className="excerpt">{date}</div>
+                    }
                   </div>
-                  {newest && (
-                    <div className="alert">
-                      <div className="new">New!</div>
-                    </div>
-                  )}
-                  {popular && !simple && !newest && (
-                    <div className="alert">
-                      <div className="popular">Popular</div>
-                    </div>
-                  )}
+                  {
+                    newest && (
+                      <div className="alert">
+                        <div className="new">New!</div>
+                      </div>
+                    )
+                  }
+                  {
+                    popular && !simple && !newest && (
+                      <div className="alert">
+                        <div className="popular">Popular</div>
+                      </div>
+                    )
+                  }
                 </div>
               </Link>
             )

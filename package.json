@@ -1,9 +1,9 @@
 {
-  "name": "taniarascia.com",
+  "name": "charlesfeng.cn",
   "description": "Personal website running on Gatsby, React, and Node.js.",
-  "version": "1.0.1",
-  "author": "Tania Rascia <hello@taniarascia.com>",
-  "repository": "git@github.com:taniarascia/taniarascia.com",
+  "version": "1.0.0",
+  "author": "CharlesFeng <fdfengjunjie970407@google.com>",
+  "repository": "git@github.com:CharlesFeng47/charlesfeng.cn.git",
   "dependencies": {
     "eslint-utils": "^1.4.1",
     "gatsby": "^2.13.13",

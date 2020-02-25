@@ -26,16 +26,14 @@ export default class Index extends Component {
         <div className="container">
           <div className="lead">
             <div className="elevator">
-              <h1>{`Hey, I'm Charles`}</h1>
+              <h1>{`Hello, I'm Charles.`}</h1>
               <p>
-                I'm a full stack software developer creating{' '}
-                <a href="https://github.com/taniarascia" target="_blank" rel="noopener noreferrer">
-                  open source
-                </a>{' '}
-                projects and <Link to="/blog">writing</Link> about modern JavaScript, Node.js, and
-                development.
+                冯俊杰，南京大学软件学院 2019 级研究生在读。
               </p>
-              <div className="social-buttons">
+              <p>
+                悟已往之不谏，知来者之可追。实迷途其未远，觉今是而昨非。希望每天都能进步一点点。(*ˉ︶ˉ*)
+              </p>
+              {/* <div className="social-buttons">
                 <a
                   className="patreon"
                   href="https://www.patreon.com/taniarascia"
@@ -45,25 +43,27 @@ export default class Index extends Component {
                   Patreon
                 </a>
                 <GitHubButton
-                  href="https://github.com/taniarascia"
+                  href="https://github.com/CharlesFeng47"
                   data-size="large"
                   data-show-count="true"
                 >
-                  taniarascia
+                  CharlesFeng
                 </GitHubButton>
-              </div>
+              </div> */}
             </div>
             <div className="newsletter-section">
               <img src={tania} className="newsletter-avatar" alt="Tania" />
-              <div>
-                <h3>Email Newsletter</h3>
-                <p>
-                  I write tutorials. Get an update when something new comes out by signing up below!
-                </p>
-                <a className="button" href="https://taniarascia.substack.com">
-                  Subscribe
-                </a>
-              </div>
+              <h3>求 Follow</h3>
+              <p>
+                绝对不是穿格子衫的程序员！
+              </p>
+              <GitHubButton
+                href="https://github.com/CharlesFeng47"
+                data-size="large"
+                data-show-count="true"
+              >
+                CharlesFeng
+             </GitHubButton>
             </div>
           </div>
         </div>
@@ -94,10 +94,10 @@ export default class Index extends Component {
             <ProjectListing projects={projects} />
           </section>
 
-          <section className="section">
+          {/* <section className="section">
             <h2>Brodcasts</h2>
             <SimpleListing data={podcasts} />
-          </section>
+          </section> */}
         </div>
       </Layout>
     )

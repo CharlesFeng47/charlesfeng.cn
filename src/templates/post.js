@@ -58,7 +58,8 @@ export default class PostTemplate extends Component {
             <div className="flex">
               <h1>{post.title}</h1>
               <div className="post-meta">
-                <time className="date">{date}</time>/
+                <time className="date">{date}</time>
+                {/* /
                 <a
                   className="twitter-link"
                   href={twitterShare}
@@ -75,7 +76,7 @@ export default class PostTemplate extends Component {
                   rel="noopener noreferrer"
                 >
                   Edit ✏️
-                </a>
+                </a> */}
               </div>
               <PostTags tags={post.tags} />
             </div>
