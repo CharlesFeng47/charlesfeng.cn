@@ -127,6 +127,7 @@ export const pageQuery = graphql`
                 }
               }
             }
+            thumbnailRound
             date
             template
           }
