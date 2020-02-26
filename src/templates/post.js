@@ -23,17 +23,18 @@ export default class PostTemplate extends Component {
     const { slug } = this.props.pageContext
     const postNode = this.props.data.markdownRemark
     const post = postNode.frontmatter
+
+    if (post.categories === null || post.categories.length === 0) {
+      post.categories = []
+      post.categories.push(config.postDefaultCategory)
+    }
     const popular = postNode.frontmatter.categories.find(category => category === 'Popular')
-    let thumbnail
 
     if (!post.id) {
       post.id = slug
     }
 
-    if (!post.category_id) {
-      post.category_id = config.postDefaultCategoryID
-    }
-
+    let thumbnail
     if (post.thumbnail) {
       thumbnail = post.thumbnail.childImageSharp.fixed
     }

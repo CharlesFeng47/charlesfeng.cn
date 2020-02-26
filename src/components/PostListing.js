@@ -3,6 +3,7 @@ import { Link } from 'gatsby'
 import Img from 'gatsby-image'
 import moment from 'moment'
 import { formatDate } from '../utils/global'
+import config from '../../data/SiteConfig'
 
 export default class PostListing extends Component {
   getPostList() {
@@ -35,6 +36,11 @@ export default class PostListing extends Component {
             let thumbnail
             if (post.thumbnail) {
               thumbnail = post.thumbnail.childImageSharp.fixed
+            }
+
+            if (post.categories === null || post.categories.length === 0) {
+              post.categories = []
+              post.categories.push(config.postDefaultCategory)
             }
 
             const popular = post.categories.includes('Popular')

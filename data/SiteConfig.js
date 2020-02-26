@@ -12,7 +12,7 @@ const config = {
     'Hello, this\'s Charles Feng.',
   siteRss: '/rss.xml',
   // googleAnalyticsID: '',
-  postDefaultCategoryID: 'Tech',
+  postDefaultCategory: 'Tech',
   // userName: 'Charles',
   // userEmail: '',
   // userTwitter: '',
