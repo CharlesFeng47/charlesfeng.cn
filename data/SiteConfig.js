@@ -12,7 +12,6 @@ const config = {
     'Hello, this\'s Charles Feng.',
   siteRss: '/rss.xml',
   // googleAnalyticsID: '',
-  postDefaultCategory: 'Tech',
   // userName: 'Charles',
   // userEmail: '',
   // userTwitter: '',

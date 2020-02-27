@@ -24,10 +24,6 @@ export default class PostTemplate extends Component {
     const postNode = this.props.data.markdownRemark
     const post = postNode.frontmatter
 
-    if (post.categories === null || post.categories.length === 0) {
-      post.categories = []
-      post.categories.push(config.postDefaultCategory)
-    }
     const popular = postNode.frontmatter.categories.find(category => category === 'Popular')
 
     if (!post.id) {
