@@ -56,11 +56,11 @@ export default class Navigation extends Component {
               aria-label="Toggle Dark Mode."
               title="Toggle Dark Mode"
             >
-              {theme.dark ? (
-                <img src={sun} className="theme-icon" alt="Light Mode" />
-              ) : (
-                <img src={moon} className="theme-icon" alt="Dark Mode" />
-              )}
+              {
+                theme.dark
+                  ? (<img src={sun} className="theme-icon" alt="Light Mode" />)
+                  : (<img src={moon} className="theme-icon" alt="Dark Mode" />)
+              }
             </button>
           </div>
         </div>

@@ -1,11 +1,16 @@
 import React, { Component } from 'react'
 import { Link } from 'gatsby'
-import netlify from '../../content/images/netlify.png'
-import gatsby from '../../content/thumbnails/gatsby.png'
-import github from '../../content/images/github.png'
+import netlify from '../images/netlify.png'
+import gatsby from '../images/gatsby.png'
+import github from '../images/github.png'
+import githubDark from '../images/github-dark.png'
+import ThemeContext from '../context/ThemeContext'
 
 export default class Footer extends Component {
+  static contextType = ThemeContext // eslint-disable-line
+
   render() {
+    const theme = this.context
     return (
       <footer className="footer container">
         <div>
@@ -29,7 +34,7 @@ export default class Footer extends Component {
         <div>
           <a href="https://github.com/CharlesFeng47" title="Open-source on GitHub">
             <img
-              src={github}
+              src={theme.dark ? githubDark : github}
               target="_blank"
               rel="noopener noreferrer"
               className="footer-img"
