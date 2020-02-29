@@ -1,15 +1,15 @@
 ---
 date: 2019-07-23
-title: 'APFS，Mac OS扩展（HFS +）和ExFAT之间有什么区别？'
+title: 'APFS，macOS 扩展（HFS +）和 exFAT 之间有什么区别？'
 template: post
-thumbnail: '../images/profile.jpg'
+thumbnail: '../thumbnails/fs.png'
 thumbnailRound: true
 slug: apfs-hfs-exfat-diff
 categories:
   - Tech
 tags:
   - Storage
-  - ExFAT
+  - exFAT
 ---
 
 
