@@ -2,12 +2,12 @@
 date: 2019-05-09
 title: 'React Controlled VS Uncountrolled'
 template: post
-thumbnail: '../thumbnails/vue.png'
+thumbnail: '../thumbnails/react.png'
 slug: react-controlled-vs-uncountrolled
 categories:
   - Tech
 tags:
-  - Vue
+  - React
 ---
 
 ## 受控组件

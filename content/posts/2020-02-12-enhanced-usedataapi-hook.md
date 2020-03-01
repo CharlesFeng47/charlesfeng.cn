@@ -12,6 +12,8 @@ tags:
   - React
   - Taro
   - Hook
+  - Stateless Component
+  - Functional Component
 ---
 
 ## 起因

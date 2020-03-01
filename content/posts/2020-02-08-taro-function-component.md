@@ -6,9 +6,11 @@ thumbnail: '../thumbnails/taro.png'
 slug: taro-function-component
 categories:
   - Tech
+  - Snippet
 tags:
-  - Linux
-  - ExFAT
+  - Taro
+  - Stateless Component
+  - Functional Component
 ---
 
 在了解 React Hooks 后，觉得这个写法大大弥补了函数组件的不足，于是决定多写函数组件~~练手~~。
