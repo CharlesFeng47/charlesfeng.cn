@@ -5,6 +5,7 @@ template: post
 thumbnail: '../thumbnails/appium.png'
 slug: appium-uiautomator
 categories:
+  - Reproduced
   - Snippet
 tags:
   - Appium

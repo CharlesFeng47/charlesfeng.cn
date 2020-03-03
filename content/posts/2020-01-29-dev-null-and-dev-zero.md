@@ -5,6 +5,7 @@ template: post
 thumbnail: '../thumbnails/terminal.png'
 slug: dev-null-and-dev-zero
 categories:
+  - Reproduced
   - Tech
 tags:
   - Linux

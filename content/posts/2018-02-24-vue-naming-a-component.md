@@ -5,6 +5,7 @@ template: post
 thumbnail: '../thumbnails/vue.png'
 slug: vue-naming-a-component
 categories:
+  - Reproduced
   - Tech
 tags:
   - Vue

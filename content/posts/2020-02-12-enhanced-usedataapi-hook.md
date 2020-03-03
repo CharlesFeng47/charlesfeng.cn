@@ -8,6 +8,7 @@ slug: enhanced-usedataapi-hook
 categories:
   - Tech
   - Snippet
+  - Popular
 tags:
   - React
   - Taro
