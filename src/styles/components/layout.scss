@@ -1103,7 +1103,12 @@ button[disabled] {
   margin: 2rem 0;
   padding: 1.5rem;
   text-align: center;
-  background: radial-gradient(circle at 20% 20%, #f58874 25%, #fa0324 100%);
+  background: radial-gradient(circle at 20% 20%, #f58874 25%, #fa0324 100%); // light red
+  // background: radial-gradient(circle at 20% 20%, #fdeb71, #f8d800); // yellow
+  // background: radial-gradient(circle at 20% 20%, #abdcff, #0396ff); // light blue
+  // background: radial-gradient(circle at 20% 20%, #81dbb8, #28c76f); // green
+  // background: radial-gradient(circle at 20% 20%, #fccf31, #f55555); // orange
+  // background: radial-gradient(circle at 20% 20%, #79f1a4, #0e5cad); // blue-green
   box-shadow: 0.5rem 1.25rem 1.75rem 0 rgba(235, 156, 143, 0.4);
   color: rgba(255, 255, 255, 0.9);
 
