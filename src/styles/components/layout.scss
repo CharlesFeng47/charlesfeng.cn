@@ -187,10 +187,6 @@
   display: grid;
   margin-bottom: 30px;
 
-  .round {
-    border-radius: 50%;
-  }
-
   &.no-thumbnail {
     display: flex;
   }
@@ -319,10 +315,6 @@
         align-items: start;
         padding: 1.5rem 2rem;
         margin: 0 -2rem;
-
-        .round {
-          border-radius: 50%;
-        }
 
         &:hover {
           border-radius: $border-radius;
