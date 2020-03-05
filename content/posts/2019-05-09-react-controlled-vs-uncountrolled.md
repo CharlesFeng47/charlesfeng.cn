@@ -1,6 +1,6 @@
 ---
 date: 2019-05-09
-title: 'React Controlled VS Uncountrolled'
+title: 'React Controlled vs. Uncountrolled'
 template: post
 thumbnail: '../thumbnails/react.png'
 slug: react-controlled-vs-uncountrolled
