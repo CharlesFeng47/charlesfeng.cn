@@ -90,7 +90,7 @@ export default class Index extends Component {
           </section>
 
           <section className="section">
-            <h2>Open Source Projects</h2>
+            <h2>My Projects</h2>
             <ProjectListing projects={projects} />
           </section>
 
