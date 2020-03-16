@@ -20,7 +20,7 @@ tags:
 
 这需要来看一下 Vue 中是怎么完成一个表单的。
 
-![](../images/2020-02-23-1.png)
+![](https://cdn.charlesfeng.top/charlesfeng/images/2020-02-23-1.png)
 
 #### Input
 
@@ -292,7 +292,7 @@ FormItem 与 Form 之间同样有交互，它有两种方式。
 
 ## 总结
 
-![](../images/2020-02-23-1.png)
+![](https://cdn.charlesfeng.top/charlesfeng/images/2020-02-23-1.png)
 
 相信到现在，Form、FormItem、具体的表单控件如 Input 这三者之间的关系已经很清楚了。
 
