@@ -10,7 +10,6 @@ import SEO from '../components/SEO'
 import config from '../../data/SiteConfig'
 import projects from '../../data/projects'
 import podcasts from '../../data/podcasts'
-import tania from '../../content/images/profile.jpg'
 
 export default class Index extends Component {
   render() {
@@ -52,7 +51,7 @@ export default class Index extends Component {
               </div> */}
             </div>
             <div className="newsletter-section">
-              <img src={tania} className="newsletter-avatar" alt="Tania" />
+              <img src={config.profileUrl} className="newsletter-avatar" alt={config.profileAlt} />
               <h3>求 Follow</h3>
               <p>
                 绝对不是穿格子衫的程序员！
