@@ -5,9 +5,9 @@ template: post
 thumbnail: '../thumbnails/vue.png'
 slug: vue-global-variables-and-functions
 categories:
-  - Reproduced
   - Tech
 tags:
+  - Reproduced
   - Vue
 ---
 

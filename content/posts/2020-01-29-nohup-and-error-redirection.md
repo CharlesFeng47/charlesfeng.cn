@@ -5,9 +5,9 @@ template: post
 thumbnail: '../thumbnails/terminal.png'
 slug: nohup-and-error-redirection
 categories:
-  - Reproduced
   - Tech
 tags:
+  - Reproduced
   - Linux
 ---
 

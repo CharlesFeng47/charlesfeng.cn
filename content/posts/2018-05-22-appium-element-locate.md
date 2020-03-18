@@ -5,9 +5,9 @@ template: post
 thumbnail: '../thumbnails/appium.png'
 slug: appium-element-locate
 categories:
-  - Reproduced
   - Snippet
 tags:
+  - Reproduced
   - Appium
   - Test
   - Android

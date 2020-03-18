@@ -5,9 +5,9 @@ template: post
 thumbnail: '../thumbnails/gatsby.png'
 slug: gatsby-vs-docusaurus
 categories:
-  - Reproduced
   - Tech
 tags:
+  - Reproduced
   - Web
   - CMS
   - Gatsby.js

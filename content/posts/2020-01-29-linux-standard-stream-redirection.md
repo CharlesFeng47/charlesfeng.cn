@@ -5,9 +5,9 @@ template: post
 thumbnail: '../thumbnails/terminal.png'
 slug: linux-standard-stream-redirection
 categories:
-  - Reproduced
   - Tech
 tags:
+  - Reproduced
   - Linux
 ---
 

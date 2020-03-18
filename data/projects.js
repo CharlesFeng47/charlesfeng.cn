@@ -12,6 +12,12 @@ export default [
     description: '通过微信小程序灵活管理你的药品',
   },
   {
+    icon: '🧩',
+    title: 'iCan 爱看',
+    source: 'https://github.com/health-gaffer/vivo-frontend',
+    description: '扫描二维码加入讲座来一起发表观点叭',
+  },
+  {
     icon: '📝',
     title: 'Yacc',
     // path: 'https://takenote.dev',

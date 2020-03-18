@@ -5,9 +5,9 @@ template: post
 thumbnail: '../thumbnails/computer.png'
 slug: fronted-architecture-from-meituan
 categories:
-  - Reproduced
   - Tech
 tags:
+  - Reproduced
   - Web
   - Frontend
 ---
