@@ -7,7 +7,6 @@ slug: nohup-and-error-redirection
 categories:
   - Tech
 tags:
-  - Reproduced
   - Linux
 ---
 
@@ -30,6 +29,10 @@ command > out.file 2>&1 &
 
 这样，所有的标准输出和错误输出都将被重定向到一个叫做 out.file 的文件中。
 
+#### 底层原理
+
+每一个命令行终端都是一个 shell 进程，你在这个终端里执行的程序实际上都是这个 shell 进程分出来的子进程。正常情况下，shell 进程会阻塞，等待子进程退出才重新接收你输入的新的命令。加上 `&` 号，只是让 shell 进程不再阻塞，立刻返回（return status 为 0），然后就可以继续响应你的新命令了。但是无论如何，你如果关掉了这个 shell 命令行端口，依附于它的所有子进程都会退出。
+
 ## nuhup
 
 使用 `&` 命令后，作业被提交到后台运行，当前控制台没有被占用，但是一但把当前控制台关掉（退出帐户时），作业就会停止运行。**`nohup` 命令可以在你退出帐户之后继续运行相应的进程。nohup 就是不挂起的意思（no hang up）。**该命令的一般形式为：
@@ -38,7 +41,7 @@ command > out.file 2>&1 &
 nohup command &
 ```
 
-如果使用 `nohup` 命令提交作业，那么在缺省情况下该作业的所有输出都被重定向到一个名为 nohup.out 的文件中，除非另外指定了输出文件：
+如果使用 `nohup` 命令提交作业，那么在缺省情况下该作业的所有输出都被重定向到一个名为 **nohup.out** 的文件中，除非另外指定了输出文件：
 
 ```shell
 nohup command > myout.file 2>&1 &
@@ -49,13 +52,22 @@ nohup command > myout.file 2>&1 &
 + `Ctrl+c`：终止前台命令。
 + `jobs`：查看当前有多少在后台运行的命令。`jobs -l` 选项可显示所有任务的 PID，jobs 的状态可以是 running、stopped、Terminated。但是如果任务被终止了（kill），shell 从当前的 shell 环境已知的列表中删除任务的进程标识。
 
+#### 底层原理
+
+**nohup** 是一个 [POSIX](https://zh.wikipedia.org/wiki/可移植操作系统接口) 命令，用于忽略 `SIGHUP` ("signal hang up"，挂断信号，是终端注销时所发送至程序的一个信号）。所以使用 `nohup` 后即使退出终端也不会是进程被关掉啦，因为它忽略了这个信号。
+
+此外，还有一种方式是 `(cmd &)` 。这样是将 `cmd` 命令挂到一个 `systemd` 系统守护进程名下，认 `systemd` 做爸爸，这样当你退出当前终端时，对于刚才的 `cmd` 命令就完全没有影响了。
+
 ## 2>&1
 
 `2>&1` 是将标准出错重定向到标准输出，这里的标准输出已经重定向到了 out.file 文件，即将标准出错也输出到 out.file 文件中。
 
 试想 `2>1` 代表什么，2 与 > 结合代表错误重定向，而 1 则代表错误重定向到一个文件 1，而不代表标准输出；换成 `2>&1`，& 与 1 结合就代表标准输出了，就变成错误重定向到标准输出。
 
-## 来源
 
-版权声明：本文为CSDN博主「liuyanfeier」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。原文链接：<a href='https://blog.csdn.net/liuyanfeier/article/details/62422742' target="_blank" rel="noopener noreferrer">https://blog.csdn.net/liuyanfeier/article/details/62422742</a>
+
+## 参考
+
++ [linux后台执行命令：& 和 nohup](https://blog.csdn.net/liuyanfeier/article/details/62422742)
++ [关于 Linux shell 你必须知道的](https://labuladong.gitbook.io/algo/di-wu-zhang-ji-suan-ji-ji-shu/linuxshell)
 
