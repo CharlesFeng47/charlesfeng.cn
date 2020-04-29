@@ -21,7 +21,7 @@ GraphQL 的核心是启用**声明式数据**获取，客户端可以在其中�
 
 如今，大多数应用程序都需要从服务器上获取数据，而该服务器将数据存储在数据库中。API 的职责是为存储的数据提供适合应用程序需求的接口。
 
-![](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-02-1.1.jpg)
+![](https://cdn.charlesfeng.top/images/2020-03-02-1.1.jpg)
 
 GraphQL 通常与作为数据库技术相混淆。这是一个误解，GraphQL 是 API 的查询语言，而非数据库的。从这个意义上讲，它与数据库无关，可以在使用 API 的任何情况下有效使用。
 
@@ -63,11 +63,11 @@ Facebook 第一次在 React.js Conf  2015 上公开谈论 GraphQL，不久之后
 
 使用 REST API，通常可以通过访问多个端点来收集数据。在示例中，这些可以是 `/users/<id>` 端点，以获取初始用户数据。其次，可能有一个 `/users/<id>/posts` 端点，该端点返回用户的所有帖子。然后，第三个端点将是 `/users/<id>/followers`，它返回每个用户的关注者列表。
 
-![](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-02-2.1-1.jpg)
+![](https://cdn.charlesfeng.top/images/2020-03-02-2.1-1.jpg)
 
 而 GraphQL 中，您只需将包含具体数据要求的单个查询发送到 GraphQL 服务器。然后，服务器将使用满足这些要求的 JSON 对象进行响应。
 
-![](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-02-2.1-2.jpg)
+![](https://cdn.charlesfeng.top/images/2020-03-02-2.1-2.jpg)
 
 ### 2.2 No more Over- and Underfetching
 
@@ -160,7 +160,7 @@ GraphQL 中采用的方法是完全不同的。GraphQL API 并不具有返回固
 }
 ```
 
-![](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-02-3.2.2.jpg)
+![](https://cdn.charlesfeng.top/images/2020-03-02-3.2.2.jpg)
 
 
 
@@ -184,7 +184,7 @@ mutation {
 
 当今许多应用程序的另一个重要要求是与服务器建立实时连接，以便立即了解重要事件。对于此用例，GraphQL 提供了订阅的概念。
 
-![](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-02-3.4.jpg)
+![](https://cdn.charlesfeng.top/images/2020-03-02-3.4.jpg)
 
 客户端订阅事件时，它将启动并保持与服务器的稳定连接。每当实际上发生该特定事件时，服务器就会将相应的数据推送到客户端。与遵循典型的“请求-响应-周期”的 query 和 mutation 不同，预订表示发送到客户端的数据流。
 
@@ -264,7 +264,7 @@ GraphQL 仅作为规范 specification 发布。这意味着 GraphQL 实际上不
 
 #### 4.1.1. GraphQL server with a connected database
 
-![](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-02-4.1.1.jpg)
+![](https://cdn.charlesfeng.top/images/2020-03-02-4.1.1.jpg)
 
 对于新建项目，这种架构将是最常见的。在安装程序中，您具有一个实现 GraphQL 规范的单个（Web）服务器。当 query 到达 GraphQL 服务器时，该服务器读取 query 的 payload 并从数据库中获取所需的信息。这称为 resolving the query。然后，它按照官方规范中的描述构造响应对象，并将其返回给客户端。
 
@@ -274,7 +274,7 @@ GraphQL 也不关心数据库或用于存储数据的格式。您可以使用 SQ
 
 #### 4.1.2. GraphQL layer that integrates existing systems
 
-![](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-02-4.1.2.jpg)
+![](https://cdn.charlesfeng.top/images/2020-03-02-4.1.2.jpg)
 
 GraphQL 的另一个主要用例是在通过单个一致的 GraphQL API 集成多个现有系统。对于拥有传统基础架构和许多不同 API 的公司而言，这尤其引人注目，这些公司已经发展了多年，现在却承担了很高的维护负担。这些遗留系统的一个主要问题是，它们实际上使当前构建一个需要访问多个系统的创新产品成为不可能。
 
@@ -284,7 +284,7 @@ GraphQL 的另一个主要用例是在通过单个一致的 GraphQL API 集成�
 
 #### 4.1.3. Hybrid approach with connected database and integration of existing system
 
-![](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-02-4.1.3.jpg)
+![](https://cdn.charlesfeng.top/images/2020-03-02-4.1.3.jpg)
 
 最后，可以将两种方法结合起来，构建一个具有连接数据库但仍可与旧系统或第三方系统通信的 GraphQL 服务器。
 

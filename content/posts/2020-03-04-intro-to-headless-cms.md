@@ -124,11 +124,11 @@ Headless CMS 可以在保留原有 CMS 强大的编辑能力（如富文本编�
 
 Gatsby.js 就是其中翘楚，它使用 React 技术来构建静态网站或 App 的框架，但是往往被大家用来用来构建静态博客网站哈哈。它可以从 Headless CMS 系统如 [Contentful](https://app.contentful.com/) 中获取数据并展示，下图所示的即为 [gatsby-contentful-starter](https://www.gatsbyjs.org/starters/contentful-userland/gatsby-contentful-starter/) 的构建结果，在 Contentful 中可以看到所有的文章内容，如下所示。
 
-![](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-04-1.jpg)
+![](https://cdn.charlesfeng.top/images/2020-03-04-1.jpg)
 
 此外，在编辑界面可以看到他的富文本编辑器，可以提供更加强大的编辑功能。
 
-![](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-04-2.jpg)
+![](https://cdn.charlesfeng.top/images/2020-03-04-2.jpg)
 
 而 Netlify 则是一个极其简单、方便的静态资源托管网站，支持持续集成、一键 HTTPS 等方便的功能。
 

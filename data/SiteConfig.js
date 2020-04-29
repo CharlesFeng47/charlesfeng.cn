@@ -4,7 +4,7 @@ const config = {
   siteTitleAlt: 'Charles Feng',
   siteLogo: '/logos/logo-1024.png',
   siteUrl: 'https://charlesfeng.cn',
-  profileUrl: 'https://cdn.charlesfeng.top/charlesfeng/images/profile.jpg',
+  profileUrl: 'https://cdn.charlesfeng.top/images/profile.jpg',
   profileAlt: 'CharlesFengProfile',
   repo: 'https://github.com/CharlesFeng47/charlesfeng.cn',
   pathPrefix: '',

@@ -43,6 +43,6 @@ export default [
     title: 'Quantour',
     // path: 'https://takenote.dev',
     source: 'https://github.com/NJUASI/Quantour',
-    description: '一个股票查看、比较、量化系统，实现了股票的量化回测及结果可视化分析',
+    description: '一个股票查看比较、量化系统，实现了股票的量化回测及结果可视化分析',
   },
 ]

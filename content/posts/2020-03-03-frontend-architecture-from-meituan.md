@@ -22,7 +22,7 @@ tags:
 
 因此，软件架构是关于软件开发中重要的事情。思考软件架构其实就是思考哪些是最重要的事情，并且要保持这些部分始终运行在良好的状态下。
 
-![img](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-03-1.jpg)
+![img](https://cdn.charlesfeng.top/images/2020-03-03-1.jpg)
 
 软件架构通常涵盖三个部分：
 
@@ -30,7 +30,7 @@ tags:
 - **通信接口**：定义了系统组件之间是如何进行通信的，通常指的是组件/模块之间的通信方式、接口定义、API。
 - **质量要求**：定义了非功能性的系统要求，例如扩展性、稳定性、高可用性、高并发、高性能、安全等等。
 
-![img](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-03-2.jpg)
+![img](https://cdn.charlesfeng.top/images/2020-03-03-2.jpg)
 
 不同阶段构成架构的因素是不同的，基于这个思路，架构设计可以分为四个层级：
 
@@ -41,13 +41,13 @@ tags:
 
 ## 2. 为什么软件架构很重要？
 
-![img](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-03-3.jpg)
+![img](https://cdn.charlesfeng.top/images/2020-03-03-3.jpg)
 
 软件架构代表了软件内部是组织运作的方式，这个往往并不会被用户所感知，因此，软件架构在某些时候会被忽略。
 
 对于用户而言，良好的用户界面和系统运行错误是能够被感知的，而内部的模块化设计并不会被感知，于是，良好的架构设计是很难被衡量的。
 
-![img](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-03-4.jpg)
+![img](https://cdn.charlesfeng.top/images/2020-03-03-4.jpg)
 
 **架构的根本价值在于能够降低未来功能开发的成本。**
 
@@ -59,7 +59,7 @@ tags:
 
 ## 3. 有哪些架构设计模型？
 
-![img](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-03-5.jpg)
+![img](https://cdn.charlesfeng.top/images/2020-03-03-5.jpg)
 
 对于软件架构设计模型，我们可以从两个层面来看。第一个层面对应的是系统的情况，所有功能在一个单一巨石系统（Monolithic）、基于服务的系统（Service-based）和分布式系统（Dsitributed）。
 
@@ -67,7 +67,7 @@ tags:
 
 对于巨石系统而言，通常的软件架构方式是基于分层设计。
 
-![img](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-03-6.jpg)
+![img](https://cdn.charlesfeng.top/images/2020-03-03-6.jpg)
 
 通过分层设计可以将系统进行解耦拆分，每一层都会专注于自己的功能，并且提供对外暴露的接口以供上层调用。
 
@@ -75,7 +75,7 @@ tags:
 
 对于基于服务的系统而言，通常的软件架构方式是微服务架构。
 
-![img](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-03-7.jpg)
+![img](https://cdn.charlesfeng.top/images/2020-03-03-7.jpg)
 
 通过将一个巨大的系统拆分成一个个独立的、单独部署的服务(Service)，可以让系统变成松耦合的状态。服务之间通过API进行通信，并且所有的服务通过特定的组织方式整合在一起共同工作。
 
@@ -83,19 +83,19 @@ tags:
 
 ### 3.3. 插件式架构(Service Oriented Architecture)
 
-![img](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-03-8.jpg)
+![img](https://cdn.charlesfeng.top/images/2020-03-03-8.jpg)
 
 插件式的架构体系，通常由一个核心系统(Kernal系统)和一系列插件组成。核心系统提供了最小可用的功能，通过插件来不断扩展系统能力。浏览器、文本编辑器、IDE等系统就都是采用插件式架构体系。
 
 ## 4 前端架构演进
 
-![img](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-03-9.jpg)
+![img](https://cdn.charlesfeng.top/images/2020-03-03-9.jpg)
 
 前端过去十年发展经历了巨大的变化，从PC时代进入了移动时代再到智能时代，前端架构也从无到有，逐步演进变得百花齐发。
 
 ### 4.1 前后端分离架构
 
-![img](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-03-10.jpg)
+![img](https://cdn.charlesfeng.top/images/2020-03-03-10.jpg)
 
 随着前后端分工划分越来越明确，**前后端系统也逐步分离**。前端系统变成了静态前端资源，部署HTML、JS、CSS文件，后端服务提供API（通常是REST API），前后端通过API进行通信。
 
@@ -105,13 +105,13 @@ tags:
 
 Node服务虽然可以进一步提升前后端协同的效率，但是Node服务器的运维、部署、发布、监控等等成本也让前端研发同学苦不堪言。**Serverless**的诞生可以帮助解决这个问题，可以将服务器的运维功能都交给Serverless平台进行管理，研发人员只需要专注于实现函数即可完成功能开发。
 
-![img](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-03-11.jpg)
+![img](https://cdn.charlesfeng.top/images/2020-03-03-11.jpg)
 
 在前后端分离BFF，除了采用Node层技术以外还可以采用**GraphQL**技术，通过GraphQL技术可以很容易使用Schema来定义需要获取的数据结构，灵活的对现有数据源进行聚合和字段裁剪。
 
 ### 4.2 组件化架构
 
-![img](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-03-12.jpg)
+![img](https://cdn.charlesfeng.top/images/2020-03-03-12.jpg)
 
 组件化架构是前端一个最为显著的架构方式，通过组件的封装和组合，可以快速的进行页面UI的搭建。
 
@@ -123,21 +123,21 @@ Node服务虽然可以进一步提升前后端协同的效率，但是Node服务
 
 ### 4.3 分层架构
 
-![img](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-03-13.jpg)
+![img](https://cdn.charlesfeng.top/images/2020-03-03-13.jpg)
 
 不论是**MVC（Model-View-Controller）**还是**MPV（Model-Presenter-View）**模式，都是将数据、界面、控制分离的方式。通过代码职责的拆分可以有效的将系统进行解耦，从而让各自部分能够很好的分工并且协同。
 
-![img](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-03-14.jpg)
+![img](https://cdn.charlesfeng.top/images/2020-03-03-14.jpg)
 
 随着页面逻辑复杂度提升，又演化出**Redux**、**Mobx**等数据流控制的框架，进一步将数据控制部分拆分成Store、Action、Dispatcher，避免了数据更改的混乱，将数据管理进行了统一，规范了数据修改的方式。
 
-![img](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-03-15.jpg)
+![img](https://cdn.charlesfeng.top/images/2020-03-03-15.jpg)
 
 Clean Architecture是分层架构的一种形态，分为Entities、User Case、Controllers、UI四层，外部层级是依赖内部层级，内部层级会对外暴露接口，但是避免暴露内部实现，所以越是上层的功能可以屏蔽掉内部的变化，降低层级之间的耦合度。
 
 ### 4.4 微前端架构
 
-![img](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-03-16.jpg)
+![img](https://cdn.charlesfeng.top/images/2020-03-03-16.jpg)
 
 微前端架构是一种将微服务理念应用到浏览器，将多个小型前端应用聚合为一的应用。微前端架构可以允许各自小型应用独立部署、独立的技术栈，因此，特别适合遗留老旧系统的整合。
 
@@ -149,7 +149,7 @@ Clean Architecture是分层架构的一种形态，分为Entities、User Case、
 
 最后，推荐几本关于软件架构的经典著作，如果有推荐的书籍欢迎留言交流。
 
-![img](https://cdn.charlesfeng.top/charlesfeng/images/2020-03-03-17.jpg)
+![img](https://cdn.charlesfeng.top/images/2020-03-03-17.jpg)
 
 ## 来源
 

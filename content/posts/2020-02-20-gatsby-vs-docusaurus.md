@@ -141,7 +141,7 @@ tags:
 
 这是集成了 `algolia` 检索功能的截图：
 
-![](https://cdn.charlesfeng.top/charlesfeng/images/2020-02-20-1.png)
+![](https://cdn.charlesfeng.top/images/2020-02-20-1.png)
 
 `Gatsby` 本身不具备站内检索功能，但它可以通过 `GraphQL` 进行文章查询，所以我觉得可以通过 `GraphQL` 来实现站内检索的功能，但这个需要用户自己去实现了。
 

@@ -20,7 +20,7 @@ tags:
 
 这需要来看一下 Vue 中是怎么完成一个表单的。
 
-![](https://cdn.charlesfeng.top/charlesfeng/images/2020-02-23-1.png)
+![](https://cdn.charlesfeng.top/images/2020-02-23-1.png)
 
 #### Input
 
