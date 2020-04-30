@@ -18,6 +18,9 @@ before_install:
   -in id_rsa.enc -out ~/.ssh/deploy_rsa -d
 - chmod 600 ~/.ssh/deploy_rsa
 - ssh-add ~/.ssh/deploy_rsa
+# yarn
+- curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | tee /etc/yum.repos.d/yarn.repo
+- yum install yarn
 install:
 - yarn install
 script:
