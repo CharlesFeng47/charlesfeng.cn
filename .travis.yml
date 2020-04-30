@@ -1,0 +1,26 @@
+language: node_js
+node_js:
+  - 12.16.0
+branches:
+  only:
+  - master
+git:
+  depth: 1
+# addons:
+#   ssh_known_hosts: "$DEPLOY_HOST"
+cache:
+  directories:
+  - node_modules
+
+before_install:
+- openssl aes-256-cbc -K $encrypted_c4e4594cf959_key -iv $encrypted_c4e4594cf959_iv
+  -in id_rsa.enc -out ~/.ssh/deploy_rsa -d
+- chmod 600 ~/.ssh/deploy_rsa
+- ssh-add ~/.ssh/deploy_rsa
+- yum install yarn
+install:
+- yarn install
+script:
+- yarn build
+# after_success:
+# - rsync -avz -r --delete -e 'ssh -o stricthostkeychecking=no' public/ root@arthurfan.com:/data/charlesfeng.cn/public/
