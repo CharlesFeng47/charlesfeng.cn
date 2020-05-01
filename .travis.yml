@@ -6,6 +6,8 @@ branches:
   - master
 git:
   depth: 1
+addons:
+  ssh_known_hosts: "$DEPLOY_HOST"
 cache:
   directories:
   - node_modules
