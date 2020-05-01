@@ -24,3 +24,4 @@ script:
 - yarn build
 after_success:
 - rsync -avz -r --delete -e 'ssh -o stricthostkeychecking=no' public/ root@$DEPLOY_HOST:/data/charlesfeng/blog/
+- rsync -avz -r --delete -e 'ssh -o stricthostkeychecking=no' defaulterror/ root@$DEPLOY_HOST:/data/charlesfeng/defaulterror/
