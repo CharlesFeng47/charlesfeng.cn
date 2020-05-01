@@ -6,8 +6,6 @@ branches:
   - master
 git:
   depth: 1
-addons:
-  ssh_known_hosts: "$DEPLOY_HOST"
 cache:
   directories:
   - node_modules
@@ -33,8 +31,9 @@ after_success:
 # -a, --archive 归档模式，表示以递归方式传输文件，并保持所有文件属性，等于-rlptgoD
 # -v, --verbose 详细模式输出
 # -z, --compress 对备份的文件在传输时进行压缩处理。
-# --delete 删除那些 DST 中 SRC 没有的文件
+# --delete 删除那些 DST 中 SRC 没有的文件，可能会导致暂时的服务不可用
+# --delete-after 传输结束以后再删除
 # --progress 显示备份过程
 # -e, --rsh=command 指定使用 rsh、ssh 方式进行数据同步。
-- rsync -azv --delete -e 'ssh -o stricthostkeychecking=no' public/ root@$DEPLOY_HOST:/data/charlesfeng/blog/
-- rsync -azv --delete -e 'ssh -o stricthostkeychecking=no' defaulterror/ root@$DEPLOY_HOST:/data/charlesfeng/defaulterror/
+- rsync -azv --delete-after --progress -e 'ssh -o stricthostkeychecking=no' public/ root@$DEPLOY_HOST:/data/charlesfeng/blog/
+- rsync -azv --delete-after --progress -e 'ssh -o stricthostkeychecking=no' defaulterror/ root@$DEPLOY_HOST:/data/charlesfeng/defaulterror/
