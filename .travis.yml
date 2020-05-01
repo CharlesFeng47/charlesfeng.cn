@@ -23,5 +23,12 @@ install:
 script:
 - yarn build
 after_success:
-- rsync -avz -r --delete -e 'ssh -o stricthostkeychecking=no' public/ root@$DEPLOY_HOST:/data/charlesfeng/blog/
-- rsync -avz -r --delete -e 'ssh -o stricthostkeychecking=no' defaulterror/ root@$DEPLOY_HOST:/data/charlesfeng/defaulterror/
+# -a, --archive 归档模式，表示以递归方式传输文件，并保持所有文件属性
+# -v, --verbose 详细模式输出
+# -r, --recursive 对子目录以递归模式处理
+# -z, --compress 对备份的文件在传输时进行压缩处理。
+# --delete 删除那些 DST 中 SRC 没有的文件
+# --progress 显示备份过程
+# -e, --rsh=command 指定使用 rsh、ssh 方式进行数据同步。
+- rsync -avrz --delete -e ssh public/ root@$DEPLOY_HOST:/data/charlesfeng/blog/
+- rsync -avrz --delete -e ssh defaulterror/ root@$DEPLOY_HOST:/data/charlesfeng/defaulterror/
