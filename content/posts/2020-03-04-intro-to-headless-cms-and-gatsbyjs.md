@@ -1,9 +1,9 @@
 ---
 date: 2020-03-04
-title: 'Intro to Headless CMS'
+title: 'Intro to Headless CMS & Gatsby.js'
 template: post
-thumbnail: '../thumbnails/contentful.png'
-slug: intro-to-headless-cms
+thumbnail: '../thumbnails/gatsby.png'
+slug: intro-to-headless-cms-and-gatsbyjs
 categories:
   - Tech
 tags:
@@ -116,7 +116,7 @@ Netlify 是一个在此语境（Headless CMS + Gatsby.js）下常被提到的工
 - 免费的 CDN：把静态资源推到 CDN（虽然是国外的）；
 - 可以一键使用 Let's Encrypt 的免费 TLS 证书，启用 HTTPS。
 
-因为国内网络的问题，访问有点慢。。以及，我一个小的 Gatsby.js 项目，居然要编译 5 分钟，实在对不起他的标语。。但是怎么说呢，使用确实简单，简简单单的前端静态项目，每次使用 Jenkins 或 Travis 来自动部署都觉得太重了，Netlify 提供了一种更好地选择。
+因为国内网络的问题，访问有点慢。。以及，我一个小的 Gatsby.js 项目，居然要编译 5 分钟，实在对不起他的标语。。但是怎么说呢，使用确实简单，这样一个简简单单的前端静态项目，不说 Jenkins，即使是 Travis 来自动部署也觉得重，Netlify 提供了一种更简便、更省心的选择。
 
 ## 总结
 
