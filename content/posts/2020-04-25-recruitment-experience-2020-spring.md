@@ -2,9 +2,7 @@
 date: 2020-04-25
 title: '2020 春招面经整理'
 template: post
-thumbnail: '../thumbnails/computer.png'
-thumbnailRound: true
-thumbnailUrl: https://cdn.charlesfeng.top/thumbnails/http.png
+thumbnail: '../thumbnails/writing.png'
 slug: recruitment-experience-2020-spring
 categories:
   - Tech
@@ -224,6 +222,8 @@ tags:
 
 > 偏好：微服务、Docker、RPC、Java
 
+#### 一面 04.16
+
 1. 项目
 2. 阿里中间件的比赛
 3. 为什么需要双亲委派机制
@@ -231,6 +231,8 @@ tags:
 ## Shopee
 
 > 偏好：网络、OS、数据库
+
+#### 一面 04.24
 
 1. HTTPS 第一次 Hello 是基于什么协议？（TCP）
 

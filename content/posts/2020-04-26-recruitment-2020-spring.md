@@ -1,16 +1,16 @@
 ---
 date: 2020-04-26
-title: '2020 春招总结👻'
+title: '2020 春招总结 👻'
 template: post
-thumbnail: '../thumbnails/summary1.jpg'
+thumbnail: '../thumbnails/blinky.png'
 thumbnailRound: true
-thumbnailUrl: https://cdn.charlesfeng.top/thumbnails/http.png
 slug: recruitment-2020-spring
 categories:
   - Tech
   - Thinking
 tags:
   - Recruitment
+  - Summary
 ---
 
 俗话说「金三银四」，我这次呢好歹也算及时抓住了春招的尾巴 233，同时相比大三时的菜鸡本鸡有了些许进步，记录一下，以免忘记...（今天瞎搞 Nginx 把 18 年底配的一个 hexo + Travis 自动部署的博客搞崩了...然后发现自己完全不记得是怎么配的。。）所以一定要记得多写博客！好功夫不如烂笔头！！（顺便攒攒人品嘻嘻）

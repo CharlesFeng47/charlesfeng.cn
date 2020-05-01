@@ -6,7 +6,6 @@ thumbnail: '../thumbnails/fs.png'
 thumbnailRound: true
 slug: apfs-hfs-exfat-diff
 categories:
-
   - Tech
 tags:
   - Reproduced
