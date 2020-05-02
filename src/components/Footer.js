@@ -40,7 +40,7 @@ export default class Footer extends Component {
           </a> */}
         </div>
         <div>
-          <a href="https://github.com/CharlesFeng47" title="Open-source on GitHub">
+          <a href="https://github.com/CharlesFeng47/charlesfeng.cn" title="Open-source on GitHub">
             <img
               src={theme.dark ? githubDark : github}
               target="_blank"

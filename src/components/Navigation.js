@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { Link } from 'gatsby'
-import charlesProfile from '../images/favicon.png'
 import ThemeContext from '../context/ThemeContext'
 
+const charlesProfile = 'https://cdn.charlesfeng.top/resources/favicon.png';
 const sun = 'https://cdn.charlesfeng.top/resources/sun.svg';
 const moon = 'https://cdn.charlesfeng.top/resources/moon.svg';
 
