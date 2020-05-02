@@ -4,8 +4,9 @@ import ThemeContext from '../context/ThemeContext'
 import Navigation from '../components/Navigation'
 import Footer from '../components/Footer'
 import config from '../../data/SiteConfig'
-import favicon from '../images/favicon.png'
 import '../styles/main.scss'
+
+const favicon = 'https://cdn.charlesfeng.top/resources/favicon.png';
 
 export default class MainLayout extends Component {
   static contextType = ThemeContext

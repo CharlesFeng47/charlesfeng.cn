@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
 import { Link } from 'gatsby'
 import charlesProfile from '../images/favicon.png'
-import sun from '../images/sun.svg'
-import moon from '../images/moon.svg'
 import ThemeContext from '../context/ThemeContext'
+
+const sun = 'https://cdn.charlesfeng.top/resources/sun.svg';
+const moon = 'https://cdn.charlesfeng.top/resources/moon.svg';
 
 export default class Navigation extends Component {
   static contextType = ThemeContext // eslint-disable-line

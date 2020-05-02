@@ -1,10 +1,18 @@
 import React, { Component } from 'react'
 import { Link } from 'gatsby'
-import travis from '../images/travis-ci.png'
-import gatsby from '../images/gatsby.png'
-import github from '../images/github.png'
-import githubDark from '../images/github-dark.png'
 import ThemeContext from '../context/ThemeContext'
+
+// github
+const github = 'https://cdn.charlesfeng.top/resources/github.png'
+const githubDark = 'https://cdn.charlesfeng.top/resources/github-dark.png'
+
+// travis
+const travisPhotoNum = 8;
+const travisIndex = Math.floor(Math.random() * travisPhotoNum) + 1; // 从 1 开始编号
+const travis = 'https://cdn.charlesfeng.top/resources/travis-ci-' + travisIndex + '.svg';
+
+// gatsby
+const gatsby = 'https://cdn.charlesfeng.top/resources/gatsby.png';
 
 export default class Footer extends Component {
   static contextType = ThemeContext // eslint-disable-line
@@ -41,7 +49,7 @@ export default class Footer extends Component {
               alt="GitHub"
             />
           </a>
-          <a href="https://travis-ci.com/github/CharlesFeng47/charlesfeng.cn" title="CI by Travis">
+          <a href="https://travis-ci.com/github/CharlesFeng47/charlesfeng.cn" title="CI/CD by Travis">
             <img
               src={travis}
               target="_blank"
