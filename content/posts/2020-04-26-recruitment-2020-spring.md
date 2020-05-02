@@ -3,11 +3,11 @@ date: 2020-04-26
 title: '2020 春招总结 👻'
 template: post
 thumbnail: '../thumbnails/blinky.png'
-thumbnailRound: true
 slug: recruitment-2020-spring
 categories:
   - Tech
   - Thinking
+  - Popular
 tags:
   - Recruitment
   - Summary
