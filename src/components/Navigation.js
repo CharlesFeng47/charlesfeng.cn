@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { Link } from 'gatsby'
 import ThemeContext from '../context/ThemeContext'
+import config from '../../data/SiteConfig'
 
-const charlesProfile = 'https://cdn.charlesfeng.top/resources/favicon.png';
 const sun = 'https://cdn.charlesfeng.top/resources/sun.svg';
 const moon = 'https://cdn.charlesfeng.top/resources/moon.svg';
 
@@ -39,7 +39,7 @@ export default class Navigation extends Component {
         <div className="nav-container">
           <div className="brand">
             <Link to="/">
-              <img src={charlesProfile} className="favicon" alt="charlesProfile" />
+              <img src={config.faviconUrl} className="favicon" alt="charlesProfile" />
               <span className="text">Charles Feng</span>
             </Link>
           </div>
