@@ -6,8 +6,6 @@ import Footer from '../components/Footer'
 import config from '../../data/SiteConfig'
 import '../styles/main.scss'
 
-const favicon = 'https://cdn.charlesfeng.top/resources/favicon.png';
-
 export default class MainLayout extends Component {
   static contextType = ThemeContext
 
@@ -30,7 +28,7 @@ export default class MainLayout extends Component {
           }}
         >
           <meta name="description" content={config.siteDescription} />
-          <link rel="shortcut icon" type="image/png" href={favicon} />
+          <link rel="shortcut icon" type="image/png" href="https://cdn.charlesfeng.top/resources/favicon.png" />
         </Helmet>
         <Navigation menuLinks={config.menuLinks} />
         <main id="main-content">
