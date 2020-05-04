@@ -4,7 +4,6 @@ import ThemeContext from '../context/ThemeContext'
 import Navigation from '../components/Navigation'
 import Footer from '../components/Footer'
 import config from '../../data/SiteConfig'
-import favicon from '../images/favicon.png'
 import '../styles/main.scss'
 
 export default class MainLayout extends Component {
@@ -29,7 +28,7 @@ export default class MainLayout extends Component {
           }}
         >
           <meta name="description" content={config.siteDescription} />
-          <link rel="icon" type="image/png" href={favicon} />
+          <link rel="shortcut icon" type="image/png" href="https://cdn.charlesfeng.top/resources/favicon.png" />
         </Helmet>
         <Navigation menuLinks={config.menuLinks} />
         <main id="main-content">
