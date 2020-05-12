@@ -45,7 +45,7 @@ tags:
 
 ![](https://cdn.charlesfeng.top/images/2020-05-12-2-https.png)
 
-可以看到，当输入域名 http://charlesfeng.cn 后，首先返回了 307 状态码，重定向到 https://charlesfeng.cn，而我目前还没有配置 SSL 证书，所以自然无法安全访问。
+可以看到，当输入域名 [http://charlesfeng.cn](http://charlesfeng.cn) 后，首先返回了 307 状态码，重定向到 [https://charlesfeng.cn](https://charlesfeng.cn)，而我目前还没有配置 SSL 证书，所以自然无法安全访问。
 
 因此，问题明确。
 
