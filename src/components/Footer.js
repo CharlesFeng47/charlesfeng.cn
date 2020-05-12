@@ -7,9 +7,9 @@ const github = 'https://cdn.charlesfeng.top/resources/github.png'
 const githubDark = 'https://cdn.charlesfeng.top/resources/github-dark.png'
 
 // travis
-const travisPhotoNum = 8;
+const travisPhotoNum = 2;
 const travisIndex = Math.floor(Math.random() * travisPhotoNum) + 1; // 从 1 开始编号
-const travis = 'https://cdn.charlesfeng.top/resources/travis-ci-' + travisIndex + '.svg';
+const travis = 'https://cdn.charlesfeng.top/resources/travis-ci-pride-' + travisIndex + '.svg';
 
 // gatsby
 const gatsby = 'https://cdn.charlesfeng.top/resources/gatsby.png';
