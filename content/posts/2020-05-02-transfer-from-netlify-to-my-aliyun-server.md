@@ -22,7 +22,7 @@ tags:
 
 （再次痛心疾首，Netlify 的一站式部署实在是方便！只需要指定一下部署指令 `yarn build` 和最后生成的目录 /public 即可，实在是太太太方便了，懒人部署！其他诸如 HTTPS 等好处可以参见我之前的[介绍文章](/intro-to-headless-cms-and-gatsbyjs/#netlify)。）
 
-博客部署在 Netlify 上，因为 Netlify 上的项目都默认拥有一个以 .netlify.app 结尾的域名，而我不想用这个，所以添加了自定义域名 charlesfeng.cn，并使用了 Netlify DNS 进行解析。
+博客部署在 Netlify 上，因为 Netlify 上的项目都默认拥有一个以 .netlify.app 结尾的域名，而我不想用这个，所以添加了自定义域名 charlesfeng.cn，并使用了 Netlify DNS 进行解析。（Netlify 官方对此 DNS Record 定义的 Type 为 Netlify，不过感觉就是 CNAME 解析叭...）
 
 博客引用的图片通过 cdn 加速，图片存放在自己服务器上，通过 Nginx 进行分发。结构如下图所示。
 
@@ -172,7 +172,7 @@ Code never lies。如果不是 Travis 的 bug，那一定与我在这次构建�
 
 D 监控显示故障，但是没说原因，放弃。
 
-![](https://cdn.charlesfeng.top/images/2020-05-02-DNSPod-error.jpg)
+![](https://cdn.charlesfeng.top/images/2020-05-02-dnspod-error.jpg)
 
 ##### 3. [Cloudflare](https://www.cloudflare.com/dns/)
 
