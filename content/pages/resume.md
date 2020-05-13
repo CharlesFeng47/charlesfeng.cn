@@ -4,31 +4,30 @@ slug: resume
 template: page
 ---
 
-## 基本信息
+### 基本信息
+
 
 + **冯俊杰**，男性，出生于 1997 年 4 月 7 日
-+ GitHub：[https://github.com/CharlesFeng47](https://github.com/CharlesFeng47)
-+ 个人博客：[CharlesFeng](https://charlesfeng.netlify.com)
++ GitHub：[https://github.com/CharlesFeng47](https://github.com/CharlesFeng47)，个人博客：[CharlesFeng](https://charlesfeng.cn)
 + 手机：15205153110，Email：<fdfengjunjie970407@gmail.com>
 
-## 教育经历
+### 教育经历
 
 + **南京大学软件学院**  _（2019 年  9 月 ~ 2021 年 6 月）_
 + **南京大学软件学院**  _（2015 年 9 月 ~ 2019 年 6 月）_
   <br>GPA：4.40 / 5.0，排名：21 / 212
 
-## 社团活动
+### 社团活动
 
 + **南京大学软件学院新媒体中心策划部部⻓**  _（2016 年  7 月 ~ 2017 年 6 月）_
 + **南京大学软件学院新媒体中心设计部部员**  _（2015 年  9 月 ~ 2016 年 6 月）_
 
-## 项目作品
+### 项目作品
 
-+ 「**[Expression](http://www.iselab.cn)**」：_（2019 年 3 月 ~ 10 月，组员）_基于[得到大学](https://www.igetget.com)和[实验室](http://www.iselab.cn)合作的需求，系统通过语音输入，以朗读、转述、叙述三种表达方式对人类的表达力进行评测。我在其中负责语音评测和题目管理等，为了减少语音音频传输消耗的带宽，使用了百度云对象存储服务 BOS。
-+ 「**MarvelTicket**」：_（2018 年春，组长）_原系统为 J2EE 课程大作业，[后端](https://github.com/CharlesFeng47/TicketsManagementSystem)使用框架 SSH，[前端](https://github.com/CharlesFeng47/MarvelTicket)使用 Vue.js ，前后端分离解耦。后在人机交互课程实践中将后端修改为 SpringBoot 项目，前端仍使用 Vue.js，但做了相应体验优化。
-+ 「**[Quantour](https://github.com/NJUASI/Quantour)**」：_（2017 年春，组⻓）_在学院竞赛的要求下，使用框架 SSH 写成的股票比较、量化系统，实现了股票的量化回测及结果可视化分析。针对回测功能的复杂性，我逐步分解为**形成指标**形成和**筛选条件**排序两步，实现了类似[果仁网](https://guorn.com)的回测功能，并保证了结果的一致性、正确性。
++ 「**[Expression](http://parclabcn.com)**」：_（2019 年 3 月 ~ 10 月，组员）_基于[得到大学](https://www.igetget.com)和[实验室](http://www.iselab.cn)合作的需求，系统通过语音输入，以朗读、转述、叙述三种表达方式，从声音质量、主旨、细节、结构、逻辑等五个方向对人类的表达力进行评测。整个项目包含前端 Vue.js 项目、后端 Flask 项目和 Docker 项目三个部分，均部署在百度云上，其中 Docker 项目用来专门对音频文件进行分析，调用了百度云 NLP 的一些接口。我在其中负责语音评测和题目管理、成绩管理等业务，为了减少语音音频传输消耗的带宽，使用了百度云对象存储服务 BOS。此外，针对甲方在「新增题目」时的需求「给灵感」，我实现了一个基于[百度风云榜](https://top.baidu.com/buzz?b=1)的爬虫，对热点分词后分别爬取百科以给出「灵感」句。
++ 「**[Quantour](https://github.com/NJUASI/Quantour)**」：_（2017 年春，组⻓）_基于大作业需求，使用 SSH 写成的股票查看、比较、量化系统，实现了类似[果仁网](https://guorn.com/stock?category=stock)的股票量化回测及结果可视化分析，并保证了结果的一致性、正确性。针对回测功能的复杂性，我逐步分解为**形成指标**形成和**筛选条件**排序两步。项目中针对形成指标和排序指标，使用了工厂模式；对查看股票时的筛选机制（如行业、地域等）使用了责任链模式。
 
-## 奖励情况
+### 奖励情况
 
 + "南京大学-vivo"软件开发马拉松（Hackathon）三等奖 _（2019 年 5 月）_
 + 第四届阿⾥中间件性能挑战赛第⼀赛季第 100 / 3101 名 _（2018 年 7 月）_
@@ -38,7 +37,7 @@ template: page
 + 第三届万科“万创奔腾杯”南京高校创业大赛第一名 _（2017）_
 + 南京大学 iNJUers 南青策划之星 _（2017）_
 
-## 实习经历
+### 实习经历
 
 + **华为技术有限公司南京研究所**  _（2018 年 7 月 ~ 2018 年 12 月）_
   + 华为海外应用市场支付模块兼容替代 Google Play。
