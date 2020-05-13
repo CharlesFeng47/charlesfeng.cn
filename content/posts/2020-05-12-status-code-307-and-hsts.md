@@ -53,7 +53,7 @@ tags:
 
 观察到上图 HTTP 转发处有 Header——`Non-Authoritative-Reason : HSTS`。首先我们需要了解 HSTS 是什么。下面是来自 MDN 的[相关介绍](https://developer.mozilla.org/zh-CN/docs/Glossary/HSTS)。
 
-> HSTS （英语：**H**TTP **S**trict **T**ransport **S**ecurity，HTTP 严格传输安全）让网站可以通知浏览器它不应该再使用 HTTP 加载该网站，而是自动转换该网站的所有的HTTP链接至更安全的 HTTPS。它包含在 HTTP 的协议头 [`Strict-Transport-Security`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Strict-Transport-Security) 中，在服务器返回资源时带上。
+> HSTS （英语：**H**TTP **S**trict **T**ransport **S**ecurity，HTTP 严格传输安全）让网站可以通知浏览器它不应该再使用 HTTP 加载该网站，而是自动转换该网站的所有的 HTTP 链接至更安全的 HTTPS。它包含在 HTTP 的协议头 [`Strict-Transport-Security`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Strict-Transport-Security) 中，在服务器返回资源时带上。
 >
 > 换句话说，它告诉浏览器将 URL 协议从 HTTP 更改为 HTTPS（会更安全），并要求浏览器对每个请求执行此操作。
 
@@ -96,9 +96,9 @@ tags:
 
 #### 不足
 
-> 用户首次访问某网站是不受 HSTS 保护的。这是因为首次访问时，浏览器还未收到 HSTS，所以仍有可能通过明文 HTTP 来访问。解决这个不足当前有两种方案，一是浏览器预置 HSTS 域名列表，[Google Chrome](https://zh.wikipedia.org/wiki/Google_Chrome)、[Firefox](https://zh.wikipedia.org/wiki/Firefox)、[Internet Explorer ](https://zh.wikipedia.org/wiki/Internet_Explorer)和 [Microsoft Edge](https://zh.wikipedia.org/wiki/Microsoft_Edge)实现了这一方案。二是将 HSTS 信息加入到[域名系统](https://zh.wikipedia.org/wiki/域名系统)记录中。但这需要保证 DNS 的安全性，也就是需要部署[域名系统安全扩展](https://zh.wikipedia.org/wiki/域名系统安全扩展)。截至 2016 年这一方案没有大规模部署。
+> 用户首次访问某网站是不受 HSTS 保护的。这是因为首次访问时，浏览器还未收到 HSTS，所以仍有可能通过明文 HTTP 来访问。解决这个不足当前有两种方案，一是浏览器预置 HSTS 域名列表，[Google Chrome](https://zh.wikipedia.org/wiki/Google_Chrome)、[Firefox](https://zh.wikipedia.org/wiki/Firefox)、[Internet Explorer ](https://zh.wikipedia.org/wiki/Internet_Explorer)和 [Microsoft Edge](https://zh.wikipedia.org/wiki/Microsoft_Edge) 实现了这一方案。二是将 HSTS 信息加入到[域名系统](https://zh.wikipedia.org/wiki/域名系统)记录中。但这需要保证 DNS 的安全性，也就是需要部署[域名系统安全扩展](https://zh.wikipedia.org/wiki/域名系统安全扩展)。截至 2016 年这一方案没有大规模部署。
 >
-> 由于 HSTS 会在一定时间后失效（有效期由 max-age 指定），所以浏览器是否强制 HSTS 策略取决于当前系统时间。部分操作系统经常通过[网络时间协议](https://zh.wikipedia.org/wiki/網絡時間協議)更新系统时间，如 [Ubuntu](https://zh.wikipedia.org/wiki/Ubuntu) 每次连接网络时、[OS X Lion](https://zh.wikipedia.org/wiki/OS_X_Lion) 每隔9分钟会自动连接时间服务器。攻击者可以通过伪造 NTP 信息，设置错误时间来绕过 HSTS。解决方法是认证 NTP 信息，或者禁止 NTP 大幅度增减时间。比如 [Windows 8](https://zh.wikipedia.org/wiki/Windows_8) 每 7 天更新一次时间，并且要求每次 NTP 设置的时间与当前时间不得超过 15 小时。
+> 由于 HSTS 会在一定时间后失效（有效期由 `max-age` 指定），所以浏览器是否强制 HSTS 策略取决于当前系统时间。部分操作系统经常通过[网络时间协议](https://zh.wikipedia.org/wiki/網絡時間協議)更新系统时间，如 [Ubuntu](https://zh.wikipedia.org/wiki/Ubuntu) 每次连接网络时、[OS X Lion](https://zh.wikipedia.org/wiki/OS_X_Lion) 每隔9分钟会自动连接时间服务器。攻击者可以通过伪造 NTP 信息，设置错误时间来绕过 HSTS。解决方法是认证 NTP 信息，或者禁止 NTP 大幅度增减时间。比如 [Windows 8](https://zh.wikipedia.org/wiki/Windows_8) 每 7 天更新一次时间，并且要求每次 NTP 设置的时间与当前时间不得超过 15 小时。
 
 ## 解决思路
 
@@ -107,16 +107,12 @@ tags:
 在 StackOverflow 上发现这样几种[解决方案](https://stackoverflow.com/a/34213531)。
 
 1. 在 Chrome 的 URL 字段中输入以下内容：`chrome://net-internals/#hsts`，然后搜索您的网站并将其删除。（最后我采用的😋）
-2. 您也可以在顶级域中设置它并包括子域，因此您可能需要从那里删除。（原文：You may also set this at a top level domain and include subdomains so you may need to delete from there.）（没看太懂...感觉他想描述的情况是 `Strict-Transport-Security` 字段中设置了子域的情况，语法为 `Strict-Transport-Security: max-age=<expire-time>; includeSubDomains`。这样当子域不再需要 HTTPS 时，可以对父域的 Header 进行更新以丢弃 `includeSubDomains`。）
+2. 您可能是在顶级域中设置的 HSTS 并包含了子域，因此可以从其中删除子域。（原文：You may also set this at a top level domain and include subdomains so you may need to delete from there.）（对于此处的「顶级域」我的理解是指一级域名 / 主域名，原文想描述的情况是 `Strict-Transport-Security` 字段中设置了子域的情况，语法为 `Strict-Transport-Security: max-age=<expire-time>; includeSubDomains`。这样当子域不再需要 HTTPS 时，可以对父域的 Header 进行更新以丢弃 `includeSubDomains`。）
 3. 更改服务器配置中的 Header `Strict-Transport-Security` 字段：先发布 `max-age` 为 0 的 Header，然后重新访问网站以清除此 Header，最后停止发布此 Header。这对于其他不太容易清除 Header 的浏览器很有帮助。
 
-> 请注意，如果网站位于预加载列表中，则无法清除此设置，因为该网站已嵌入在 Web 浏览器的代码中。网站所有者可以提交要从预加载列表中删除的请求，但这需要花几个月的时间才能完成 Chrome 的发布周期，而其他浏览器则没有明确的时间表。出于安全原因，Chrome 也无法覆盖预加载的设置。
+> 请注意，如果网站位于预加载列表中，则无法清除此设置，因为该网站已嵌入在 Web 浏览器的代码中。网站所有者可以提交请求，要求从预加载列表中进行删除。但这对于 Chrome 而言，需要花费几个月的时间才能走完其发布周期；而对于其他浏览器而言，则没有明确的时间表。出于安全原因，Chrome 也无法覆盖预加载的设置。
 
-在 Chrome 中键入 `chrome://net-internals/#hsts`，先搜索域名，结果如下图。删除后，可以通过 HTTP 正常访问。
-
-![](https://cdn.charlesfeng.top/images/2020-05-12-chrome-hsts-query.png)
-
-因为 Chrome 版本更新的问题（我是 v81.0.4044.138），具体界面跟[此处](https://really-simple-ssl.com/knowledge-base/clear-hsts-browser/)描述的不太一样，所以也记录下。（~~涨字数~~）
+对于上述解决方案 1，更详细的说明在[此处](https://really-simple-ssl.com/knowledge-base/clear-hsts-browser/)。可能是因为 Chrome 版本更新的问题（我是 v81.0.4044.138），具体界面跟其描述的不太一致，所以也记录下。（~~涨字数~~）
 
 >1. In the address bar, type “chrome://net-internals/#hsts”.
 >2. Type the domain name in the text field below “Delete domain security policies”.
@@ -125,9 +121,13 @@ tags:
 >5. Click the “Query” button.
 >6. Your response should be “Not found”.
 
+在 Chrome 中键入 `chrome://net-internals/#hsts`，先搜索域名，结果如下图。删除后，可以通过 HTTP 正常访问。
+
+![](https://cdn.charlesfeng.top/images/2020-05-12-chrome-hsts-query.png)
+
 ## Safari 较 Chrome 的不同
 
-估计 Safari 也是同样的问题，但是按照上述解决方案的 Safari 版本（如下所示）解决并没有解决问题...改天再找找吧😂
+估计 Safari 也是同样的问题，但是按照上述解决方案的 Safari 版本（如下所示）解决并没能成功...改天再找找吧😂（~~写不动了~~）
 
 >1. Close Safari.
 >2. Delete the ~/Library/Cookies/HSTS.plist file.
