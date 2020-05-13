@@ -1,5 +1,5 @@
 ---
-date: 2020-05-12
+date: '2020-05-12 16:00'
 title: 'DNS 的解析过程'
 template: post
 thumbnail: '../thumbnails/dns.png'

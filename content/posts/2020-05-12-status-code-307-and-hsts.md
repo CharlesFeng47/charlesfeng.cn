@@ -1,5 +1,5 @@
 ---
-date: 2020-05-12
+date: '2020-05-12 20:00'
 title: 'HTTPS -> HTTP 引起的 307 状态码与 HSTS'
 template: post
 thumbnail: '../thumbnails/https.png'
