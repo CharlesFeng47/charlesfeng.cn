@@ -30,6 +30,9 @@ export default class MainLayout extends Component {
           <meta name="description" content={config.siteDescription} />
           <link rel="icon" type="image/png" href={config.faviconUrl} />
         </Helmet>
+        <div id="wx_pic" style="margin:0 auto;display:none;">
+          <img src="https://cdn.charlesfeng.top/resources/wx-share-icon.png" />
+        </div>
         <Navigation menuLinks={config.menuLinks} />
         <main id="main-content">
           {children}
