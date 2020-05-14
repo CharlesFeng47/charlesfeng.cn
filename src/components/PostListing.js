@@ -39,7 +39,7 @@ export default class PostListing extends Component {
 
             const popular = post.categories.includes('Popular')
             const date = formatDate(post.date)
-            const newest = moment(post.date) > moment().subtract(15, 'days')
+            const newest = moment(post.date) > moment().subtract(8, 'days')
 
             return (
               <Link to={post.path} key={post.title}>
