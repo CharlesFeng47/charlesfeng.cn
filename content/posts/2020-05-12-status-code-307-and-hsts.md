@@ -6,8 +6,10 @@ thumbnail: '../thumbnails/https.png'
 slug: status-code-307-and-hsts
 categories:
   - Tech
+  - Bug
 tags:
   - HTTPS
+  - HSTS
   - Web
   - DevOps
 ---
