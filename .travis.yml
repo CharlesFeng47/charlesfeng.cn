@@ -17,6 +17,8 @@ before_install:
 - openssl aes-256-cbc -K $encrypted_c4e4594cf959_key -iv $encrypted_c4e4594cf959_iv
   -in id_rsa.enc -out ~/.ssh/deploy_rsa -d
 - chmod 600 ~/.ssh/deploy_rsa
+# Start SSH agent
+- eval "$(ssh-agent -s)"
 - ssh-add ~/.ssh/deploy_rsa
 install:
 - yarn install
