@@ -139,13 +139,13 @@ tags:
 
 ## 参考
 
-2. [如何刷新本机DNS缓存（Win+Linux+OSX）](https://blog.csdn.net/zhyl8157121/article/details/100551350)
-3. [MDN 307 Temporary Redirect](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/307)
-4. [MDN HSTS](https://developer.mozilla.org/zh-CN/docs/Glossary/HSTS)
-5. [MDN HTTP Strict Transport Security](https://developer.mozilla.org/zh-CN/docs/Security/HTTP_Strict_Transport_Security)
-6. [WIKI HTTP 严格传输安全](https://zh.wikipedia.org/wiki/HTTP%E4%B8%A5%E6%A0%BC%E4%BC%A0%E8%BE%93%E5%AE%89%E5%85%A8)
-7. [How to configure HSTS on www and other subdomains](https://www.danielmorell.com/blog/how-to-configure-hsts-on-www-and-other-subdomains)
-8. [Status Code:307 Internal Redirect 和 Non-Authoritative-Reason:HSTS 问题](https://www.jianshu.com/p/005f3466b714)
-9. [Non-Authoritative-Reason header field HTTP](https://stackoverflow.com/a/34213531)
-10. [How to clear HSTS from your browser]([https://really-simple-ssl.com/knowledge-base/clear-hsts-browser/])
+- [如何刷新本机DNS缓存（Win+Linux+OSX）](https://blog.csdn.net/zhyl8157121/article/details/100551350)
+- [MDN 307 Temporary Redirect](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/307)
+- [MDN HSTS](https://developer.mozilla.org/zh-CN/docs/Glossary/HSTS)
+- [MDN HTTP Strict Transport Security](https://developer.mozilla.org/zh-CN/docs/Security/HTTP_Strict_Transport_Security)
+- [WIKI HTTP 严格传输安全](https://zh.wikipedia.org/wiki/HTTP%E4%B8%A5%E6%A0%BC%E4%BC%A0%E8%BE%93%E5%AE%89%E5%85%A8)
+- [How to configure HSTS on www and other subdomains](https://www.danielmorell.com/blog/how-to-configure-hsts-on-www-and-other-subdomains)
+- [Status Code:307 Internal Redirect 和 Non-Authoritative-Reason:HSTS 问题](https://www.jianshu.com/p/005f3466b714)
+- [Non-Authoritative-Reason header field HTTP](https://stackoverflow.com/a/34213531)
+- [How to clear HSTS from your browser]([https://really-simple-ssl.com/knowledge-base/clear-hsts-browser/])
 

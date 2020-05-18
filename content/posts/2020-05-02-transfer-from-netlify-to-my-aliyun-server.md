@@ -235,9 +235,9 @@ D 监控显示故障，但是没说原因，放弃。
 
 ## 参考
 
-1. [使用 Travis-ci 自动 SSH 部署代码](https://www.zhuwenlong.com/blog/article/5c24b6f2895e3a0fb4072a5c)
-2. [Travis CI 自动化部署博客](https://segmentfault.com/a/1190000011218410)
-3. [linux rsync 同步命令](https://blog.51cto.com/lookingdream/1826670)
-4. [11个国内外免费域名解析服务](https://segmentfault.com/a/1190000000512176)
-5. [建站第一步注册域名，选择国外最便宜域名注册商](https://jhrs.com/2019/31589.html)
-6. [如何给你的网站套上Cloudflare（以阿里云为例）](https://blog.csdn.net/zhyl8157121/article/details/100551592)
+- [使用 Travis-ci 自动 SSH 部署代码](https://www.zhuwenlong.com/blog/article/5c24b6f2895e3a0fb4072a5c)
+- [Travis CI 自动化部署博客](https://segmentfault.com/a/1190000011218410)
+- [linux rsync 同步命令](https://blog.51cto.com/lookingdream/1826670)
+- [11个国内外免费域名解析服务](https://segmentfault.com/a/1190000000512176)
+- [建站第一步注册域名，选择国外最便宜域名注册商](https://jhrs.com/2019/31589.html)
+- [如何给你的网站套上Cloudflare（以阿里云为例）](https://blog.csdn.net/zhyl8157121/article/details/100551592)
