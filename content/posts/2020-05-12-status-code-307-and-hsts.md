@@ -79,6 +79,8 @@ tags:
 
 注意最后一段话，Chrome 访问该域名时，会产生一个 307 的内部跳转，并自动重定向到该地址的 HTTPS 版本。**这个 307 响应是虚假的（dummy）**，而非服务器生成的——即 Chrome 是先在**内部**进行了此操作，（注意此 307 状态码的描述是 Internal Redirect，而 307 状态码本身的描述是 Temporary Redirect，）然后才发出真正到达目标服务器的 HTTPS 请求。
 
+（扩充知识：Edge 是直接改变 URL。）
+
 除了网站手动设置 Header `Strict-Transport-Security` ，还可以通过预加载 HSTS 的方式，将自己的域名提交到 Chrome 自动包含的预加载列表中。
 
 > 谷歌维护着一个 [HSTS 预加载服务](https://hstspreload.appspot.com/)。按照如下指示成功提交你的域名后，浏览器将会永不使用非安全的方式连接到你的域名。虽然该服务是由谷歌提供的，但所有浏览器都有使用这份列表的意向（或者已经在用了）。但是，这不是 HSTS 标准的一部分，也不该被当作正式的内容。
@@ -129,7 +131,7 @@ tags:
 
 ## Safari 较 Chrome 的不同
 
-估计 Safari 也是同样的问题，但是按照上述解决方案的 Safari 版本（如下所示）解决并没能成功...改天再找找吧😂（~~写不动了~~）
+估计 Safari 也是同样的问题，但是按照上述解决方案的 Safari 版本（如下所示）解决并没能成功...改天再找找吧😂（~~不存在的~~）
 
 >1. Close Safari.
 >2. Delete the ~/Library/Cookies/HSTS.plist file.
@@ -142,7 +144,8 @@ tags:
 4. [MDN HSTS](https://developer.mozilla.org/zh-CN/docs/Glossary/HSTS)
 5. [MDN HTTP Strict Transport Security](https://developer.mozilla.org/zh-CN/docs/Security/HTTP_Strict_Transport_Security)
 6. [WIKI HTTP 严格传输安全](https://zh.wikipedia.org/wiki/HTTP%E4%B8%A5%E6%A0%BC%E4%BC%A0%E8%BE%93%E5%AE%89%E5%85%A8)
-7. [Status Code:307 Internal Redirect 和 Non-Authoritative-Reason:HSTS 问题](https://www.jianshu.com/p/005f3466b714)
-8. [Non-Authoritative-Reason header field HTTP](https://stackoverflow.com/a/34213531)
-9. [How to clear HSTS from your browser]([https://really-simple-ssl.com/knowledge-base/clear-hsts-browser/])
+7. [How to configure HSTS on www and other subdomains](https://www.danielmorell.com/blog/how-to-configure-hsts-on-www-and-other-subdomains)
+8. [Status Code:307 Internal Redirect 和 Non-Authoritative-Reason:HSTS 问题](https://www.jianshu.com/p/005f3466b714)
+9. [Non-Authoritative-Reason header field HTTP](https://stackoverflow.com/a/34213531)
+10. [How to clear HSTS from your browser]([https://really-simple-ssl.com/knowledge-base/clear-hsts-browser/])
 
