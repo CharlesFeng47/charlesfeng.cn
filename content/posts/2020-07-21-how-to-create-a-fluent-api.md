@@ -2,7 +2,7 @@
 date: 2020-06-19
 title: '如何实现一个 Fluent API'
 template: post
-thumbnail: '../thumbnails/qualys.png'
+thumbnail: '../thumbnails/microsoft.png'
 slug: how-to-create-a-fluent-api
 categories:
   - Tech
@@ -10,6 +10,7 @@ tags:
   - c#
   - Fluent API
   - Refactor
+  - Internship
 ---
 
 ## Fluent API
@@ -191,7 +192,8 @@ namespace xxx
 }
 ```
 
-<div class="filename">IWithRepositories.cs/div>
+<div class="filename">IWithRepositories.cs</div>
+
 
 ```csharp
 namespace xxx
