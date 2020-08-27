@@ -1,5 +1,5 @@
 ---
-date: 2020-06-19
+date: 2020-07-21
 title: '如何实现一个 Fluent API'
 template: post
 thumbnail: '../thumbnails/microsoft.png'
