@@ -11,6 +11,7 @@ categories:
 tags:
   - Service Fabric
   - gRPC
+  - Service Discovery
   - Load Balancer
   - Azure
   - Microsoft
