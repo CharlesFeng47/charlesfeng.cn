@@ -139,9 +139,11 @@ gRPC 在 C# 环境中有两个版本，区别如下。
 
 ##### Version 4: 可以直接启动 Server
 
-这是与 @XinNi 交流后的版本。因为刚接触 C# 平台，对底层其实并不了解，只是根据 Java Boy 的直觉，在没有 JVM 的条件下 ➕ 之前 C / C++ 下都是多进程，所以直接先入为主认为 C# 环境下 `Server.Start()` 也是多进程。
+这是与 @XinNi 交流后的版本。因为刚接触 C# 平台，对底层其实并不了解，只是根据 Java Boy 的直觉，认为没有 JVM ➕ 之前 C / C++ 的编程经历都是多进程，所以直接先入为主认为 C# 环境下 `Server.Start()` 也是多进程。但是事实并不是这样。
 
-但是事实并不是这样。.Net 平台下提供的[公共语言运行库（CLR）](https://en.wikipedia.org/wiki/Common_Language_Runtime)是与 JVM 类似的抽象，所以 `Server.Start()` 启动的不是进程而是线程，那么在 LockboxMonitor 进程退出时，gRPC 线程自然就会退出，所以不会有上面 Version 3 的问题。
+首先，我们知道，Service Fabric Cluster 运行时在每个节点上都启动了一个 Local Node Agent 监视该节点上的 Services，且**各 Service 启动时都是一个进程**。（在 ServiceManifest.xml 文件中指明了 `EntryPoint` 的 exe 文件，该文件在 vm 节点上是可以直接双击运行的。Service Fabric Cluster Recourse Manager 做的相当于是帮用户双击 exe 文件、删除该进程、并保持 Service 实例数量满足需求即可。）
+
+其次，.Net 平台下提供的[公共语言运行库（CLR）](https://en.wikipedia.org/wiki/Common_Language_Runtime)是与 JVM 类似的抽象，所以在 Service LockboxMonitor 进程中直接使用 `Server.Start()` 启动的 gRPC Server 不是另一个进程而是**线程**，那么在 LockboxMonitor 进程被 Recourse Manager 管理、删除时，gRPC 线程自然就会退出，所以不会有上面 Version 3 的问题。
 
 #### Final Data Flow
 
