@@ -98,7 +98,7 @@ gRPC 在 C# 环境中有两个版本，区别如下。
 |                    | [grpc](https://github.com/grpc/grpc/tree/master/src/csharp) | [grpc-dotnet](https://github.com/grpc/grpc-dotnet) |
 | ------------------ | ----------------------------------------------------------- | -------------------------------------------------- |
 | 实现方式           | C# API over native C-core binaries                          | C# implemented gRPC                                |
-| 使用环境           | .Net Framework                                              | .Net Core                                          |
+| 使用环境           | .Net Core，.Net Framework 4.5+                              | .Net Core                                          |
 | Cert               | pem                                                         | pfx                                                |
 | 与 Protobuf 的集成 | 手动编译 proto 文件                                         | 自动编译 proto 文件                                |
 
