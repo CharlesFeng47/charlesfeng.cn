@@ -2,7 +2,6 @@ export default [
   {
     icon: '🧠',
     title: 'Expression',
-    path: 'https://parclabcn.com/',
     description: '通过朗读、转述、叙述三种表达方式对人类的表达力进行评测',
   },
   {
