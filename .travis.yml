@@ -6,8 +6,8 @@ branches:
   - master
 git:
   depth: 1
-addons:
-  ssh_known_hosts: "$DEPLOY_HOST"
+# addons:
+#   ssh_known_hosts: "$DEPLOY_HOST"
 cache:
   directories:
   - node_modules
@@ -19,6 +19,7 @@ before_install:
 # Start SSH agent
 - eval "$(ssh-agent -s)"
 - ssh-add ~/.ssh/deploy_rsa
+- ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
 install:
 - yarn install
 script:
