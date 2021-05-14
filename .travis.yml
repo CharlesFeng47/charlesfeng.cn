@@ -7,15 +7,14 @@ branches:
 git:
   depth: 1
 addons:
-  ssh_known_hosts: 119.23.201.68
+  ssh_known_hosts: "$DEPLOY_HOST"
 cache:
   directories:
   - node_modules
 
 before_install:
 # ssh config
-- openssl aes-256-cbc -K $encrypted_c4e4594cf959_key -iv $encrypted_c4e4594cf959_iv
-  -in id_rsa.enc -out ~/.ssh/deploy_rsa -d
+- openssl aes-256-cbc -K $encrypted_318d69ee3267_key -iv $encrypted_318d69ee3267_iv -in TravisCI.enc -out ~/.ssh/deploy_rsa -d
 - chmod 600 ~/.ssh/deploy_rsa
 # Start SSH agent
 - eval "$(ssh-agent -s)"
@@ -39,5 +38,5 @@ after_success:
 # --delete-after 传输结束以后再删除
 # --progress 显示备份过程
 # -e, --rsh=command 指定使用 rsh、ssh 方式进行数据同步。
-- rsync -azv --delete-after -e ssh public/ root@119.23.201.68:/data/charlesfeng/blog/
-- rsync -azv --delete-after -e ssh defaulterror/ root@119.23.201.68:/data/charlesfeng/defaulterror/
+- rsync -azv --delete-after -e ssh public/ root@"$DEPLOY_HOST":/data/charlesfeng/blog/
+- rsync -azv --delete-after -e ssh defaulterror/ root@"$DEPLOY_HOST":/data/charlesfeng/defaulterror/
