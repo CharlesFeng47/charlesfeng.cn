@@ -27,7 +27,7 @@ export default class Index extends Component {
             <div className="elevator">
               <h1>{`Hello, I'm Charles.`}</h1>
               <p>
-                冯俊杰，南京大学软件学院 2019 级研究生在读。
+                冯俊杰，NJUer 19/21 届毕业生，巨硬打工仔。
               </p>
               <p>
                 悟已往之不谏，知来者之可追。实迷途其未远，觉今是而昨非。希望每天都能进步一点点。(*ˉ︶ˉ*)
