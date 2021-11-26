@@ -23,6 +23,9 @@ export default class Footer extends Component {
       <footer className="footer container">
         <div>
           {/* <Link to="/newsletter">Newsletter</Link> */}
+          <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">
+            渝ICP备18013709号-4
+          </a>
           <a href="https://weibo.com/u/5708997053" target="_blank" rel="noopener noreferrer">
             Weibo
           </a>
