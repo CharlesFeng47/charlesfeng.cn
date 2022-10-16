@@ -5,11 +5,12 @@ import ThemeContext from '../context/ThemeContext'
 // github
 const github = 'https://cdn.charlesfeng.top/resources/github.png'
 const githubDark = 'https://cdn.charlesfeng.top/resources/github-dark.png'
+const githubActions = 'https://cdn.charlesfeng.top/resources/github-actions.svg'
 
-// travis
-const travisPhotoNum = 2;
-const travisIndex = Math.floor(Math.random() * travisPhotoNum) + 1; // 从 1 开始编号
-const travis = 'https://cdn.charlesfeng.top/resources/travis-ci-pride-' + travisIndex + '.svg';
+// // travis
+// const travisPhotoNum = 2;
+// const travisIndex = Math.floor(Math.random() * travisPhotoNum) + 1; // 从 1 开始编号
+// const travis = 'https://cdn.charlesfeng.top/resources/travis-ci-pride-' + travisIndex + '.svg';
 
 // gatsby
 const gatsby = 'https://cdn.charlesfeng.top/resources/gatsby.png';
@@ -52,13 +53,13 @@ export default class Footer extends Component {
               alt="GitHub"
             />
           </a>
-          <a href="https://travis-ci.com/github/CharlesFeng47/charlesfeng.cn" title="CI/CD by Travis">
+          <a href="https://github.com/CharlesFeng47/charlesfeng.cn/actions" title="CI/CD by GitHub Actions">
             <img
-              src={travis}
+              src={githubActions}
               target="_blank"
               rel="noopener noreferrer"
               className="footer-img"
-              alt="Travis"
+              alt="GitHub Actions"
             />
           </a>
           <a href="https://www.gatsbyjs.org/" title="Built with Gatsby">
