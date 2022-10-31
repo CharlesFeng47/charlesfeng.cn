@@ -234,7 +234,7 @@ export default useDataApi
 
 #### 简单 Demo
 
-在此 demo 中无需只需加载一次数据，所以只需要解构出相关信息。
+在此 demo 中只需加载一次数据，所以只需要解构出相关信息。
 
 ```jsx
   const [{data, isLoading, statusCode}] = useDataApi({

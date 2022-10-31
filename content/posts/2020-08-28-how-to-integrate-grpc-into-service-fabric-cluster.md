@@ -7,7 +7,6 @@ slug: how-to-integrate-grpc-into-service-fabric-cluster
 categories:
   - Tech
   - Thinking
-  - Popular
 tags:
   - Service Fabric
   - gRPC
