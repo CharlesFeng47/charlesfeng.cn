@@ -1,11 +1,12 @@
 ---
 date: 2022-03-05
-title: '一次 Configure(false) 导致的死锁问题'
+title: '一次未正确使用 Configure(false) 导致的死锁问题'
 template: post
 thumbnail: '../thumbnails/loop-triangle.png'
-slug: deadlock-by-configure-false
+slug: deadlock-by-wrongly-using-configure-false
 categories:
   - Tech
+  - Bug
   - Popular
 tags:
   - csharp
@@ -15,7 +16,7 @@ tags:
 
 ## 写在前面
 
-写本篇文章的原因是因为自己在工作中 check in 了一个死锁问题，虽然是个 new feature 并且在联调阶段发现了，没有对线上造成什么影响，但是还是写下来引以为戒吧。另外，在 debug 搜索资料过程中发现这个问题算是一个挺经典的问题，所以更想着记录一下。
+写本篇文章的原因是因为自己在工作中 check in 了一个死锁问题，虽然是个 new feature 并且在联调阶段发现了，没有对线上造成什么影响，但是还是写下来引以为戒吧。另外，在 debug 搜索资料过程中发现这个问题算是一个挺经典的问题 sync over async，所以更想着记录一下。
 
 ## 我是怎么引入这个死锁的？
 

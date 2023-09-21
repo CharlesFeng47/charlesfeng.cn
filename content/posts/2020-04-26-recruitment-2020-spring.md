@@ -7,7 +7,6 @@ slug: recruitment-2020-spring
 categories:
   - Tech
   - Thinking
-  - Popular
 tags:
   - Recruitment
   - Summary

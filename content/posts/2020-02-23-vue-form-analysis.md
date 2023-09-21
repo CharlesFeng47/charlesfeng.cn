@@ -6,7 +6,6 @@ thumbnail: '../thumbnails/vue.png'
 slug: vue-form-analysis
 categories:
   - Tech
-  - Popular
 tags:
   - Vue
   - Form
