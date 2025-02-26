@@ -1,10 +1,15 @@
 name: Deploy Blog
 run-name: ${{ github.actor }} is deploying via GitHub Actions 🚀
+
 on:
   push:
     branches:
       - 'main'
       - 'master'
+
+permissions:
+  contents: read # access to check out code and install dependencies by action setup-node
+
 jobs:
   Deploy-Blog:
     runs-on: ubuntu-latest
