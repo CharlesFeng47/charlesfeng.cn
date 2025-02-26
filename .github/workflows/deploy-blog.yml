@@ -19,7 +19,7 @@ jobs:
       - name: Resolve yarn cert issue
         run: yarn config set strict-ssl false
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --frozen-lockfile # optional, --immutable
       - name: Build blog
         run: yarn build
       - name: Deploy blog to server
