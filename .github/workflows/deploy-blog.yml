@@ -10,16 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Use Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 20.x
-      - name: Cache node modules
-        uses: actions/cache@v3
-        with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          node-version: 20
+          cache: 'yarn'
       - name: Resolve yarn cert issue
         run: yarn config set strict-ssl false
       - name: Install dependencies
@@ -28,7 +24,7 @@ jobs:
         run: yarn build
       - name: Deploy blog to server
         id: deploy
-        uses: Pendect/action-rsyncer@v1.1.0
+        uses: Pendect/action-rsyncer@v2.0.0
         env:
           DEPLOY_KEY: ${{secrets.DeployKey}}
         with:
@@ -41,7 +37,7 @@ jobs:
         run: echo "${{ steps.deploy.outputs.status }}"
       - name: Deploy error page to server
         id: deploy2
-        uses: Pendect/action-rsyncer@v1.1.0
+        uses: Pendect/action-rsyncer@v2.0.0
         env:
           DEPLOY_KEY: ${{secrets.DeployKey}}
         with:
