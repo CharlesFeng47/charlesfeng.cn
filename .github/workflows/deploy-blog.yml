@@ -20,6 +20,8 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+      - name: Resolve yarn cert issue
+        run: sed -i '/^  resolved /d' yarn.lock
       - name: Install dependencies
         run: yarn install
       - name: Build blog
