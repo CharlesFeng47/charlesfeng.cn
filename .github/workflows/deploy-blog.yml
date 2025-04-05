@@ -1,39 +1,32 @@
 name: Deploy Blog
 run-name: ${{ github.actor }} is deploying via GitHub Actions 🚀
-
 on:
   push:
     branches:
       - 'main'
       - 'master'
-
-permissions:
-  contents: read # access to check out code and install dependencies by action setup-node
-
 jobs:
   Deploy-Blog:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
+        uses: actions/checkout@v3
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
           node-version: 12.16.0
-          cache: 'yarn'
-      - name: Resolve yarn cert issue
-        run: yarn config set strict-ssl false
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
       - name: Install dependencies
         run: yarn install
       - name: Build blog
         run: yarn build
       - name: Deploy blog to server
         id: deploy
-        uses: Pendect/action-rsyncer@v2.0.0
+        uses: Pendect/action-rsyncer@v1.1.0
         env:
           DEPLOY_KEY: ${{secrets.DeployKey}}
         with:
@@ -46,7 +39,7 @@ jobs:
         run: echo "${{ steps.deploy.outputs.status }}"
       - name: Deploy error page to server
         id: deploy2
-        uses: Pendect/action-rsyncer@v2.0.0
+        uses: Pendect/action-rsyncer@v1.1.0
         env:
           DEPLOY_KEY: ${{secrets.DeployKey}}
         with:
