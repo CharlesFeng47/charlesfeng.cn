@@ -20,6 +20,8 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+      - name: Resolve yarn cert issue
+        run: yarn config set strict-ssl false
       - name: Install dependencies
         run: yarn install
       - name: Build blog
