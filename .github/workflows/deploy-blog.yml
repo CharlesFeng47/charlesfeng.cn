@@ -7,14 +7,14 @@ on:
       - 'master'
 jobs:
   Deploy-Blog:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 12.16.0
       - name: Cache node modules
         uses: actions/cache@v3
         with:
