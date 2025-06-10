@@ -27,7 +27,7 @@ tags:
 4. Netwwork Security Group：网关，可分别配置 Inbound 和 Outbound 的流量规则。对 Inbound Source 可指定具体的 IP Address Range，也可以是 Service Tag。（Service Tag 本质是上一组预先定义好的identifiers，代表着一类 IP 地址。比如 Tag `VirtualNetwork` 代表所有的虚拟/本地网络地址空间、Tag `Azure Load Balancer` 代表 Azure Load Balancer 进行 health probe 时的源 IP 地址。）
 5. **Virtual Machine Scale Set / Node Type**：一个集群上的一组 vm 实例，该 Cluster 中的所有 node / vm 都具有相同的大小和特征，如 CPU 数量、内存、磁盘数量、IO 等。可以为每一种 Node Type 分别进行扩展，比如修改 OS SKU、打开不同的端口。（但是一种 Node Type 中的所有 instance 都一样。）网关使用 Network Security Group，负载均衡使用 Load Balancer。
 
-![](https://cdn.charlesfeng.top/images/2020-08-27-service-fabric-cluster-arch.png)
+![](https://images.charlesfeng.cn/2020-08-27-service-fabric-cluster-arch.png)
 
 上图所示的是 Azure Cluster 上 Service Fabric 项目的架构（详见[文档](https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-azure-clusters-overview)）。每一组 VMSS / Node Type 都有着独立的 Load Balancer 和网关 NSG。所以当外部流量通过域名访问时，该域名会先被 Public IP Address 转换为对应的 IP 地址，然后经过 NSG 网关拦截过滤，到达 Load Balancer 流量转发，从而击中具体节点。
 
@@ -45,11 +45,11 @@ tags:
 
 在实际中，我们所有的路由规则都有对应的探针 probe。
 
-![](https://cdn.charlesfeng.top/images/2020-08-27-azure-load-balancer-health-probes.png)
+![](https://images.charlesfeng.cn/2020-08-27-azure-load-balancer-health-probes.png)
 
 对探针 probe 可配置其探测协议、探测端口、间隔时间、确定为 unhealthy 状态的阈值（即连续探测失败次数）。
 
-![](https://cdn.charlesfeng.top/images/2020-08-27-azure-load-balancer-health-probe-configuration.png)
+![](https://images.charlesfeng.cn/2020-08-27-azure-load-balancer-health-probe-configuration.png)
 
 **注意：Azure Load Balancer  和探针 probe 仅仅知道节点 nodes，而不知道在 nodes 上运行的 services。Azure Load Balancer 将总是向响应探针 probe 的节点转发流量，所以必须小心确保在这些响应探针 probe 的节点上有相关的可用服务 Service。**
 
@@ -69,7 +69,7 @@ Service Fabric 框架提供了几种 pre-built 的通信选项（不指明协议
 
 在单纯的 gRPC 项目中，Client 与 Server 端交互有着自己的一套逻辑。
 
-![](https://cdn.charlesfeng.top/images/2020-08-27-grpc-load-balancing.png)
+![](https://images.charlesfeng.cn/2020-08-27-grpc-load-balancing.png)
 
 1. 在启动时，gRPC Client 会针对 Server 的 domain name 发 [name resolution](https://github.com/grpc/grpc/blob/master/doc/naming.md) 的请求，这可能返回多个 IP 地址和 Server 端的 [service config](https://github.com/grpc/grpc/blob/master/doc/service_config.md) 文件（用于指导 Client 进行负载均衡）。
 2. Client 初始化负载均衡策略。

@@ -92,11 +92,11 @@ Realm 底层是 B+ 树实现的，在 Realm 团队开源的 [realm-core](https:/
 
 B+ 树通常用于数据库和操作系统的[文件系统](http://baike.baidu.com/view/266589.htm)中。NTFS、ReiserFS、NSS、XFS、JFS、ReFS 和 BFS 等文件系统都在使用 B+ 树作为元数据索引。B+ 树的特点是能够保持数据稳定有序，其插入与修改拥有较稳定的对数时间复杂度。B+ 树元素自底向上插入。
 
-![2019-05-25-1](https://cdn.charlesfeng.top/images/2019-05-25-1.jpg)
+![2019-05-25-1](https://images.charlesfeng.cn/2019-05-25-1.jpg)
 
 Realm 会让每一个连接的线程都会有数据在一个特定时刻的快照。这也是为什么能够在上百个线程中做大量的操作并同时访问数据库，却不会发生崩溃的原因。
 
-![2019-05-25-2](https://cdn.charlesfeng.top/images/2019-05-25-2.jpeg)
+![2019-05-25-2](https://images.charlesfeng.cn/2019-05-25-2.jpeg)
 
 
 
@@ -136,7 +136,7 @@ Realm 对象不能在线程间传递的原因就是为了保证隔离性和数�
 
 ##### 5. Realm 中的文件
 
-![2019-05-25-3](https://cdn.charlesfeng.top/images/2019-05-25-3.jpeg)
+![2019-05-25-3](https://images.charlesfeng.cn/2019-05-25-3.jpeg)
 
 + Database File：.realm 文件是 memory mapped 的，所有的对象都是文件首地址偏移量的一个引用。对象的存储不一定是连续的，但是 Array 可以保证是连续存储。.realm 执行写操作的时候，有3个指针，一个是*current top pointer ，一个是 other top pointer ，最后一个是 switch bit*。
 

@@ -26,7 +26,7 @@ tags:
 
 博客引用的图片通过 cdn 加速，图片存放在自己服务器上，通过 Nginx 进行分发。结构如下图所示。
 
-![](https://cdn.charlesfeng.top/images/2020-05-02-netlify-arch.jpg)
+![](https://images.charlesfeng.cn/2020-05-02-netlify-arch.jpg)
 
 #### 迁移到自己的服务器
 
@@ -40,7 +40,7 @@ tags:
 
 大概的架构如下图所示。未来如果将项目部署在此服务器上，仍然通过 Nginx 进行转发。此外，这里还学习到对 Nginx 可以监听同一端口，因此可以分到不同的配置文件中，更好地解耦，具体详见[这里](/nginx-conf-multi-server)。
 
-![](https://cdn.charlesfeng.top/images/2020-05-02-own-server-arch.jpg)
+![](https://images.charlesfeng.cn/2020-05-02-own-server-arch.jpg)
 
 对博客而言，Nginx 分发其实就是将请求分发到生成的 /public 目录下，只要路径正确就可以正确访问啦。所以对博客进行更新，其实就是修改服务器上对应的 /public 目录。而自动集成部署博客，就是自动修改啦。
 
@@ -67,13 +67,13 @@ after_success:
 
 注意这一步的参数 `-e 'ssh -o stricthostkeychecking=no'`，它指明了数据同步的方式——不进行 ssh host key 的验证，否则在执行时仍然会弹出 check 的提示，导致任务无法完成。这里就很迷惑了，我明明在 `addons` 中增加了 `ssh_known_hosts`，为什么还会弹提示？此处困扰了我超久，在 18 年底也没有想通，直到现在再来看，才豁然开朗。
 
-![](https://cdn.charlesfeng.top/images/2020-05-02-rsync-prompt.jpg)
+![](https://images.charlesfeng.cn/2020-05-02-rsync-prompt.jpg)
 
 在 18 年底时，我看它既然提醒，那么就直接忽视好了，所以直接通过 `ssh -o stricthostkeychecking=no` 对提示进行了忽略。（学艺不精🥺）但现在来看，这显然不太合理。搜索之后，我本来以为是[此处](https://github.com/travis-ci/travis-ci/issues/9109#issuecomment-359254763)的原因——`ssh_known_hosts` 只是为当前用户添加，但是 `rsync` 是以 root 用户执行的——可是答主还有一句「通过 `sudo` 」，而我没有通过 `sudo` 执行，所以不是这个问题。
 
 后来在日志中看到下图。猜想是因为对配置参数 `ssh_known_hosts` 配置时使用了变量 `$DEPLOY_HOST` ，而这里的变量却不能被解析，所以 `ssh_known_hosts` 中其实并没有添加成功。换成常量测试通过，确实是这个问题。
 
-![](https://cdn.charlesfeng.top/images/2020-05-02-addons.jpg)
+![](https://images.charlesfeng.cn/2020-05-02-addons.jpg)
 
 所以，其实在我 18 年的版本中，配置的 `addons` 完全没起作用，只需要如下所示这样的代码即可以通过。
 
@@ -144,7 +144,7 @@ Code never lies。如果不是 Travis 的 bug，那一定与我在这次构建�
 
 在此次构建 #4 前我不知道 Travis 已经默认支持 `yarn`，所以我自己在流水线中通过 `yum install yarn` 安装了 `yarn`。在发现已经默认支持后，我在 #4 相关的这次提交中不再自己安装，而是直接使用。与此同时，我又缓存了 node_modules。而因为在 Travis 的执行中，缓存的 cache 是会在所有[脚本生命周期](https://docs.travis-ci.com/user/job-lifecycle)执行前被获取的（如下图 log 所示，先在 188 行取出了 cache，然后在 208 行才开始执行脚本），所以猜想这次构建 #4 是因为使用了上一次下载的、在 `node` 版本为 12.16.0 支持下最新版的 `yarn`，然后之后的构建使用的是 Travis 提供的 `yarn`。
 
-![](https://cdn.charlesfeng.top/images/2020-05-02-cache.jpg)
+![](https://images.charlesfeng.cn/2020-05-02-cache.jpg)
 
 事实上，上图的 log 也证明了这一点，在 `script` 生命周期执行完毕后，在 236 行对 cache 进行了缓存，从而修改了 yarn 版本。😶
 
@@ -158,7 +158,7 @@ Code never lies。如果不是 Travis 的 bug，那一定与我在这次构建�
 
 因为阿里云的 cdn 加速也需要域名备案，所以通过已经备案过的域名 charlesfeng.top 得到另一个 cdn 加速域名 cdn2.charlesfeng.top，然后为域名 charlesfeng.cn 添加 CNAME 解析到 cdn2.charlesfeng.top。理想很美好对不对，但是这样 CNAME 解析并不生效，我也没想明白为啥...
 
-![](https://cdn.charlesfeng.top/images/2020-05-02-cdn-cname.jpg)
+![](https://images.charlesfeng.cn/2020-05-02-cdn-cname.jpg)
 
 #### 方案二：更换境外 DNS 解析
 
@@ -172,13 +172,13 @@ Code never lies。如果不是 Travis 的 bug，那一定与我在这次构建�
 
 D 监控显示故障，但是没说原因，放弃。
 
-![](https://cdn.charlesfeng.top/images/2020-05-02-dnspod-error.jpg)
+![](https://images.charlesfeng.cn/2020-05-02-dnspod-error.jpg)
 
 ##### 3. [Cloudflare](https://www.cloudflare.com/dns/)
 
 最开始一直无法导入域名。
 
-<img src="https://cdn.charlesfeng.top/images/2020-05-02-cloudflare-add-site-error.jpg" height="300px"></img>
+<img src="https://images.charlesfeng.cn/2020-05-02-cloudflare-add-site-error.jpg" height="300px"></img>
 
 
 
@@ -186,13 +186,13 @@ D 监控显示故障，但是没说原因，放弃。
 
 #### 方案三：购买境外域名
 
-<img src="https://cdn.charlesfeng.top/images/2020-05-02-dns-resolver-compare.jpg" height="400px"></img>
+<img src="https://images.charlesfeng.cn/2020-05-02-dns-resolver-compare.jpg" height="400px"></img>
 
 因为尝试对 Cloudflare DNS 解析 charlesfeng.cn 速度测量一下，和阿里云解析 charlesfeng.top 差不多，所以尝试使用境外购买的域名，看通过「境外域名 + 境外 Cloudflare DNS 解析 + 境内服务器」的组合是否可以访问，以及境内访问的速度如何。
 
 先在 [NameSilo](https://www.namesilo.com/) 购买了一个便宜的域名 charlesfeng.xyz，买完并修改 DNS 记录后测试，境外访问速度还行（但是境外的话 Netlify 本身速度也还不错啊...我瞎折腾啥），然鹅境内速度...
 
-![](https://cdn.charlesfeng.top/images/2020-05-02-namesilo-domain-test.jpg)
+![](https://images.charlesfeng.cn/2020-05-02-namesilo-domain-test.jpg)
 
 我要你有何用！！还好没直接买 .com 域名😨
 
@@ -200,7 +200,7 @@ D 监控显示故障，但是没说原因，放弃。
 
 好了，感受到了被这个页面支配的恐惧...
 
-![](https://cdn.charlesfeng.top/images/2020-05-02-beian.jpg)
+![](https://images.charlesfeng.cn/2020-05-02-beian.jpg)
 
 #### 方法四：境内 DNS 解析到 Netlify
 
@@ -212,11 +212,11 @@ D 监控显示故障，但是没说原因，放弃。
 
 至此...我本想再试一下境内 DNS 解析。但是，估计大概率速度不行，所以先直接对 Netlify 提供的域名进行测试。
 
-<img src="https://cdn.charlesfeng.top/images/2020-05-02-ping-netlify.jpg" height="250px"></img>
+<img src="https://images.charlesfeng.cn/2020-05-02-ping-netlify.jpg" height="250px"></img>
 
 不管是上图直接 ping 显示结果丢包率 20%，还是下图对网站访问速度的测试，都不算优秀。所以放弃。
 
-![](https://cdn.charlesfeng.top/images/2020-05-02-netlify-test.jpg)
+![](https://images.charlesfeng.cn/2020-05-02-netlify-test.jpg)
 
 #### 总结
 

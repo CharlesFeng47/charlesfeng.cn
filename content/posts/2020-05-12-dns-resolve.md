@@ -50,7 +50,7 @@ DNS 是域名系统（Domain Name System）的缩写，是因特网的一项核�
 9. 浏览器向IP地址发出HTTP请求。
 10. 该IP处的web服务器返回要在浏览器中呈现的网页。
 
-![](https://cdn.charlesfeng.top/images/2020-05-12-dns.jpg)
+![](https://images.charlesfeng.cn/2020-05-12-dns.jpg)
 
 ## DNS术语
 

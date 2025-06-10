@@ -26,7 +26,7 @@ tags:
 
 首先排除此思路，因为如下图我已经可以 ping 到了，说明 DNS Resolver 已经同步了对应记录。如果需要复习 DNS 的解析过程可参考[这里](/dns-resolve)。
 
-![](https://cdn.charlesfeng.top/images/2020-05-12-ping-domain.png)
+![](https://images.charlesfeng.cn/2020-05-12-ping-domain.png)
 
 #### 浏览器的自身缓存
 
@@ -43,9 +43,9 @@ tags:
 
 最后，我终于想起来看 Chrome 控制台了...结果如下图。（还是不够有直觉啊 555，我不是一个合格的程序员😤）
 
-![](https://cdn.charlesfeng.top/images/2020-05-12-1-http.png)
+![](https://images.charlesfeng.cn/2020-05-12-1-http.png)
 
-![](https://cdn.charlesfeng.top/images/2020-05-12-2-https.png)
+![](https://images.charlesfeng.cn/2020-05-12-2-https.png)
 
 可以看到，当输入域名 [http://charlesfeng.cn](http://charlesfeng.cn) 后，首先返回了 307 状态码，重定向到 [https://charlesfeng.cn](https://charlesfeng.cn)，而我目前还没有配置 SSL 证书，所以自然无法安全访问。
 
@@ -63,7 +63,7 @@ tags:
 
 访问我的另一个域名 cuihuaergou.top 验证下。（对，我的域名就是这么多🥰）可以看到确实在响应中设置了 `Strict-Transport-Security` 字段，`max-age=31536000` 表示自动使用 HTTPS 连接的时间为一年。（虽然害我这里查了会儿资料，但是 Netlify 这功能也太好了叭😭，学习了学习了）
 
-![](https://cdn.charlesfeng.top/images/2020-05-12-reponse-hsts.jpg)
+![](https://images.charlesfeng.cn/2020-05-12-reponse-hsts.jpg)
 
 详细的 `Strict-Transport-Security` 可以参见 MDN 的[相关说明](https://developer.mozilla.org/zh-CN/docs/Security/HTTP_Strict_Transport_Security)，需要特别注意的是非加密传输（即 HTTP）时设置的 HSTS 字段无效， `Strict-Transport-Security` 字段会被浏览器**忽略**。（因为攻击者可以通过中间人攻击的方式在连接中修改、注入或删除它。只有在你的网站通过 HTTPS 访问并且没有证书错误时，浏览器才认为你的网站支持 HTTPS 然后使用 `Strict-Transport-Security` 的值。）
 
@@ -127,7 +127,7 @@ tags:
 
 在 Chrome 中键入 `chrome://net-internals/#hsts`，先搜索域名，结果如下图。删除后，可以通过 HTTP 正常访问。
 
-![](https://cdn.charlesfeng.top/images/2020-05-12-chrome-hsts-query.png)
+![](https://images.charlesfeng.cn/2020-05-12-chrome-hsts-query.png)
 
 ## Safari 较 Chrome 的不同
 

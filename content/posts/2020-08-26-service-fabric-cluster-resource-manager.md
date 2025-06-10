@@ -55,7 +55,7 @@ Cluster Resource Manager 必须跟踪每个 Service 的 requirements 及单个 S
 4. Resource Manager 根据当前配置下发命令，进行 reconfiguration。
 5. N5 超载，所以将服务 B 移到 N4。
 
-![](https://cdn.charlesfeng.top/images/2020-08-26-service-fabric-resource-manager-architecture-activity.png)
+![](https://images.charlesfeng.cn/2020-08-26-service-fabric-resource-manager-architecture-activity.png)
 
 ## 来源
 

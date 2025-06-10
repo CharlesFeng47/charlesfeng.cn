@@ -15,7 +15,7 @@ Nginx 支持将不同 server 的配置提取到不同的文件中，只需要在
 
 Nginx 还支持对同一个端口进行监听，并通过 server\_name 进行区分。在我的例子中，也可以看到 server\_name 的不同。
 
-![](https://cdn.charlesfeng.top/images/2020-05-01-nginx-conf.png)
+![](https://images.charlesfeng.cn/2020-05-01-nginx-conf.png)
 
 此外，因为对 charlesfeng.cn 进行备案，阿里云会对之前备案的域名进行检查，底部是否添加备案号并链接到工信部，所以 charlesfeng.conf 中最下方的配置是为之前备案的域名 charlesfeng.top 提供一个默认界面并添加备案哈，以通过审核 =。=
 
