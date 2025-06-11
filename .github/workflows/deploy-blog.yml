@@ -30,6 +30,8 @@ jobs:
         run: echo ${{ hashFiles('**/yarn.lock') }}
       - name: Build blog
         run: yarn build
+      - name: Print files
+        run: find . -type f -print
       - name: Deploy blog to server
         id: deploy
         uses: Pendect/action-rsyncer@v2.0.0
