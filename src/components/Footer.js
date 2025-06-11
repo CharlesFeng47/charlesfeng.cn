@@ -3,17 +3,17 @@ import { Link } from 'gatsby'
 import ThemeContext from '../context/ThemeContext'
 
 // github
-const github = 'https://cdn.charlesfeng.top/resources/github.png'
-const githubDark = 'https://cdn.charlesfeng.top/resources/github-dark.png'
-const githubActions = 'https://cdn.charlesfeng.top/resources/github-actions.svg'
+const github = 'https://resources.charlesfeng.cn/github.png'
+const githubDark = 'https://resources.charlesfeng.cn/github-dark.png'
+const githubActions = 'https://resources.charlesfeng.cn/github-actions.svg'
 
 // // travis
 // const travisPhotoNum = 2;
 // const travisIndex = Math.floor(Math.random() * travisPhotoNum) + 1; // 从 1 开始编号
-// const travis = 'https://cdn.charlesfeng.top/resources/travis-ci-pride-' + travisIndex + '.svg';
+// const travis = 'https://resources.charlesfeng.cn/travis-ci-pride-' + travisIndex + '.svg';
 
 // gatsby
-const gatsby = 'https://cdn.charlesfeng.top/resources/gatsby.png';
+const gatsby = 'https://resources.charlesfeng.cn/gatsby.png';
 
 export default class Footer extends Component {
   static contextType = ThemeContext // eslint-disable-line

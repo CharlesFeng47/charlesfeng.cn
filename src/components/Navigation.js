@@ -3,8 +3,8 @@ import { Link } from 'gatsby'
 import ThemeContext from '../context/ThemeContext'
 import config from '../../data/SiteConfig'
 
-const sun = 'https://cdn.charlesfeng.top/resources/sun.svg';
-const moon = 'https://cdn.charlesfeng.top/resources/moon.svg';
+const sun = 'https://resources.charlesfeng.cn/sun.svg';
+const moon = 'https://resources.charlesfeng.cn/moon.svg';
 
 export default class Navigation extends Component {
   static contextType = ThemeContext // eslint-disable-line
