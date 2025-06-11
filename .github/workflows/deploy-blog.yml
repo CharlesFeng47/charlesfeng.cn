@@ -24,6 +24,8 @@ jobs:
         run: yarn config set strict-ssl false
       - name: Install dependencies
         run: yarn install
+      - name: Yarn Lock file
+        run: cat yarn.lock
       - name: Build blog
         run: yarn build
       - name: Deploy blog to server
