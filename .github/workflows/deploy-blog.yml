@@ -27,7 +27,7 @@ jobs:
       - name: Yarn Lock file
         run: cat yarn.lock
       - name: Yarn Lock file hashcode
-        run: cat ${{ hashFiles('**/yarn.lock') }}
+        run: echo ${{ hashFiles('**/yarn.lock') }}
       - name: Build blog
         run: yarn build
       - name: Deploy blog to server
