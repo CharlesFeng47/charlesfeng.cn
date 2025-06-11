@@ -6,7 +6,7 @@ const config = {
   siteUrl: 'https://charlesfeng.cn',
   profileUrl: 'https://images.charlesfeng.cn/profile.jpg',
   profileAlt: 'CharlesFengProfile',
-  faviconUrl: 'https://images.charlesfeng.cn/resources/favicon.ico',
+  faviconUrl: 'https://resources.charlesfeng.cn/favicon.ico',
   repo: 'https://github.com/CharlesFeng47/charlesfeng.cn',
   pathPrefix: '',
   // dateFromFormat: 'YYYY-MM-DD',
