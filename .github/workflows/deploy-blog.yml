@@ -55,6 +55,6 @@ jobs:
           options: ''
           ssh_options: '-v -T -o StrictHostKeyChecking=no -o SendEnv=NONE'
           src: 'defaulterror/'
-          dest: ${{ format('azureuser@{0}:/data/charlesfeng/defaulterror/', secrets.DeployHost) }}
+          dest: ${{ format('azureuser@{0}:~/blog/charlesfeng/defaulterror/', secrets.DeployHost) }}
       - name: Display status from deploy error page
         run: echo "${{ steps.deploy2.outputs.status }}"
