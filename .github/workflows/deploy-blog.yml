@@ -34,9 +34,9 @@ jobs:
         with:
           flags: '-avzr --delete-after'
           options: ''
-          ssh_options: ''
+          ssh_options: '-o StrictHostKeyChecking=no'
           src: 'public/'
-          dest: ${{ format('root@{0}:/data/charlesfeng/blog/', secrets.DeployHost) }}
+          dest: ${{ format('root@{0}:~/blog/charlesfeng/blog/', secrets.DeployHost) }}
       - name: Display status from deploy
         run: echo "${{ steps.deploy.outputs.status }}"
       - name: Deploy error page to server
@@ -47,7 +47,7 @@ jobs:
         with:
           flags: '-avzr --delete-after'
           options: ''
-          ssh_options: ''
+          ssh_options: '-o StrictHostKeyChecking=no'
           src: 'defaulterror/'
           dest: ${{ format('root@{0}:/data/charlesfeng/defaulterror/', secrets.DeployHost) }}
       - name: Display status from deploy error page

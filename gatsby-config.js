@@ -149,8 +149,8 @@ module.exports = {
             query: `
             {
               allMarkdownRemark(
-                limit: 1000,
-                sort: { order: DESC, fields: [fields___date] },
+                limit: 1000
+                sort: { fields: { date: DESC } }
                 filter: { frontmatter: { template: { eq: "post" } } }
               ) {
                 edges {
