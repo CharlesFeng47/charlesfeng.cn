@@ -58,6 +58,8 @@ module.exports = {
               offsetY: `100`,
               maintainCase: false,
               removeAccents: true,
+              icon: false,
+              isIconAfterHeader: false,
             },
           },
         ],
