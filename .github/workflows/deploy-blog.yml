@@ -30,7 +30,7 @@ jobs:
         run: yarn build
       - name: Deploy blog to server
         id: deploy
-        uses: Pendect/action-rsyncer@v2.0.0
+        uses: Pendect/action-rsyncer@v1.1.0
         env:
           DEPLOY_KEY: ${{secrets.DeployKey}}
         with:
@@ -43,7 +43,7 @@ jobs:
         run: echo "${{ steps.deploy.outputs.status }}"
       - name: Deploy error page to server
         id: deploy2
-        uses: Pendect/action-rsyncer@v2.0.0
+        uses: Pendect/action-rsyncer@v1.1.0
         env:
           DEPLOY_KEY: ${{secrets.DeployKey}}
         with:
