@@ -26,12 +26,8 @@ jobs:
         run: yarn install
       - name: Yarn Lock file
         run: cat yarn.lock
-      - name: Yarn Lock file hashcode
-        run: echo ${{ hashFiles('**/yarn.lock') }}
       - name: Build blog
         run: yarn build
-      - name: Print files
-        run: find . -type f -print
       - name: Deploy blog to server
         id: deploy
         uses: Pendect/action-rsyncer@v2.0.0
@@ -40,7 +36,7 @@ jobs:
         with:
           flags: '-avzr --delete-after'
           options: ''
-          ssh_options: '-v -T -o StrictHostKeyChecking=no -o SendEnv=NONE'
+          ssh_options: ''
           src: 'public/'
           dest: ${{ format('azureuser@{0}:~/blog/charlesfeng/blog/', secrets.DeployHost) }}
       - name: Display status from deploy
@@ -53,7 +49,7 @@ jobs:
         with:
           flags: '-avzr --delete-after'
           options: ''
-          ssh_options: '-v -T -o StrictHostKeyChecking=no -o SendEnv=NONE'
+          ssh_options: ''
           src: 'defaulterror/'
           dest: ${{ format('azureuser@{0}:~/blog/charlesfeng/defaulterror/', secrets.DeployHost) }}
       - name: Display status from deploy error page
