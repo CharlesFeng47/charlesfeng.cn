@@ -40,7 +40,7 @@ jobs:
           options: ''
           ssh_options: '-v -T -o StrictHostKeyChecking=no -o SendEnv=NONE'
           src: 'public/'
-          dest: ${{ format('root@{0}:~/blog/charlesfeng/blog/', secrets.DeployHost) }}
+          dest: ${{ format('azureuser@{0}:~/blog/charlesfeng/blog/', secrets.DeployHost) }}
       - name: Display status from deploy
         run: echo "${{ steps.deploy.outputs.status }}"
       - name: Deploy error page to server
@@ -53,6 +53,6 @@ jobs:
           options: ''
           ssh_options: '-v -T -o StrictHostKeyChecking=no -o SendEnv=NONE'
           src: 'defaulterror/'
-          dest: ${{ format('root@{0}:/data/charlesfeng/defaulterror/', secrets.DeployHost) }}
+          dest: ${{ format('azureuser@{0}:/data/charlesfeng/defaulterror/', secrets.DeployHost) }}
       - name: Display status from deploy error page
         run: echo "${{ steps.deploy2.outputs.status }}"
