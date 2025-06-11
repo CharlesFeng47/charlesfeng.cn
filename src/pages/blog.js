@@ -105,7 +105,7 @@ export const pageQuery = graphql`
   query BlogQuery {
     posts: allMarkdownRemark(
       limit: 2000
-      sort: { fields: [fields___date], order: DESC }
+      sort: { fields: { date: DESC } }
       filter: { frontmatter: { template: { eq: "post" } } }
     ) {
       edges {
@@ -135,7 +135,7 @@ export const pageQuery = graphql`
       }
     }
     categories: allMarkdownRemark(limit: 2000) {
-      group(field: frontmatter___categories) {
+      group(field: { frontmatter: { categories: SELECT } } ) {
         fieldValue
         totalCount
       }

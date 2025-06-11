@@ -107,7 +107,7 @@ export const pageQuery = graphql`
   query IndexQuery {
     latest: allMarkdownRemark(
       limit: 6
-      sort: { fields: [fields___date], order: DESC }
+      sort: { fields: { date: DESC } }
       filter: { frontmatter: { template: { eq: "post" } } }
     ) {
       edges {
@@ -138,7 +138,7 @@ export const pageQuery = graphql`
     }
     popular: allMarkdownRemark(
       limit: 7
-      sort: { fields: [fields___date], order: DESC }
+      sort: { fields: { date: DESC } }
       filter: { frontmatter: { categories: { eq: "Popular" } } }
     ) {
       edges {
