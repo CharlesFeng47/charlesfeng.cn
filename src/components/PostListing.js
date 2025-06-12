@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Link } from 'gatsby'
-import { GatsbyImage } from "gatsby-plugin-image"
+import Img from 'gatsby-image'
 import moment from 'moment'
 import { formatDate } from '../utils/global'
 
@@ -34,7 +34,7 @@ export default class PostListing extends Component {
           postList.map(post => {
             let thumbnail
             if (post.thumbnail) {
-              thumbnail = post.thumbnail.childImageSharp.gatsbyImageData
+              thumbnail = post.thumbnail.childImageSharp.fixed
             }
 
             const popular = post.categories.includes('Popular')
@@ -46,7 +46,7 @@ export default class PostListing extends Component {
                 <div className="each">
                   {
                     thumbnail
-                      ? <GatsbyImage image={thumbnail} className={post.thumbnailRound ? 'round' : ''} />
+                      ? <Img fixed={thumbnail} className={post.thumbnailRound ? 'round' : ''} />
                       : <div />
                   }
                   <div className="each-list-item">

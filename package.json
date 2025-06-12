@@ -11,6 +11,7 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
 
+    "gatsby-image": "^2.2.4",
     "gatsby-plugin-catch-links": "^2.1.0",
     "gatsby-plugin-feed": "^2.3.2",
     "gatsby-plugin-google-analytics": "^2.1.1",
@@ -25,7 +26,6 @@
     "gatsby-plugin-sass": "^6.0.0",
     "sass": "^1.88.0",
 
-    "gatsby-plugin-image": "^3.0.0",
     "gatsby-plugin-sharp": "^5.14.0",
     "gatsby-transformer-sharp": "^5.14.0",
     "sharp": "^0.33.0",
