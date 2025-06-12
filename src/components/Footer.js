@@ -25,10 +25,10 @@ export default class Footer extends Component {
         <div>
           {/* <Link to="/newsletter">Newsletter</Link> */}
           <a href="https://www.xiaohongshu.com/user/profile/5d1cacbe00000000160107f7" target="_blank" rel="noopener noreferrer">
-            小红书/RedNote
+            📕 小红书
           </a>
           <a href="https://music.apple.com/cn/playlist/charles-fengs-favorites/pl.u-6mo414WcBZVzxD8" target="_blank" rel="noopener noreferrer">
-            Apple Music Playlist
+            🎧 Apple Music Playlist
           </a>
           {/* <a href="https://space.bilibili.com/8298364/" target="_blank" rel="noopener noreferrer">
             bilibili
