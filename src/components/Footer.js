@@ -28,7 +28,7 @@ export default class Footer extends Component {
             渝ICP备18013709号-4
           </a>
           <a href="https://weibo.com/u/7761932948/" target="_blank" rel="noopener noreferrer">
-            Weibo
+            小红书/RedNote
           </a>
           <a href="https://music.apple.com/cn/playlist/charles-fengs-favorites/pl.u-6mo414WcBZVzxD8" target="_blank" rel="noopener noreferrer">
             Apple Music Playlist
