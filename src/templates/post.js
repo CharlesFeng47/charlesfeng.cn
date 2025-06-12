@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import Helmet from 'react-helmet'
 import { graphql } from 'gatsby'
-import Img from 'gatsby-image'
+import { GatsbyImage } from "gatsby-plugin-image"
 import Layout from '../layout'
 import UserInfo from '../components/UserInfo'
 import PostTags from '../components/PostTags'
@@ -32,7 +32,7 @@ export default class PostTemplate extends Component {
 
     let thumbnail
     if (post.thumbnail) {
-      thumbnail = post.thumbnail.childImageSharp.fixed
+      thumbnail = post.thumbnail.childImageSharp.gatsbyImageData
     }
 
     const date = formatDate(post.date)
@@ -50,7 +50,7 @@ export default class PostTemplate extends Component {
           <header className={`single-header ${!thumbnail ? 'no-thumbnail' : ''}`}>
             {
               thumbnail && 
-              <Img fixed={post.thumbnail.childImageSharp.fixed} className={post.thumbnailRound ? 'round' : ''} />
+              <GatsbyImage image={thumbnail} className={post.thumbnailRound ? 'round' : ''} />
             }
             <div className="flex">
               <h1>{post.title}</h1>
