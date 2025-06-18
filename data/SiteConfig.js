@@ -14,7 +14,7 @@ const config = {
   siteDescription:
     'Hello, this\'s Charles Feng.',
   siteRss: '/rss.xml',
-  googleAnalyticsID: 'UA-159923804-1',
+  googleAnalyticsID: 'GT-M63L65L',
   // userName: 'Charles',
   // userEmail: '',
   // userTwitter: '',

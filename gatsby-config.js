@@ -66,9 +66,11 @@ module.exports = {
       },
     },
     {
-      resolve: 'gatsby-plugin-google-analytics',
+      resolve: 'gatsby-plugin-google-gtag',
       options: {
-        trackingId: config.googleAnalyticsID,
+        trackingIds: [
+          config.googleAnalyticsID,
+        ],
       },
     },
     {

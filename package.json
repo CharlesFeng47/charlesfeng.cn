@@ -11,10 +11,11 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
 
+    "gatsby-plugin-google-gtag": "^5.0.0",
+
     "gatsby-image": "^2.2.4",
     "gatsby-plugin-catch-links": "^2.1.0",
     "gatsby-plugin-feed": "^2.3.2",
-    "gatsby-plugin-google-analytics": "^2.1.1",
     "gatsby-plugin-manifest": "^5.13.0",
     "gatsby-plugin-netlify": "^2.0.13",
     "gatsby-plugin-nprogress": "^2.1.0",
