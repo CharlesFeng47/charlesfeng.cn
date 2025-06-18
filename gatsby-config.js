@@ -6,7 +6,7 @@ const siteUrl = urljoin(config.siteUrl, config.pathPrefix)
 module.exports = {
   pathPrefix: config.pathPrefix === '' ? '/' : config.pathPrefix,
   siteMetadata: {
-    siteUrl,
+    siteUrl, // used by gatsby-plugin-sitemap
   //   rssMetadata: {
   //     site_url: urljoin(config.siteUrl, config.pathPrefix),
   //     feed_url: urljoin(config.siteUrl, config.pathPrefix, config.siteRss),
@@ -84,17 +84,12 @@ module.exports = {
     'gatsby-plugin-sharp',
     `gatsby-transformer-sharp`,
     'gatsby-plugin-catch-links',
-    {
-      resolve: 'gatsby-plugin-sitemap',
-      options: {
-        resolveSiteUrl: () => siteUrl, // set proactively
-      },
-    },
+    'gatsby-plugin-sitemap',
     {
       resolve: 'gatsby-plugin-robots-txt',
       options: {
         sitemap: `${urljoin(siteUrl, "/sitemap.xml")}`,
-      },
+      }
     },
     {
       resolve: 'gatsby-plugin-manifest',
