@@ -1,16 +1,17 @@
 const urljoin = require('url-join')
 const config = require('./data/SiteConfig')
 
+const siteUrl = urljoin(config.siteUrl, config.pathPrefix)
 module.exports = {
   pathPrefix: config.pathPrefix === '' ? '/' : config.pathPrefix,
   siteMetadata: {
-    siteUrl: urljoin(config.siteUrl, config.pathPrefix),
+    siteUrl: siteUrl,
     rssMetadata: {
-      site_url: urljoin(config.siteUrl, config.pathPrefix),
-      feed_url: urljoin(config.siteUrl, config.pathPrefix, config.siteRss),
+      site_url: siteUrl,
+      feed_url: urljoin(siteUrl, config.siteRss),
       title: config.siteTitle,
       description: config.siteDescription,
-      image_url: `${urljoin(config.siteUrl, config.pathPrefix)}/logos/logo-48.png`,
+      image_url: `${siteUrl}/logos/logo-48.png`,
     },
   },
   plugins: [
@@ -86,7 +87,7 @@ module.exports = {
     {
       resolve: 'gatsby-plugin-robots-txt',
       options: {
-        sitemap: `${siteMetadata.siteUrl}/sitemap.xml`,
+        sitemap: `${siteUrl}/sitemap.xml`,
       }
     },
     {
@@ -113,80 +114,80 @@ module.exports = {
         ],
       },
     },
-    {
-      resolve: 'gatsby-plugin-feed',
-      options: {
-        setup(ref) {
-          const ret = ref.query.site.siteMetadata.rssMetadata
-          ret.allMarkdownRemark = ref.query.allMarkdownRemark
-          ret.generator = 'Charles Feng'
-          return ret
-        },
-        query: `
-        {
-          site {
-            siteMetadata {
-              rssMetadata {
-                site_url
-                feed_url
-                title
-                description
-                image_url
-              }
-            }
-          }
-        }
-      `,
-        feeds: [
-          {
-            serialize(ctx) {
-              const { rssMetadata } = ctx.query.site.siteMetadata
-              return ctx.query.allMarkdownRemark.edges.map(edge => ({
-                categories: edge.node.frontmatter.tags,
-                date: edge.node.fields.date,
-                title: edge.node.frontmatter.title,
-                description: edge.node.excerpt,
-                url: rssMetadata.site_url + edge.node.fields.slug,
-                guid: rssMetadata.site_url + edge.node.fields.slug,
-                custom_elements: [
-                  { 'content:encoded': edge.node.html },
-                  { author: config.userEmail },
-                ],
-              }))
-            },
-            query: `
-            {
-              allMarkdownRemark(
-                limit: 1000
-                sort: { fields: { date: DESC } }
-                filter: { frontmatter: { template: { eq: "post" } } }
-              ) {
-                edges {
-                  node {
-                    excerpt(pruneLength: 180)
-                    html
-                    timeToRead
-                    fields {
-                      slug
-                      date
-                    }
-                    frontmatter {
-                      title
-                      date
-                      categories
-                      tags
-                      template
-                    }
-                  }
-                }
-              }
-            }
-          `,
-            output: config.siteRss,
-            title: 'Charles Feng - RSS Feed',
-          },
-        ],
-      },
-    },
+    // {
+    //   resolve: 'gatsby-plugin-feed',
+    //   options: {
+    //     setup(ref) {
+    //       const ret = ref.query.site.siteMetadata.rssMetadata
+    //       ret.allMarkdownRemark = ref.query.allMarkdownRemark
+    //       ret.generator = 'Charles Feng'
+    //       return ret
+    //     },
+    //     query: `
+    //     {
+    //       site {
+    //         siteMetadata {
+    //           rssMetadata {
+    //             site_url
+    //             feed_url
+    //             title
+    //             description
+    //             image_url
+    //           }
+    //         }
+    //       }
+    //     }
+    //   `,
+    //     feeds: [
+    //       {
+    //         serialize(ctx) {
+    //           const { rssMetadata } = ctx.query.site.siteMetadata
+    //           return ctx.query.allMarkdownRemark.edges.map(edge => ({
+    //             categories: edge.node.frontmatter.tags,
+    //             date: edge.node.fields.date,
+    //             title: edge.node.frontmatter.title,
+    //             description: edge.node.excerpt,
+    //             url: rssMetadata.site_url + edge.node.fields.slug,
+    //             guid: rssMetadata.site_url + edge.node.fields.slug,
+    //             custom_elements: [
+    //               { 'content:encoded': edge.node.html },
+    //               { author: config.userEmail },
+    //             ],
+    //           }))
+    //         },
+    //         query: `
+    //         {
+    //           allMarkdownRemark(
+    //             limit: 1000
+    //             sort: { fields: { date: DESC } }
+    //             filter: { frontmatter: { template: { eq: "post" } } }
+    //           ) {
+    //             edges {
+    //               node {
+    //                 excerpt(pruneLength: 180)
+    //                 html
+    //                 timeToRead
+    //                 fields {
+    //                   slug
+    //                   date
+    //                 }
+    //                 frontmatter {
+    //                   title
+    //                   date
+    //                   categories
+    //                   tags
+    //                   template
+    //                 }
+    //               }
+    //             }
+    //           }
+    //         }
+    //       `,
+    //         output: config.siteRss,
+    //         title: 'Charles Feng - RSS Feed',
+    //       },
+    //     ],
+    //   },
+    // },
   ],
 }
