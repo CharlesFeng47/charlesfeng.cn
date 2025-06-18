@@ -6,7 +6,7 @@ const siteUrl = urljoin(config.siteUrl, config.pathPrefix)
 module.exports = {
   pathPrefix: config.pathPrefix === '' ? '/' : config.pathPrefix,
   siteMetadata: {
-    siteUrl: urljoin(config.siteUrl, config.pathPrefix), // used by gatsby-plugin-sitemap
+    siteUrl, // used by gatsby-plugin-sitemap
   //   rssMetadata: {
   //     site_url: urljoin(config.siteUrl, config.pathPrefix),
   //     feed_url: urljoin(config.siteUrl, config.pathPrefix, config.siteRss),
