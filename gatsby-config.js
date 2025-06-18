@@ -1,10 +1,12 @@
 const urljoin = require('url-join')
 const config = require('./data/SiteConfig')
 
+const siteUrl = urljoin(config.siteUrl, config.pathPrefix)
+
 module.exports = {
   pathPrefix: config.pathPrefix === '' ? '/' : config.pathPrefix,
-  // siteMetadata: {
-  //   siteUrl: urljoin(config.siteUrl, config.pathPrefix),
+  siteMetadata: {
+    siteUrl: siteUrl, // used by gatsby-plugin-sitemap
   //   rssMetadata: {
   //     site_url: urljoin(config.siteUrl, config.pathPrefix),
   //     feed_url: urljoin(config.siteUrl, config.pathPrefix, config.siteRss),
@@ -12,7 +14,7 @@ module.exports = {
   //     description: config.siteDescription,
   //     image_url: `${urljoin(config.siteUrl, config.pathPrefix)}/logos/logo-48.png`,
   //   },
-  // },
+  },
   plugins: [
     'gatsby-plugin-sass',
     'gatsby-plugin-react-helmet',
@@ -86,7 +88,7 @@ module.exports = {
     {
       resolve: 'gatsby-plugin-robots-txt',
       options: {
-        sitemap: `${urljoin(config.siteUrl, config.pathPrefix)}sitemap.xml`,
+        sitemap: `${urljoin(siteUrl, "/sitemap.xml")}`,
       }
     },
     {
