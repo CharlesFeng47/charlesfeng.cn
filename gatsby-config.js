@@ -85,12 +85,12 @@ module.exports = {
     `gatsby-transformer-sharp`,
     'gatsby-plugin-catch-links',
     'gatsby-plugin-sitemap',
-    // {
-    //   resolve: 'gatsby-plugin-robots-txt',
-    //   options: {
-    //     sitemap: `${urljoin(siteUrl, "/sitemap.xml")}`,
-    //   }
-    // },
+    {
+      resolve: 'gatsby-plugin-robots-txt',
+      options: {
+        sitemap: `${urljoin(siteUrl, "/sitemap.xml")}`,
+      }
+    },
     {
       resolve: 'gatsby-plugin-manifest',
       options: {
