@@ -84,7 +84,7 @@ module.exports = {
     'gatsby-plugin-sharp',
     `gatsby-transformer-sharp`,
     'gatsby-plugin-catch-links',
-    'gatsby-plugin-sitemap',
+    'gatsby-plugin-sitemap', // Do not upgrade to versions >= 4.0.0 as the generated file will be sitemap-index.xml
     {
       resolve: 'gatsby-plugin-robots-txt',
       options: {
