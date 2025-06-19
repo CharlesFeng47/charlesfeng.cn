@@ -7,12 +7,12 @@
   "dependencies": {
     "eslint-utils": "^1.4.1",
 
-    "gatsby": "^5.14.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
+    "gatsby": "^5.14.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
 
     "gatsby-plugin-google-gtag": "^5.14.0",
-    "gatsby-plugin-sitemap": "^3.0.0",
+    "gatsby-plugin-sitemap": "^3.3.0",
     "gatsby-plugin-robots-txt": "^1.8.0",
 
     "gatsby-image": "^2.2.4",
@@ -24,26 +24,27 @@
     "gatsby-plugin-react-helmet": "3.1.0",
     "gatsby-source-filesystem": "^2.0.23",
 
-    "gatsby-plugin-sass": "^6.0.0",
-    "sass": "^1.88.0",
+    "gatsby-plugin-sass": "^6.14.0",
+    "sass": "^1.89.2",
 
     "gatsby-plugin-sharp": "^5.14.0",
     "gatsby-transformer-sharp": "^5.14.0",
-    "sharp": "^0.33.0",
+    "sharp": "^0.33.5",
 
-    "gatsby-transformer-remark": "^6.0.0",
-    "gatsby-remark-images": "^7.0.0",
-    "gatsby-remark-prismjs": "^7.0.0",
-    "gatsby-remark-copy-linked-files": "^6.0.0",
-    "gatsby-remark-autolink-headers": "^6.0.0",
+    "gatsby-transformer-remark": "^6.14.0",
+    "gatsby-remark-images": "^7.14.0",
+    "gatsby-remark-prismjs": "^7.14.0",
+    "gatsby-remark-copy-linked-files": "^6.14.0",
+    "gatsby-remark-autolink-headers": "^6.14.0",
+    "prismjs": "^1.30.0",
+
+    "moment": "^2.30.1",
+    "url-join": "^4.0.1",
 
     "lodash": "^4.17.13",
     "lodash.kebabcase": "^4.1.1",
-    "moment": "^2.24.0",
-    "prismjs": "^1.15.0",
     "react-github-btn": "^1.1.1",
-    "react-helmet": "^5.2.0",
-    "url-join": "^4.0.0"
+    "react-helmet": "^5.2.0"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.1",
