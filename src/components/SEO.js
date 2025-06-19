@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import Helmet from 'react-helmet'
-import urljoin from 'url-join'
+import urlJoin from 'url-join'
 import config from '../../data/SiteConfig'
 
 export default class SEO extends Component {
@@ -19,15 +19,15 @@ export default class SEO extends Component {
       if (postMeta.thumbnail) {
         image = postMeta.thumbnail.childImageSharp.fixed.src
       }
-      postURL = urljoin(config.siteUrl, replacePath(postPath))
+      postURL = urlJoin(config.siteUrl, replacePath(postPath))
     } else {
       title = config.siteTitle
       description = config.siteDescription
       image = config.siteLogo
     }
 
-    image = urljoin(config.siteUrl, image)
-    const blogURL = urljoin(config.siteUrl, config.pathPrefix)
+    image = urlJoin(config.siteUrl, image)
+    const blogURL = urlJoin(config.siteUrl, config.pathPrefix)
     const schemaOrgJSONLD = [
       {
         '@context': 'http://schema.org',
