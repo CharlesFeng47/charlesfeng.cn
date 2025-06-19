@@ -1,4 +1,4 @@
-import urlJoin from 'url-join'
+const urlJoin = require('url-join')
 const config = require('./data/SiteConfig')
 
 const siteUrl = urlJoin(config.siteUrl, config.pathPrefix)
