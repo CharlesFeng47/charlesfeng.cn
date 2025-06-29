@@ -88,7 +88,8 @@ module.exports = {
       resolve: 'gatsby-plugin-sitemap', // Do not upgrade to versions >= 4.0.0 as the generated file will be sitemap-index.xml
       options: {
         excludes: [
-          `/resume*`,
+          `/resume`,
+          `/resume-en`,
         ],
       }
     },
