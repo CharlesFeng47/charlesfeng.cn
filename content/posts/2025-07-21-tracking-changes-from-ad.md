@@ -98,7 +98,7 @@ Active Directory Domain Services 为客户端的应用程序提供了一种向 D
 | Filter     | 使用filter 比如 `(objectclass=*)` ，在指定范围内任何对象的变更都将收到通知。 |
 | Attributes | 指定发生变更时要返回的属性列表。请注意，当任何属性被修改时都会收到通知，而不仅仅是指定的属性。<u>*（注：区分被监听的对象属性和返回结果的属性）*</u> |
 
-在一个 LDAP connection 上最多可以注册五个 notification request。使用者必须有一个专门的线程来等待 notifcation 并快速处理结果。当调用 `ldap_search_ext` 方法来注册 notification request 时，该方法会返回一个标识该请求的消息标识符 message identifier。然后使用 `ldap_result` 方法来等待变更的通知。当变更发生时，服务器会发送一条 LDAP 消息，其中包含生成这条通知的 notification request 的 message identifier。这样，`ldap_result` 方法就会返回标识已被变更的对象的搜索结果。
+在一个 LDAP connection 上最多可以注册五个 notification request。使用者必须有一个专门的线程来等待 notification 并快速处理结果。当调用 `ldap_search_ext` 方法来注册 notification request 时，该方法会返回一个标识该请求的消息标识符 message identifier。然后使用 `ldap_result` 方法来等待变更的通知。当变更发生时，服务器会发送一条 LDAP 消息，其中包含生成这条通知的 notification request 的 message identifier。这样，`ldap_result` 方法就会返回标识已被变更的对象的搜索结果。
 
 客户端的应用程序必须决定被监控对象的初始状态。为此，必须首先注册 notification request，然后读取当前的状态。
 
@@ -114,7 +114,7 @@ Active Directory Domain Services 为客户端的应用程序提供了一种向 D
 
 ## Polling for Changes Using the DirSync Control
 
-Active Directory directory synchronization（DirSync）control 是 LDAP 服务器的一个 extention，它使应用程序能够在 directory partition 中搜索自上一个状态以来变更的对象。
+Active Directory directory synchronization（DirSync）control 是 LDAP 服务器的一个 extension，它使应用程序能够在 directory partition 中搜索自上一个状态以来变更的对象。
 
 当进行一次 DirSync 搜索时，需要传入一个应用相关的数据 cookie，用它可以标志上一次 DirSync 搜索时的 directory 状态。对于第一次搜索，传入的 cookie 是 `null`，搜索结果将返回与筛选条件匹配的所有对象。搜索还会返回一个有效的 cookie。应用需要将 cookie 存储在与 Active Directory 服务器同步的同一存储介质中<u>*（注：其实就是保存下来之后能读到，并且能够保证跟 sync 的数据一致/同步就行）*</u>。在后续搜索中，从该存储中获取 cookie 并将其与新的搜索请求一起发给 AD。返回的搜索结果将仅包含自 cookie 标识的上一个状态以来变更过的对象和属性。搜索还会返回一个新的 cookie，这样存储起来可以供下次搜索时使用。
 
@@ -151,7 +151,7 @@ Active Directory directory synchronization（DirSync）control 是 LDAP 服务�
 
 举个例子，对于 user 对象，通常会使用 filter：`(&(objectClass=user)(objectCategory=person))`。可是属性 `objectCategory` 会在对象被删除时被移除，因此上述 filter 不会匹配任何 tombstones 对象。相反，tombstones 对象会保留 `objectClass` 属性，因此 filter `(objectClass=user)` 可以匹配被删除的 user 对象。
 
-在 DirSync 搜索中指定的属性列表也可用作 filter；搜索结果只包括自上次 DirSync 搜索以来指定属性集合中一个或多个属性发生变化的对象。如果属性列表不包括 tombstones 上保留的任何属性，搜索结果将不包括 tombstones 对象。为了处理这种情况，可以通过指定一个空属性列表来请求所有的属性；也可以请求属性 `isDeleted`，它在所有 tombstones 上被设为 `TRUE`。tombstones 的属性 `searchFlags` 也将 `0x8` 位设为了 TRUE，这个属性来自 `attributeSchema` 的定义。
+在 DirSync 搜索中指定的属性列表也可用作 filter；搜索结果只包括自上次 DirSync 搜索以来指定属性集合中一个或多个属性发生变化的对象。如果属性列表不包括 tombstones 上保留的任何属性，搜索结果将不包括 tombstones 对象。为了处理这种情况，可以通过指定一个空属性列表 `null` 来请求所有的属性；也可以明确请求属性 `isDeleted`，它在所有 tombstones 对象上都被设为 `TRUE`。Tombstones 对象上的属性在其定义的 `attributeSchema` 中都将 `searchFlags` 中的 `0x8` 位设为了 TRUE。<u>*（注：很难懂的一句话 😅，意思是说只有那些在 schema 定义时 `searchFlags` （一个位掩码  bitmask）被设置了 `0x8` （二进制 1000 第四位）的属性，才会对象被删变成在 tombstone 时保留。举个例子，一个对象删除时 DN [`distinguishedName`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-distinguishedname) 总是会被保留，它的属性定义的 `searchFlags` 值为 `0x8`，意味着 `fPRESERVEONDELETE`，同理 [`uSNChanged`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-usnchanged)、[`objectClass`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-objectclass) 等。我们同样检查上一段提到的属性 [`objectCategory`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-objectcategory)，它在属性 `searchFlags` 值为 `0x1`，表示 `fATTINDEX`，所以在对象删除时变成 tombstone 时不会被保留。但需要注意的是，属性 [`whenCreated`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-whencreated)、[`whenChanged`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-whenchanged) 在属性 `searchFlags` 上的值为 `0x0`，但是它们也都会保留，可能有特殊处理吧？ 😶‍🌫️ 此外，属性 [`isDeleted`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-isdeleted) 在这上面的值也是 `0x0`，不过它是对象被删时新加的属性，不算原来有然后决定是否需要保留，也算可以理解吧。）*</u>
 
 ## Polling for Changes Using USNChanged
 
@@ -172,7 +172,7 @@ DirSync control 功能强大并且效率高，但有两个明显的局限性：
 
 + 使用 rootDSE 的属性 `highestCommittedUSN` 来绑定基于 `uSNChanged` 的 filter。
   + 也就是说，在开始一次 full sync 前，需要先读取 affiliated DC 上的 `highestCommittedUSN`。然后，执行一次 full sync（结果可能很多，需要分页）来初始化数据库。当这完成后，存储 full sync 前读取的 `highestCommittedUSN` 值，它将作为下一次同步的属性 `uSNChanged` 的下限。
-  + 之后，在执行增量同步时，请重新读取rootDSE 上的属性 `highestCommittedUSN` 。然后使用上次 sync 完保存的 `uSNChanged` 值，来分页读取相关对象，这些对象的属性 `uSNChanged` 都比 filter 中的值大。完成后，用在增量同步开始之前读取的 `highestCommittedUSN` 值更新属性 `uSNChanged` 属性的下限。<u>*（注：原文没有提及上限，万一 DC 已经 replcaite 了新的 change，`highestCommittedUSN` 被更新为更大的值了怎么办？看 [demo code](https://learn.microsoft.com/en-us/windows/win32/ad/example-code-to-retrieve-changes-using-usnchanged)，被记录的 `highestCommittedUSN` 确实是在搜索前被更新，搜索实际使用的是根据上一次 usn 构造的 `iLowerBoundUSN`。理论上这样也不会丢 change，只是下一次返回的结果里面可能有上一次已经处理过的结果而已，更需要应用在处理时仔细小心。）*</u>
+  + 之后，在执行增量同步时，请重新读取rootDSE 上的属性 `highestCommittedUSN` 。然后使用上次 sync 完保存的 `uSNChanged` 值，来分页读取相关对象，这些对象的属性 `uSNChanged` 都比 filter 中的值大。完成后，用在增量同步开始之前读取的 `highestCommittedUSN` 值更新属性 `uSNChanged` 属性的下限。<u>*（注：原文没有提及上限，万一 DC 已经 replicate 了新的 change，`highestCommittedUSN` 被更新为更大的值了怎么办？看 [demo code](https://learn.microsoft.com/en-us/windows/win32/ad/example-code-to-retrieve-changes-using-usnchanged)，被记录的 `highestCommittedUSN` 确实是在搜索前被更新，搜索实际使用的是根据上一次 usn 构造的 `iLowerBoundUSN`。理论上这样也不会丢 change，只是下一次返回的结果里面可能有上一次已经处理过的结果而已，更需要应用在处理时仔细小心。）*</u>
   + 始终将这两个东西存储在同一存储中：属性 `uSNChanged` 下限的这个值、应用程序从 DC 同步的内容。
 + 由于属性 `uSNChanged` 是不可复制的，应用程序每次运行时都必须绑定到同一个 DC 上。如果无法与该 DC 绑定，要么等待直到可以重新绑定为止，要么换一台 DC 关联并从新 DC 上面执行一次 full sync。当应用程序关联到某个 DC 时，它会在一个稳定的存储介质中记录该 DC 的 DNS 名称，这个存储介质与从 DC 同步的数据保持一致。然后，它会使用存储下来的 DNS 名称来绑定到同一 DC ，以进行后续的同步。
 + 应用程序必须检测当前关联的这台 DC 何时从备份中恢复，因为这可能导致不一致 inconsistancy。
@@ -195,3 +195,5 @@ DirSync control 功能强大并且效率高，但有两个明显的局限性：
 + [Example Code Using ADS_SEARCHPREF_DIRSYNC](https://learn.microsoft.com/en-us/windows/win32/ad/example-code-using-ads-searchpref-dirsync)
 + [Polling for Changes Using USNChanged](https://learn.microsoft.com/en-us/windows/win32/ad/polling-for-changes-using-usnchanged)
 + [Example Code to Retrieve Changes Using USNChanged](https://learn.microsoft.com/en-us/windows/win32/ad/example-code-to-retrieve-changes-using-usnchanged)
++ [Definitions for all attributes](https://learn.microsoft.com/en-us/windows/win32/adschema/attributes-all)
++ [MS-ADLS: Active Directory Lightweight Directory Services Schema](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-adls/94279943-25ab-4c13-9bf2-6d411cc2f796)
