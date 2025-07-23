@@ -3,7 +3,7 @@ date: 2025-07-23
 title: '基于 AD User 的命名实践'
 template: post
 thumbnail: '../thumbnails/user.png'
-slug: naming-practices-on-ad-users.md
+slug: naming-practices-on-ad-users
 categories:
   - Tech
 tags:
