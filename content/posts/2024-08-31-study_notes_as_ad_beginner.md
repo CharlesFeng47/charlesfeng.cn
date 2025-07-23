@@ -237,7 +237,7 @@ tags:
 >
 > AD server should only have remote replica id for other replica servers, and has no awareness of our sync engine. AD just return the following changes/replication packages based on USN.
 >
-> This behavior is a feature in the AD system. For more details on how to track AD changes, please refer to this [blog](https://charlesfeng.cn/tracking-changes-from-ad/).
+> This behavior is a feature in the AD system. For more details on how to track AD changes, please refer to this [blog](/tracking-changes-from-ad/).
 
 ## Q: What if one server down and others don't have the latest replication packages? Just like the stale cookie cases, if the latest change is only stored on one server and this server down, is there any approaches to ensure this latest change could be read by other servers?
 
@@ -380,7 +380,7 @@ tags:
 
 ## Q: `\0ACNF:` 和 `\0ADEL:` 这些出现在 DN/CN 里的特殊标记，AD 会不会当成保留字段，不允许用户输入？
 
-> ChatGPT 的这个回答不知道是从哪学来的……但和实际情况不太一致。建议参考我这篇 [基于 AD User 的命名实践](https://charlesfeng.cn/naming-practices-on-ad-users)。
+> ChatGPT 的这个回答不知道是从哪学来的……但和实际情况不太一致。建议参考我这篇 [基于 AD User 的命名实践](/naming-practices-on-ad-users)。
 >
 > ## ~~✅ 简洁回答：~~
 >
