@@ -9,7 +9,6 @@ categories:
 tags:
   - Reproduced
   - Active Directory
-  - Microsoft
   - Windows Server
   - Server
   - Distributed System

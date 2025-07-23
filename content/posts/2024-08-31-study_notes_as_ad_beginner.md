@@ -8,12 +8,11 @@ categories:
   - Tech
 tags:
   - Active Directory
-  - Microsoft
-  - Windows Server
   - Server
+  - Database
   - Distributed System
   - Multimaster
-  - Synchronization
+  - Replication
 ---
 
 ## 写在 25.07.22
@@ -134,7 +133,7 @@ tags:
 
 ## Q: Why `CN=, DC=, ...` Why some are CN and others are DC? What's the meaning in practice?
 
-> This is is used to represent the DN (Distinguished Name, like `CN=John Doe,OU=Users,DC=example,DC=com`.
+> This is used to represent the DN (Distinguished Name, like `CN=John Doe,OU=Users,DC=example,DC=com`.
 >
 > + **CN**（Common Name）: John Doe - 表示用户对象的名称。
 > + **OU**（Organizational Unit）: Users - 表示对象所在的组织单位.
