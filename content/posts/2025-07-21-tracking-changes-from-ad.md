@@ -40,8 +40,8 @@ tags:
 + Security auditing 安全性审计。通过修改对象安全描述符的系统访问控制列表 （system access-control list (SACL)） 部分，可以使得在访问指定 DC 上的对象时，会在该 DC 上的安全事件日志 security event log 中生成审核记录 audit records。应用可以审计读取和/或写入；也可以审计整个对象或特定属性。
 
 + Event logging 事件日志。通过修改指定 DC 上的注册表设置，可以更改记录到 directory service event log 中的事件类型。更具体地说，如果想记录所有的修改操作，可以将以下注册表项下的 `8 Directory Access` 值设置为 `4`。
-  ```
-  HKEY_LOCAL_MACHINE.SYSTEM.CurrentControlSet.Services.NTDS.Diagnostics
+  ```ini
+  HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\NTDS\Diagnostics
   ```
 
 + Event tracing 事件跟踪。Windows 2000 引入了事件跟踪的 API，用于跟踪和记录软件或硬件中的相关 event。尤其是 Windows 操作系统和 Active Directory Domain Services，支持使用事件跟踪进行容量规划 capacity planning 和详细的性能分析。

@@ -31,7 +31,7 @@ tags:
 
 ![2025-07-23-special-chars3](https://images.charlesfeng.cn/2025-07-23-special-chars3.PNG)
 
-后来确认，其实是属性 `sAMAccountName` 在限制这些字符。[官方文档](https://learn.microsoft.com/en-us/windows/win32/adschema/a-samaccountname) 有明确列出不能使用的字符 🤦🏻。不过好像文档里并没有提到点号 `.`，问了下 ChatGPT （是的我还爱他 ❤️），是被 UPN 限制，只是不能加在末尾。
+后来确认，其实是属性 `sAMAccountName` 在限制这些字符。[官方文档](https://learn.microsoft.com/en-us/windows/win32/adschema/a-samaccountname) 有明确列出不能使用的字符 🤦🏻。不过好像文档里并没有提到点号 `.`，问了下 ChatGPT （是的我还爱它 ❤️），是被 UPN 限制，只是不能加在末尾。
 
 >#### 🧠 为什么实际使用中有时感觉 “`.` 不行”？
 >
@@ -69,9 +69,9 @@ tags:
 
 ![2025-07-23-length-constraint](https://images.charlesfeng.cn/2025-07-23-length-constraint.PNG)
 
-查看了类 [`User`](https://learn.microsoft.com/en-us/windows/win32/adschema/c-user) 上跟 name 相关的属性，发现虽然 [`sAMAccountName`]() 的 `Range-Upper` 指定的是 256 个字符，但是有特别说明不能超过 20 个字符，所以限制正是源自这里。当然，根本原因应该更底层，因为这个属性是为了支持 Windows 98 之前的系统了 🥱。不过这种坑，除非踩到，不然谁知道啊！AD 这方面真的蛮难用的。。（顺带一提，对我组的 Sync Engine 来说，这个属性也是不需要维护的，说明在 M365 内部它已经被彻底 deprecated 掉了。）
+查看了类 [`User`](https://learn.microsoft.com/en-us/windows/win32/adschema/c-user) 上跟 name 相关的属性，发现虽然 [`sAMAccountName`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-samaccountname) 的 `Range-Upper` 指定的是 256 个字符，但是有特别说明不能超过 20 个字符，所以限制正是源自这里。当然，根本原因应该更底层，因为这个属性是为了支持 Windows 98 之前的系统了 🥱。不过这种坑，除非踩到，不然谁知道啊！AD 这方面真的蛮难用的。。（顺带一提，对我组的 Sync Engine 来说，这个属性也是不需要维护的，说明在 M365 内部它已经被彻底 deprecated 掉了。）
 
-FYI，其他属性如 [`cn/Common-Name`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-cn)、[`sn/Surname`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-sn)、 [`givenName`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-givenname)、[`middleName/Other-Name`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-middlename) 限制为 64 个字符，[`displayName`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-displayname)、[`adminDisplayName`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-admindisplayname) 等限制为 256 个字符。不过，真正 mandatory 的 name 相关的属性只有 `cn` 和 `sAMAccountName` 啦，
+FYI，其他属性如 [`cn/Common-Name`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-cn)、[`sn/Surname`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-sn)、 [`givenName`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-givenname)、[`middleName/Other-Name`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-middlename) 限制为 64 个字符，[`displayName`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-displayname)、[`adminDisplayName`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-admindisplayname) 等限制为 256 个字符。不过，真正 mandatory 的 name 相关的属性只有 `cn` 和 `sAMAccountName` 啦。
 
 最后，好像这整个测试本来是为了验证是不是能主动创建一个类似 DEL/CNF 命名规则的 AD object 的……算了，下次再说吧 👋。
 

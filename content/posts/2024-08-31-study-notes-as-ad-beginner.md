@@ -151,13 +151,19 @@ tags:
 >
 > 1. **Schema NC（架构命名上下文）**：Schema NC contains all the schema objects that define **how data is structured and represented** in Active Directory. DC 之间 replicate 的时候如果 Schema NC mismatch，会抛异常优先 replicate schema 相关的信息，match 了才会 sync 别的 object。
 >
->    > Dn: CN=Schema,CN=Configuration,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com
+>    ```ini
+>    Dn: CN=Schema,CN=Configuration,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com
+>    ```
 > 2. **Configuration NC（配置命名上下文）**：Configuration NC contains forest-wide configuration data such as the **site topology objects** and objects that represent naming contexts and application partitions
 >
->    > Dn: CN=Configuration,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com
+>    ```ini
+>    Dn: CN=Configuration,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com
+>    ```
 > 3. **Domain NC（域命名上下文）**：包含有关特定域的信息。包括域内所有用户、计算机和组等对象。
 >
->    > Dn: DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com
+>    ```ini
+>    Dn: DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com
+>    ```
 >
 > 这些命名上下文在 AD 中相互独立，但它们之间的变化通过复制被传播到所有相关的域控制器上，以确保目录数据的一致性和可靠性。
 >
