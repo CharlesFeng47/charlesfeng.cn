@@ -689,9 +689,7 @@ tags:
 >
 > ## ✅ LVR 是如何表示增删的？
 >
-> LVR 使用特殊的数据结构叫：
->
-> ### 🔹 `msDS-ReplValueMetaData`
+> LVR 使用特殊的数据结构叫：`msDS-ReplValueMetaData`
 >
 > 每一个被 replicate 的值，都携带以下元数据字段：
 >
@@ -717,7 +715,7 @@ tags:
 >
 > ------
 >
-> ## 🧪 举个实际例子（伪结构）：[Real code for structure](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-drsr/22946fbf-170e-4ab4-82c7-dabdfd97bf5a)
+> ## 🧪 举个实际例子（伪结构）：[Real code here](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-drsr/22946fbf-170e-4ab4-82c7-dabdfd97bf5a)
 >
 > ```
 > {
@@ -1288,9 +1286,7 @@ tags:
 > | **UTD Vector Check**    | ✅ 在 **source DC 决定发不发** 时 | 是否把这条变更发给你 | `originatingInvocationId + originatingUSN` | 节省带宽   |
 > | **Conflict Resolution** | ✅ 在 **target DC 接收到变更后**  | 要不要 apply         | `versionNumber → timestamp → originId`     | 保证一致性 |
 >
-> ------
->
-> ### ✅ 所以这两段逻辑发生在：
+> ### ✅ 这两段逻辑发生在：
 >
 > ```
 > [A → B replicate] 期间：
@@ -1372,7 +1368,7 @@ tags:
 
 ## Q: CNF 对象是怎么产生的？发生命名冲突时，是谁的对象会被改名（变成 CNF）？是 Source 还是 Target？被改名的对象，会不会自动 version+1？是谁来做？
 
-> <u>*AD 实际保留 local 的，sync partner 的会被改名为 CNF，实践可以参考我这篇  [AD 如何通过 CNF 对象来解决冲突？](/how-ad-resolve-conflicts-with-cnf-objects)*</u>
+> <u>*AD 实际也会依据类似 attribute level conflict 的方式（VersionNumber、Timestamp、InvocationId）处理 object level conflict，实践可以参考我这篇  [AD 如何通过 CNF 对象来解决冲突？](/how-ad-resolve-conflicts-with-cnf-objects)*</u>
 >
 > ## ~~✅ 回答 1：永远是 target（接收端）重命名它自己的对象，source 保留不动~~
 >
@@ -1434,13 +1430,13 @@ tags:
 > → 命名冲突！
 > ```
 >
-> ### ✅ 冲突解决方式：
+> ### ~~✅ 冲突解决方式：~~
 >
-> - 保留 source（即复制过来的对象）
-> - 改名 local 的对象，加 `\0ACNF:{GUID}` 后缀
-> - 对 local 对象触发 rename（CN 属性变更），并 version+1
+> - ~~保留 source（即复制过来的对象）~~
+> - ~~改名 local 的对象，加 `\0ACNF:{GUID}` 后缀~~
+> - ~~对 local 对象触发 rename（CN 属性变更），并 version+1~~
 >
-> 👉 **这个阶段根本不管 version、timestamp 等 attribute-level 元数据**
+> ~~👉 **这个阶段根本不管 version、timestamp 等 attribute-level 元数据**~~
 >
 > ------
 >
@@ -1474,8 +1470,8 @@ tags:
 > 
 >     Step 1a: if GUID same → proceed to attribute merge
 >     Step 1b: if GUID different → object conflict
->        → rename local to CNF
->        → accept source as real
+>        → accept the object with larger version number, timestamp, invocation id
+>        → rename another one to CNF
 > 
 > Step 2️⃣ For each attribute:
 >     → compare version / timestamp / originId

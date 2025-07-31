@@ -122,7 +122,7 @@ Current DSA Options: IS_GC DISABLE_INBOUND_REPL DISABLE_OUTBOUND_REPL
 ![](https://images.charlesfeng.cn/2025-07-30-1.5.PNG)
 
 6. `-DISABLE_INBOUND_REPL`，A/B 互相可以 replicate。
-7. DC A 同步结束，保留 B 解决完的结果，即 A 自己原有的对象不变，B 创建的 CNF 对象被同步。但  `cn` 被 local 修改，version 为 1 而不是 2，local 更新时间为 00:05:05。
+7. DC A 同步结束，保留 B 解决完的结果，即 A 自己原有的对象不变，B 创建的 CNF 对象被同步。但 CNF 对象的属性 `cn` 被 local 修改，注意 version 为 1 而不是 2，（猜想是因为此 CNF 对象是被复制过来新创建的，version 从 local 开始计算，）local 更新时间为 00:05:05。
 
 ![](https://images.charlesfeng.cn/2025-07-30-1.7.PNG)
 
@@ -151,12 +151,12 @@ Current DSA Options: IS_GC DISABLE_INBOUND_REPL DISABLE_OUTBOUND_REPL
 ![](https://images.charlesfeng.cn/2025-07-30-2.5.PNG)
 
 6. `-DISABLE_INBOUND_REPL`，仍有 `+DISABLE_OUTBOUND_REPL`，只允许 B replicate 给 A。
-7. DC A 同步结束，保留 B 解决完的结果，即保留 B 创建的对象，而 A 自己原有的对象变成 CNF 对象。A 自己原有的对象 `cn` version++。两个对象 metadata 都被更新，local 更新时间为 00:20:56。
+7. DC A 同步结束，保留 B 解决完的结果，即保留 B 创建的对象，而 A 自己原有的对象变成 CNF 对象。A 自己原有对象上的属性 `cn/name` version++。两个对象 metadata 都被更新，local 更新时间为 00:20:56。
 
 ![](https://images.charlesfeng.cn/2025-07-30-2.7.PNG)
 
 8. `-DISABLE_OUTBOUND_REPL`，A/B 互相可以 replicate。
-9. DC B 同步结束，CNF 对象 metadata 被再次更新，更新时间为 00:25:26。（TODO：不是很理解这里。本来觉得是因为 A 更新了 CNF 对象的 `cn` ，version++ 变为 2，而 B 同步前 local version 为 1，对此 1 -> 2 的新 change 会产生同步。可是在 Round 1 中，最后 DC A/B 上的 CNF 对象 `cn` version 也不一致，但是就不会产生被同步为一样的值了。）
+9. DC B 同步结束，CNF 对象 metadata 被再次更新，更新时间为 00:25:26。（注意现在是在 DC B 上，对比下图和 2.5 的图，可以看出 CNF 对象上不同的 metadata 包含 `cn/name`。基于猜想 `cn` 是 local 维护的，那么这里 B 的第二次更新则是由 2.7 中 A 对 `name` 的本地更新导致的。为什么 2.7 中 A 要更新 name，1.7 中不必呢？因为 2.7 中 CNF 对象的原对象原本就在 A 上，A 可以根据 objectGuid 找到此对象并进行 rename 操作，所以产生了本地写请求；而 1.7 中 CNF 对象的原对象由 B 创建，A 上本来就没有，所以只需要同步最新的数据就行了，不需要本地 rename。）
 
 ![](https://images.charlesfeng.cn/2025-07-30-2.9.PNG)
 
@@ -207,7 +207,7 @@ CNF 对象都是在 DC B 解决 A replicate to B 时产生的，一次保留的�
 ![](https://images.charlesfeng.cn/2025-07-30-3.7.PNG)
 
 8. `-DISABLE_OUTBOUND_REPL`，仍有 `+DISABLE_INBOUND_REPL`，只允许 A replicate 给 B。
-9. B 收到 A 处理之后的 change，`cn` version++，更新时间为 00:45:59。其他 metadata 更新为 A 上对象的值。
+9. B 收到 A 处理之后的 change，将属性更新为 A 解决完冲突后的对象的值。`cn` version++ 从 2 更新为 3，更新时间为 00:45:59。
 
 ![](https://images.charlesfeng.cn/2025-07-30-3.9.PNG)
 
@@ -248,8 +248,11 @@ CNF 对象都是在 DC B 解决 A replicate to B 时产生的，一次保留的�
 
 ## 总结
 
-1. 解决 object level conflict、创建 CNF 对象的逻辑和 attribute level conflict 类似。（ChatGPT 又胡说啦 😷）
-1. Object metadata AttID 为 3 的属性 `cn` 的更新有时会被 replicate 有时不会，不太理解。。
+1. 解决 object level conflict、创建 CNF 对象的逻辑和 attribute level conflict 类似。虽然他们 objectGuid 不一样，数据库层面可以被视为两个对象，但是考虑到 AD 中 DN 也是唯一的，所以在解决冲突时使用 VersionNumber 也算 make sense 吧。（ChatGPT 又胡说啦 😷）
+1. 根据 object/attribute level conflict resolution 的上述实践，我们还可以看出：
+   1. object metadata AttID 为 3 的属性 `cn` 看起来不参与 replicate，（或者说参与，但是被特殊处理了，）且始终维护 `Originating DSA` 为 local DC，单纯修改属性 `cn` 不会产生 change for replication。猜想是因为属性 `cn` 总是本地写入/构造的，因此 `Originating DSA` 总是为 local DC。
+   1. 其他属性被更新则会导致 metadata 更新，并产生 change for replication。同时，属性 `cn` 也总是会被同步修改并导致 version++。
+
 
 ## 参考
 
