@@ -13,6 +13,7 @@ tags:
   - Distributed System
   - Multimaster
   - Replication
+  - ChatGPT
 ---
 
 ## 写在 25.07.22
@@ -300,7 +301,7 @@ tags:
 >
 > ### 🧯 于是 AD 会：
 >
-> - ~~保留其中一个对象的原始 DN（如 DC-A 的）~~ 每个 DC 会按照特定的规则（VersionNumber、Timestamp、InvocationId）处理，这样可以保证所有的 DC 按照同样的规则处理后得到的结果是一样的，以达到最终一致。
+> - ~~保留其中一个对象的原始 DN（如 DC-A 的）~~ 每个 DC 会按照特定的规则（VersionNumber、Timestamp、InvocationId）处理，这样可以保证所有的 DC 按照同样的规则处理后得到的结果是一样的，以达到最终一致。<u>*实践可以参考我这篇 [AD 如何通过 CNF 对象来解决冲突？](/how-ad-resolve-conflicts-with-cnf-objects)*</u>
 > - 对另一个对象自动重命名为：
 >
 > ```
