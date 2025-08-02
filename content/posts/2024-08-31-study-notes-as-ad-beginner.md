@@ -229,9 +229,86 @@ tags:
 
 > When an object is deleted, it becomes tombstone to ensure all other DC servers could delete such objects to reach the eventual consistency among the AD forests. The timespan is 180 days usually, and the object could be deleted permanently after tombstone. This process is called garbage collection.
 >
-> The tombstone object could be recovered by ldp but most properties might be lost.
+> The tombstone object could be recovered by ldp but most properties might be lost. The attributes preserved on tombstone objects all have the 0x8 bit (`PRESERVE_ON_DELETE`) set in the **searchFlags** attribute of their attributeSchema definition.
 >
 > The tombstone DN looks like `CN=CN=<Original Name>\0ADEL:<GUID>,CN=Deleted Objects,DC=example,DC=com`.
+
+## Q: 什么是 Phantom 对象？和 Tombstone 对象有什么区别？
+
+> ## 🧾 简明对比表
+>
+> | 特性             | **Tombstone**                                     | **Phantom**                                 |
+> | ---------------- | ------------------------------------------------- | ------------------------------------------- |
+> | ✅ 用途           | 记录已删除对象，以便复制删除操作                  | 协助跨分区或跨域引用目标对象                |
+> | 🏷 是否为真实对象 | ✅ 是真实存在的 Directory 对象（只是被标记为删除） | ❌ 不是真实对象，只是一个占位符              |
+> | 📅 生命周期       | 默认保留 180 天（可配置）后被垃圾回收             | 临时存在，仅在需要解析链接时使用            |
+> | 🔄 是否被复制     | ✅ 是的，被复制到所有 DC                           | ❌ 不复制，只在引用时临时生成                |
+> | 🧺 存储位置       | 与原对象相同的 NC（Naming Context）               | 多数位于 `CN=System`、`LostAndFound` 等区域 |
+> | 📉 属性保留情况   | 保留有限属性（如 `objectGUID`、`isDeleted`）      | 仅存储最小属性，如目标 `objectGUID`         |
+> | 🧭 常见触发场景   | 用户删除对象（如用户、组、OU）                    | 一个对象引用另一个未存在于本地 NC 的对象    |
+>
+> ------
+>
+> ## 🔍 1. 什么是 Tombstone？
+>
+> ### ✅ 本质：
+>
+> > 一个已经被**逻辑删除**的对象。
+>
+> 当你删除一个 AD 对象（比如 CN=Alice），它并不会立刻从数据库中抹掉，而是被标记为一个 **Tombstone（墓碑）对象**。
+>
+> ### ✅ 为什么要这么做？
+>
+> - 让其他 DC 知道该对象“已经被删除”
+> - 避免“删除事件”的同步缺失
+> - 多主复制模型中避免“鬼影对象”重新复活
+>
+> ### ✅ 特点：
+>
+> - 设置 `isDeleted: TRUE`
+> - 被移动到 `CN=Deleted Objects`（逻辑上）
+> - 属性几乎全部被剥离，只保留最小信息（GUID、SID 等）
+> - **仍然有 objectClass 和 objectGUID**
+> - 最后被 `garbage collection` 彻底物理删除
+>
+> ------
+>
+> ## 🔍 2. 什么是 Phantom？
+>
+> ### ✅ 本质：
+>
+> > 一个“虚拟对象引用占位符”，用于帮助解析 AD 中的跨域链接（例如外部组成员、外域信任等）。
+>
+> ### ✅ 场景举例：
+>
+> 1. CN=GroupA（在 domainA）有个 `member` 属性指向 CN=UserB（在 domainB）；
+> 2. domainA 的 DC 本地没有 CN=UserB；
+> 3. 为了处理这个引用，它会生成一个 **phantom object**，包含 UserB 的 objectGUID 和 SID 等信息；
+> 4. 这样 GroupA 的 `member` 链接能正确显示 "CN=UserB" 即使不在同一 NC。
+>
+> ### ✅ 特点：
+>
+> - 不是 directory 对象，也不会出现在 ADUC 或搜索里
+> - 没有 objectClass，只有 GUID 和部分元数据
+> - 会临时保存在 local DB 的 phantom table（非数据表 DataTable）
+> - 不参与复制，仅本地使用
+>
+> ------
+>
+> ## 🔄 小心混淆的地方
+>
+> | 看起来像对象，但不是      | 是 Tombstone？                | 是 Phantom？ |
+> | ------------------------- | ----------------------------- | ------------ |
+> | 被删除的用户 CN=Foo       | ✅ 是                          | ❌ 否         |
+> | member 属性引用的外部对象 | ❌ 否                          | ✅ 是         |
+> | GC 中找不到完整对象       | ❌ 否（可能是 partial object） | ❌ 否         |
+>
+> ------
+>
+> ## 🧠 总结记忆口诀
+>
+> > 🪦 Tombstone：**删除对象的尸体，用来同步“死亡消息”**
+> >  👻 Phantom：**引用未知对象的灵魂，用来暂时填坑**
 
 ## Q: Why don't use the unique GUID to decide if it's the same object directly, in other words, resolving the conflict, comparing to check the name first in 8352 errors?
 
@@ -261,7 +338,7 @@ tags:
 >
 > DC in RF: Stores the forest data, will be used by HA to manage the forests, actually is not the SoT, HA uses them as cache.
 
-## Q: CNF 对象是什么
+## Q: CNF 对象是什么？
 
 > ## ✅ 什么是 CNF？
 >
@@ -582,7 +659,7 @@ tags:
 >
 > 这是一种通用的工程折中：**逻辑上更具语义表达力、物理上更方便存储优化**。
 
-## Q: AD 系统里有 single master 的 case吗？
+## Q: AD 系统里有 single master 的 case 吗？
 
 >  对于某些关键任务，如架构更改、域添加或删除、RID 池分配等，AD 使用单主复制模型，由特定的 FSMO 角色（操作主机角色）承担这些任务。
 >
