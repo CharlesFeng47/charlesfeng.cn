@@ -7,7 +7,7 @@ slug: how-to-create-a-fluent-api
 categories:
   - Tech
 tags:
-  - c#
+  - csharp
   - Fluent API
   - Refactor
   - Internship
