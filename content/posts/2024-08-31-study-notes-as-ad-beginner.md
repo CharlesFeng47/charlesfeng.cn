@@ -202,7 +202,7 @@ tags:
       3. handle the WIs starting from the one with highest priority,
       4. Current WI could be preempted and placed back if there is another WI with higher priority. 
    3. SchemaNC failure will block the ConfigNC and DomainNC by throwing schema mismatch error
-   
+
 2. **Schedule based**: 
    1. KCC will set the interval on an attribute called `Schedule` in the format of bitmap vector and one hour is represented to four bits.
    2. The minimal scheduled replication interval is 15 minutes 
