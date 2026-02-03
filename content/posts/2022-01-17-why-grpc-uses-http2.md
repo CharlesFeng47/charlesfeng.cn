@@ -1,6 +1,6 @@
 ---
 date: 2022-01-17
-title: 'gPRC 为什么使用 HTTP/2'
+title: 'gRPC 为什么使用 HTTP/2'
 template: post
 thumbnail: '../thumbnails/grpc.png'
 slug: why-grpc-uses-http2

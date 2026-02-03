@@ -19,7 +19,7 @@ tags:
 
 ## 客户端
 
-通过 jQuery 的 ajax 也可以实现跨域访问，代码如下。主要是 `crossDomain: true` 和 `xhrFields`（设置 `withCredentials` 为 `true` 之后才可以发送 Cockie）。
+通过 jQuery 的 ajax 也可以实现跨域访问，代码如下。主要是 `crossDomain: true` 和 `xhrFields`（设置 `withCredentials` 为 `true` 之后才可以发送 Cookie）。
 
 ```javascript
 $.ajax({
@@ -126,7 +126,7 @@ public class CorsFilter implements Filter {
 + [Understanding CORS](https://spring.io/understanding/CORS)
 + [HTTP访问控制（CORS）](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS)
 + [CORS support in Spring Framework](https://spring.io/blog/2015/06/08/cors-support-in-spring-framework)
-+ [[Spring boot 入门之CORS 跨域配置详解](http://www.leftso.com/blog/303.html) ](http://www.leftso.com/blog/303.html)
++ [[Spring boot 入门之CORS 跨域配置详解](http://www.leftso.com/blog/303.html)](http://www.leftso.com/blog/303.html)
 + [跨域资源共享 CORS 详解](http://www.ruanyifeng.com/blog/2016/04/cors.html)
 + [说说跨域那些事儿](https://itoss.me/2016/12/31/说说跨域那些事儿/)
 + [使用CORS](http://leungwensen.github.io/blog/2015/cors.html)

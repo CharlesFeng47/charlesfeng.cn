@@ -29,7 +29,7 @@ tags:
 
 ```Java
 //UiAutomator原生的定位方式
-UiObject iv = new UiObject(new UiSelecor().className("android.widget.ImageView").clickable(true);
+UiObject iv = new UiObject(new UiSelector().className("android.widget.ImageView").clickable(true);
 iv.click();
 ```
 
@@ -56,7 +56,7 @@ iv.click();
 //UiAutomator原生
 //此方法的含义是先获取当前页面可滑动的元素，然后在这个元素的基础上，找到包含`上课中`这三个字的项目，再点击。
 UiObject cl = new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new UiSelector().textContains("上课中"));
-cl.clickt()
+cl.click()
 ```
 
 那么，在Appium中的写法就是：

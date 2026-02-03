@@ -3,7 +3,7 @@ date: 2024-08-31
 title: '作为 AD 初学者的学习笔记'
 template: post
 thumbnail: '../thumbnails/active-directory.png'
-slug: study_notes_as_ad_beginner
+slug: study-notes-as-ad-beginner
 categories:
   - Tech
 tags:

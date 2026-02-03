@@ -3,7 +3,7 @@ date: 2020-03-02
 title: 'How to GraphQL'
 template: post
 thumbnail: '../thumbnails/graphql.png'
-slug: how-to-grapgql
+slug: how-to-graphql
 categories:
   - Tech
 tags:

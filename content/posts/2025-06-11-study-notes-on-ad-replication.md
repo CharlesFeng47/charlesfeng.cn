@@ -3,7 +3,7 @@ date: 2025-06-11
 title: '对 AD multimatser replication 多主复制的学习笔记'
 template: post
 thumbnail: '../thumbnails/active-directory.png'
-slug: study_notes_on_ad_replication
+slug: study-notes-on-ad-replication
 categories:
   - Tech
 tags:
