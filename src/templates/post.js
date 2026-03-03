@@ -7,7 +7,7 @@ import UserInfo from '../components/UserInfo'
 import PostTags from '../components/PostTags'
 import SEO from '../components/SEO'
 import config from '../../data/SiteConfig'
-import { formatDate, editOnGithub } from '../utils/global'
+import { formatDate, editOnGithub, getThumbnailData } from '../utils/global'
 
 export default class PostTemplate extends Component {
   constructor(props) {
@@ -30,10 +30,8 @@ export default class PostTemplate extends Component {
       post.id = slug
     }
 
-    let thumbnail
-    if (post.thumbnail) {
-      thumbnail = post.thumbnail.childImageSharp.fixed
-    }
+    const { fixed: thumbnail, src: thumbnailSrc } = getThumbnailData(post.thumbnail)
+    const hasThumbnail = Boolean(thumbnail || thumbnailSrc)
 
     const date = formatDate(post.date)
     const githubLink = editOnGithub(post)
@@ -47,10 +45,18 @@ export default class PostTemplate extends Component {
         </Helmet>
         <SEO postPath={slug} postNode={postNode} postSEO />
         <article className="single container">
-          <header className={`single-header ${!thumbnail ? 'no-thumbnail' : ''}`}>
+          <header className={`single-header ${!hasThumbnail ? 'no-thumbnail' : ''}`}>
             {
-              thumbnail && 
-              <Img fixed={post.thumbnail.childImageSharp.fixed} className={post.thumbnailRound ? 'round' : ''} />
+              thumbnail
+                ? <Img fixed={thumbnail} className={post.thumbnailRound ? 'round' : ''} />
+                : thumbnailSrc && (
+                  <img
+                    src={thumbnailSrc}
+                    alt=""
+                    className={`thumbnail-image ${post.thumbnailRound ? 'round' : ''}`}
+                    loading="eager"
+                  />
+                )
             }
             <div className="flex">
               <h1>{post.title}</h1>
@@ -97,6 +103,7 @@ export const pageQuery = graphql`
       frontmatter {
         title
         thumbnail {
+          publicURL
           childImageSharp {
             fixed(width: 150, height: 150) {
               ...GatsbyImageSharpFixed

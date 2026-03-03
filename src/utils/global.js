@@ -9,4 +9,18 @@ const editOnGithub = post => {
   return urlJoin(config.repo, '/blob/master/content/posts', `${date}-${post.slug}.md`)
 }
 
-export { formatDate, editOnGithub }
+const getThumbnailData = thumbnail => {
+  if (!thumbnail) {
+    return {
+      fixed: null,
+      src: '',
+    }
+  }
+
+  return {
+    fixed: thumbnail.childImageSharp ? thumbnail.childImageSharp.fixed : null,
+    src: thumbnail.publicURL || '',
+  }
+}
+
+export { formatDate, editOnGithub, getThumbnailData }

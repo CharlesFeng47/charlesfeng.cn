@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Link } from 'gatsby'
 import Img from 'gatsby-image'
 import moment from 'moment'
-import { formatDate } from '../utils/global'
+import { formatDate, getThumbnailData } from '../utils/global'
 
 export default class PostListing extends Component {
   getPostList() {
@@ -32,23 +32,30 @@ export default class PostListing extends Component {
       <section className={`posts ${simple ? 'simple' : ''}`}>
         {
           postList.map(post => {
-            let thumbnail
-            if (post.thumbnail) {
-              thumbnail = post.thumbnail.childImageSharp.fixed
-            }
+            const { fixed: thumbnail, src: thumbnailSrc } = getThumbnailData(post.thumbnail)
 
             const popular = post.categories.includes('Popular')
             const date = formatDate(post.date)
             const newest = moment(post.date) > moment().subtract(30, 'days')
+            let thumbnailNode = <div />
+
+            if (thumbnail) {
+              thumbnailNode = <Img fixed={thumbnail} className={post.thumbnailRound ? 'round' : ''} />
+            } else if (thumbnailSrc) {
+              thumbnailNode = (
+                <img
+                  src={thumbnailSrc}
+                  alt=""
+                  className={`thumbnail-image ${post.thumbnailRound ? 'round' : ''}`}
+                  loading="lazy"
+                />
+              )
+            }
 
             return (
               <Link to={post.path} key={post.title}>
                 <div className="each">
-                  {
-                    thumbnail
-                      ? <Img fixed={thumbnail} className={post.thumbnailRound ? 'round' : ''} />
-                      : <div />
-                  }
+                  {thumbnailNode}
                   <div className="each-list-item">
                     <h2>{post.title}</h2>
                     {

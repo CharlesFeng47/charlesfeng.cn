@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import Helmet from 'react-helmet'
 import urlJoin from 'url-join'
 import config from '../../data/SiteConfig'
+import { getThumbnailData } from '../utils/global'
 
 export default class SEO extends Component {
   render() {
@@ -17,7 +18,8 @@ export default class SEO extends Component {
       title = postMeta.title
       description = postMeta.description ? postMeta.description : postNode.excerpt
       if (postMeta.thumbnail) {
-        image = postMeta.thumbnail.childImageSharp.fixed.src
+        const thumbnail = getThumbnailData(postMeta.thumbnail)
+        image = thumbnail.fixed ? thumbnail.fixed.src : thumbnail.src
       }
       postURL = urlJoin(config.siteUrl, replacePath(postPath))
     } else {
