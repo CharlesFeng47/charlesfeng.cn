@@ -19,7 +19,7 @@ export default class SEO extends Component {
       description = postMeta.description ? postMeta.description : postNode.excerpt
       if (postMeta.thumbnail) {
         const thumbnail = getThumbnailData(postMeta.thumbnail)
-        image = thumbnail.fixed ? thumbnail.fixed.src : thumbnail.src
+        image = thumbnail.optimizedImage ? thumbnail.optimizedImage.src : thumbnail.publicUrl
       }
       postURL = urlJoin(config.siteUrl, replacePath(postPath))
     } else {

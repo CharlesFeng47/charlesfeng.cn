@@ -32,19 +32,19 @@ export default class PostListing extends Component {
       <section className={`posts ${simple ? 'simple' : ''}`}>
         {
           postList.map(post => {
-            const { fixed: thumbnail, src: thumbnailSrc } = getThumbnailData(post.thumbnail)
+            const { optimizedImage, publicUrl } = getThumbnailData(post.thumbnail)
 
             const popular = post.categories.includes('Popular')
             const date = formatDate(post.date)
             const newest = moment(post.date) > moment().subtract(30, 'days')
             let thumbnailNode = <div />
 
-            if (thumbnail) {
-              thumbnailNode = <Img fixed={thumbnail} className={post.thumbnailRound ? 'round' : ''} />
-            } else if (thumbnailSrc) {
+            if (optimizedImage) {
+              thumbnailNode = <Img fixed={optimizedImage} className={post.thumbnailRound ? 'round' : ''} />
+            } else if (publicUrl) {
               thumbnailNode = (
                 <img
-                  src={thumbnailSrc}
+                  src={publicUrl}
                   alt=""
                   className={`thumbnail-image ${post.thumbnailRound ? 'round' : ''}`}
                   loading="lazy"

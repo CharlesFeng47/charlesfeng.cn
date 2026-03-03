@@ -30,8 +30,8 @@ export default class PostTemplate extends Component {
       post.id = slug
     }
 
-    const { fixed: thumbnail, src: thumbnailSrc } = getThumbnailData(post.thumbnail)
-    const hasThumbnail = Boolean(thumbnail || thumbnailSrc)
+    const { optimizedImage, publicUrl } = getThumbnailData(post.thumbnail)
+    const hasThumbnail = Boolean(optimizedImage || publicUrl)
 
     const date = formatDate(post.date)
     const githubLink = editOnGithub(post)
@@ -47,11 +47,11 @@ export default class PostTemplate extends Component {
         <article className="single container">
           <header className={`single-header ${!hasThumbnail ? 'no-thumbnail' : ''}`}>
             {
-              thumbnail
-                ? <Img fixed={thumbnail} className={post.thumbnailRound ? 'round' : ''} />
-                : thumbnailSrc && (
+              optimizedImage
+                ? <Img fixed={optimizedImage} className={post.thumbnailRound ? 'round' : ''} />
+                : publicUrl && (
                   <img
-                    src={thumbnailSrc}
+                    src={publicUrl}
                     alt=""
                     className={`thumbnail-image ${post.thumbnailRound ? 'round' : ''}`}
                     loading="eager"
