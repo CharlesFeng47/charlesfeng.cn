@@ -2,7 +2,7 @@
 date: 2020-03-04
 title: 'Intro to Headless CMS & Gatsby.js'
 template: post
-thumbnail: '../thumbnails/gatsby.png'
+thumbnail: '../thumbnails/gatsby.svg'
 slug: intro-to-headless-cms-and-gatsbyjs
 categories:
   - Tech

@@ -2,7 +2,7 @@
 date: 2018-02-14
 title: 'RestController 返回对象抛错 HttpMessageNotWritableException'
 template: post
-thumbnail: '../thumbnails/spring.png'
+thumbnail: '../thumbnails/spring.svg'
 slug: http-message-not-writeable-exception
 categories:
   - Bug

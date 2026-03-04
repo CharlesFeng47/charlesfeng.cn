@@ -2,7 +2,7 @@
 date: 2019-05-25
 title: 'React Native 本地持久化方案'
 template: post
-thumbnail: '../thumbnails/react.png'
+thumbnail: '../thumbnails/react.svg'
 thumbnailRound: true
 slug: react-native-local-storage
 categories:

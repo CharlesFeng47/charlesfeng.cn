@@ -2,7 +2,7 @@
 date: 2020-07-21
 title: '如何实现一个 Fluent API'
 template: post
-thumbnail: '../thumbnails/microsoft.png'
+thumbnail: '../thumbnails/microsoft.svg'
 slug: how-to-create-a-fluent-api
 categories:
   - Tech

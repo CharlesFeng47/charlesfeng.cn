@@ -2,7 +2,7 @@
 date: 2018-05-22
 title: 'Appium 进阶使用 UIAutomator'
 template: post
-thumbnail: '../thumbnails/appium.png'
+thumbnail: '../thumbnails/appium.svg'
 slug: appium-uiautomator
 categories:
   - Snippet

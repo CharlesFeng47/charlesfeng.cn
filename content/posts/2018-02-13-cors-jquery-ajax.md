@@ -2,8 +2,7 @@
 date: 2018-02-13
 title: '跨域访问 CORS 时使用 jQuery ajax 的坑'
 template: post
-thumbnail: '../thumbnails/jquery.jpg'
-thumbnailRound: true
+thumbnail: '../thumbnails/jquery.svg'
 slug: cors-jquery-ajax
 categories:
   - Tech

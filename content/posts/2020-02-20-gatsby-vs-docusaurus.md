@@ -2,7 +2,7 @@
 date: 2020-02-20
 title: '基于 React 的 CMS 框架对比：Docusaurus vs. Gatsby'
 template: post
-thumbnail: '../thumbnails/gatsby.png'
+thumbnail: '../thumbnails/gatsby.svg'
 slug: gatsby-vs-docusaurus
 categories:
   - Tech

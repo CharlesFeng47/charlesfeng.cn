@@ -2,7 +2,7 @@
 date: 2019-03-17
 title: 'Vue :model 与 v-model 区别'
 template: post
-thumbnail: '../thumbnails/vue.png'
+thumbnail: '../thumbnails/vue.svg'
 slug: vue-model-diff-vmodel
 categories:
   - Tech

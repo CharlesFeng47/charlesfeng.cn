@@ -2,7 +2,7 @@
 date: 2018-02-24
 title: 'Vue 组件的命名问题'
 template: post
-thumbnail: '../thumbnails/vue.png'
+thumbnail: '../thumbnails/vue.svg'
 slug: vue-naming-a-component
 categories:
   - Tech

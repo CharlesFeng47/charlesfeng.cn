@@ -2,7 +2,7 @@
 date: 2020-05-02
 title: '从 Netlify 迁移到自己的阿里云服务器'
 template: post
-thumbnail: '../thumbnails/aliyun.png'
+thumbnail: '../thumbnails/aliyun.svg'
 slug: transfer-from-netlify-to-my-aliyun-server
 categories:
   - Tech

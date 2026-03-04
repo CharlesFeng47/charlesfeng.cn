@@ -2,7 +2,7 @@
 date: 2020-08-26
 title: 'Service Fabric 的服务编排 Orchestrator: Cluster Recource Manager'
 template: post
-thumbnail: '../thumbnails/azure.png'
+thumbnail: '../thumbnails/azure.svg'
 slug: service-fabric-cluster-resource-manager
 categories:
   - Tech

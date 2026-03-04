@@ -2,7 +2,7 @@
 date: 2018-05-22
 title: 'Appium 元素定位'
 template: post
-thumbnail: '../thumbnails/appium.png'
+thumbnail: '../thumbnails/appium.svg'
 slug: appium-element-locate
 categories:
   - Snippet

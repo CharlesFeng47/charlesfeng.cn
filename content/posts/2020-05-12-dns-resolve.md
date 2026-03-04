@@ -2,7 +2,7 @@
 date: '2020-05-12 16:00'
 title: 'DNS 的解析过程'
 template: post
-thumbnail: '../thumbnails/dns.png'
+thumbnail: '../thumbnails/dns.svg'
 slug: dns-resolve
 categories:
   - Tech

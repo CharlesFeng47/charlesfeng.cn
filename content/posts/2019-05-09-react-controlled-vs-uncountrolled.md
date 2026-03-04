@@ -2,7 +2,7 @@
 date: 2019-05-09
 title: 'React Controlled vs. Uncontrolled'
 template: post
-thumbnail: '../thumbnails/react.png'
+thumbnail: '../thumbnails/react.svg'
 slug: react-controlled-vs-uncountrolled
 categories:
   - Tech

@@ -2,7 +2,7 @@
 date: 2018-02-20
 title: 'Hibernate 映射 Map'
 template: post
-thumbnail: '../thumbnails/hibernate.png'
+thumbnail: '../thumbnails/hibernate.svg'
 slug: hibernate-mapping-map
 categories:
   - Snippet

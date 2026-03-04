@@ -2,7 +2,7 @@
 date: 2020-02-12
 title: 'Enhanced useDataApi Hook'
 template: post
-thumbnail: '../thumbnails/react.png'
+thumbnail: '../thumbnails/react.svg'
 thumbnailRound: true
 slug: enhanced-usedataapi-hook
 categories:

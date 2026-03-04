@@ -2,7 +2,7 @@
 date: 2018-03-09
 title: 'Vue 在连续界面中使用同一组件'
 template: post
-thumbnail: '../thumbnails/vue.png'
+thumbnail: '../thumbnails/vue.svg'
 slug: vue-using-same-component-in-sequencial-pages
 categories:
   - Bug

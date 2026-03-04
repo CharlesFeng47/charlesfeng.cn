@@ -2,7 +2,7 @@
 date: 2020-05-01
 title: '多个 Server 时的 Nginx 配置'
 template: post
-thumbnail: '../thumbnails/nginx.png'
+thumbnail: '../thumbnails/nginx-2.svg'
 slug: nginx-conf-multi-server
 categories:
   - Tech

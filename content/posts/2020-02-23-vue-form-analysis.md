@@ -2,7 +2,7 @@
 date: 2020-02-23
 title: 'Vue Form 源码结构分析'
 template: post
-thumbnail: '../thumbnails/vue.png'
+thumbnail: '../thumbnails/vue.svg'
 slug: vue-form-analysis
 categories:
   - Tech

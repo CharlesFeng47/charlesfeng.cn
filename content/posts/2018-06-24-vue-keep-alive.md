@@ -2,7 +2,7 @@
 date: 2018-06-24
 title: 'Vue keep-alive 注意点'
 template: post
-thumbnail: '../thumbnails/vue.png'
+thumbnail: '../thumbnails/vue.svg'
 slug: vue-keep-alive
 categories:
   - Tech

@@ -2,7 +2,7 @@
 date: 2018-02-14
 title: 'Vue 项目中定义全局变量和全局函数'
 template: post
-thumbnail: '../thumbnails/vue.png'
+thumbnail: '../thumbnails/vue.svg'
 slug: vue-global-variables-and-functions
 categories:
   - Tech
