@@ -123,7 +123,7 @@ gRPC 在 C# 环境中有两个版本，区别如下。
 
 这时已经知晓了上文的全部知识点。所以发现 Version 2 的考虑就是 bullshit。🤗
 
-上文中有提到 Service Fabric 中各个服务间可以使用任何协议或框架进行通信，只需要实现相关的接口 [`ICommunicationListener`](https://docs.microsoft.com/en-us/dotnet/api/microsoft.Service Fabric.services.communication.runtime.icommunicationlistener?view=azure-dotnet)。而在原来的 WCF 版本中，Service Fabric 提供了 pre-built WCF SDK，所以直接使用了官方实现的 [`WcfCommunicationListener<TServiceContract>`](https://docs.microsoft.com/en-us/dotnet/api/microsoft.Service Fabric.services.communication.wcf.runtime.wcfcommunicationlistener-1?view=azure-dotnet)，整体就都是按照 Service Fabric 规范来的。监听 WCF 的工作是 LockboxMonitor 运行实例的一部分，且会随着该实例被正常管理、启动和删除。
+上文中有提到 Service Fabric 中各个服务间可以使用任何协议或框架进行通信，只需要实现相关的接口 [`ICommunicationListener`](https://docs.microsoft.com/en-us/dotnet/api/microsoft.ServiceFabric.services.communication.runtime.icommunicationlistener?view=azure-dotnet)。而在原来的 WCF 版本中，Service Fabric 提供了 pre-built WCF SDK，所以直接使用了官方实现的 [`WcfCommunicationListener<TServiceContract>`](https://docs.microsoft.com/en-us/dotnet/api/microsoft.ServiceFabric.services.communication.wcf.runtime.wcfcommunicationlistener-1?view=azure-dotnet)，整体就都是按照 Service Fabric 规范来的。监听 WCF 的工作是 LockboxMonitor 运行实例的一部分，且会随着该实例被正常管理、启动和删除。
 
 但是直接启动 gRPC Server 的情况就不一样了。`Server.Start()` 会启动一个 gRPC 的进程，那么运行节点上的 LockboxMonitor 实例被删除后，父进程被 kill，而该 gRPC 进程有以下两种情况。
 

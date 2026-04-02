@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Link } from 'gatsby'
-import Img from 'gatsby-image'
+import { GatsbyImage } from 'gatsby-plugin-image'
 import moment from 'moment'
 import { formatDate, getThumbnailData } from '../utils/global'
 
@@ -32,15 +32,15 @@ export default class PostListing extends Component {
       <section className={`posts ${simple ? 'simple' : ''}`}>
         {
           postList.map(post => {
-            const { optimizedImage, publicUrl } = getThumbnailData(post.thumbnail)
+            const { optimizedImageData, publicUrl } = getThumbnailData(post.thumbnail)
 
             const popular = post.categories.includes('Popular')
             const date = formatDate(post.date)
             const newest = moment(post.date) > moment().subtract(30, 'days')
             let thumbnailNode = <div />
 
-            if (optimizedImage) {
-              thumbnailNode = <Img fixed={optimizedImage} className={post.thumbnailRound ? 'round' : ''} />
+            if (optimizedImageData) {
+              thumbnailNode = <GatsbyImage image={optimizedImageData} alt="" className={post.thumbnailRound ? 'round' : ''} />
             } else if (publicUrl) {
               thumbnailNode = (
                 <img
