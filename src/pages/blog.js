@@ -123,9 +123,7 @@ export const pageQuery = graphql`
             thumbnail {
               publicURL
               childImageSharp {
-                fixed(width: 150, height: 150) {
-                  ...GatsbyImageSharpFixed
-                }
+                gatsbyImageData(width: 150, height: 150, layout: FIXED, placeholder: BLURRED)
               }
             }
             thumbnailRound

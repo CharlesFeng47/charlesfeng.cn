@@ -9,17 +9,17 @@ const editOnGithub = post => {
   return urlJoin(config.repo, '/blob/master/content/posts', `${date}-${post.slug}.md`)
 }
 
-// Prefer Gatsby's optimized image data, but keep the original file url as a fallback for formats like SVG, which is not intented to be supported by gatsby-transformer-sharp.
+// Prefer Gatsby's optimized image data, and keep the original file URL as a fallback for formats like SVG.
 const getThumbnailData = thumbnail => {
   if (!thumbnail) {
     return {
-      optimizedImage: null,
+      optimizedImageData: null,
       publicUrl: '',
     }
   }
 
   return {
-    optimizedImage: thumbnail.childImageSharp ? thumbnail.childImageSharp.fixed : null,
+    optimizedImageData: thumbnail.childImageSharp ? thumbnail.childImageSharp.gatsbyImageData : null,
     publicUrl: thumbnail.publicURL || '',
   }
 }

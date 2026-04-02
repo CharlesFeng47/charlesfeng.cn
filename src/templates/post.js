@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import Helmet from 'react-helmet'
 import { graphql } from 'gatsby'
-import Img from 'gatsby-image'
+import { GatsbyImage } from 'gatsby-plugin-image'
 import Layout from '../layout'
 import UserInfo from '../components/UserInfo'
 import PostTags from '../components/PostTags'
@@ -30,8 +30,8 @@ export default class PostTemplate extends Component {
       post.id = slug
     }
 
-    const { optimizedImage, publicUrl } = getThumbnailData(post.thumbnail)
-    const hasThumbnail = Boolean(optimizedImage || publicUrl)
+    const { optimizedImageData, publicUrl } = getThumbnailData(post.thumbnail)
+    const hasThumbnail = Boolean(optimizedImageData || publicUrl)
 
     const date = formatDate(post.date)
     const githubLink = editOnGithub(post)
@@ -47,8 +47,8 @@ export default class PostTemplate extends Component {
         <article className="single container">
           <header className={`single-header ${!hasThumbnail ? 'no-thumbnail' : ''}`}>
             {
-              optimizedImage
-                ? <Img fixed={optimizedImage} className={post.thumbnailRound ? 'round' : ''} />
+              optimizedImageData
+                ? <GatsbyImage image={optimizedImageData} alt="" className={post.thumbnailRound ? 'round' : ''} />
                 : publicUrl && (
                   <img
                     src={publicUrl}
@@ -105,9 +105,7 @@ export const pageQuery = graphql`
         thumbnail {
           publicURL
           childImageSharp {
-            fixed(width: 150, height: 150) {
-              ...GatsbyImageSharpFixed
-            }
+            gatsbyImageData(width: 150, height: 150, layout: FIXED, placeholder: BLURRED)
           }
         }
         thumbnailRound
