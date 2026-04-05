@@ -28,6 +28,8 @@ jobs:
         run: cat yarn.lock
       - name: Build blog
         run: yarn build
+      - name: Prepare remote dir
+        run: ssh -o StrictHostKeyChecking=no azureuser@${{secrets.DeployHost}} "mkdir -p ~/blog/charlesfeng/public"
       - name: Deploy blog to server
         id: deploy
         uses: Pendect/action-rsyncer@v2.0.0
