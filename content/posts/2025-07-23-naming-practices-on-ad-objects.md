@@ -9,6 +9,7 @@ categories:
 tags:
   - Active Directory
   - Practices
+  - ChatGPT
 ---
 
 基于[前文](/study_notes_as_ad_beginner) ChatGPT 提到的如下理论，我实际测试了一下 AD 中的命名规则。首先，`CNF`、`DEL` 本身并不是 AD 的保留字或特殊字符，只有当它们和 [`\0A`](https://en.wikipedia.org/wiki/Control_character)（换行符） 一起使用时才有特殊含义。而根据实践，在这些 User 对象里面真正被限制的其实是字符 `\` 和 `:`，至于普通对象则并没有此类限制。
@@ -70,6 +71,25 @@ tags:
 ![2025-07-23-length-constraint](https://images.charlesfeng.cn/2025-07-23-length-constraint.PNG)
 
 查看了类 [`User`](https://learn.microsoft.com/en-us/windows/win32/adschema/c-user) 上跟 name 相关的属性，发现虽然 [`sAMAccountName`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-samaccountname) 的 `Range-Upper` 指定的是 256 个字符，但是有特别说明不能超过 20 个字符，所以限制正是源自这里。当然，根本原因应该更底层，因为这个属性是为了支持 Windows 98 之前的系统了 🥱。不过这种坑，除非踩到，不然谁知道啊！AD 这方面真的蛮难用的。。（顺带一提，对我组的 Sync Engine 来说，这个属性也是不需要维护的，说明在 M365 内部它已经被彻底 deprecated 掉了。）
+
+> **SAM (Security Accounts Manager)** 是 Windows 系统的**本地**账号数据库。它存在于每台独立的 Windows 电脑上（路径通常为 `C:\Windows\System32\config\SAM`），负责管理这台电脑本地的用户名和密码。AD 则是把类似的账号与权限模型扩展成了整个域的分布式目录服务。
+>
+> - **演进与替代**：在没有 AD 的早期网络（如 Windows NT 4.0）中，企业依赖 SAM 来进行网络认证。由于 SAM 无法支撑大规模网络，微软在 Windows 2000 中推出了 AD。在企业域环境中，AD 替代了本地 SAM 的核心地位。
+> - **属性继承 (`sAMAccountName`)**：为了兼容旧系统，AD 在设计时继承了 SAM 的命名规范。
+>   - AD 中每个用户对象的登录名属性就被命名为 **`sAMAccountName`**（即俗称的旧版登录名，格式为 `DOMAIN\username`）。
+>   - 别的 `sAM*` 属性不一定是为了兼容本地 SAM 数据库，比如 `sAMAccountType` 把 AD 安全主体表达为 SAM/SAMR 账户类型，同时仍用于实际查询和枚举；`samDomainUpdates`  用于 AD 内部跟踪 SAM 域模型的默认账户、组和成员关系升级。
+> - **共存机制**：
+>   - 普通电脑或成员服务器：SAM 和 AD 同时存在。登录时，Windows 根据账号类型决定去哪里验证，**加入域不会删除本机 SAM**。
+>     - **本地账号**保存在本地 **SAM** 数据库中，例如：`MYPC\alice`
+>     - **域账号**保存在 Domain Controller 的 AD 中，例如：`CONTOSO\alice`
+>   - 域控制器上：AD 取代普通本地 SAM。域控制器的域用户、域组和计算机账号保存在 AD 数据库 `C:\Windows\NTDS\ntds.dit` 中。
+>     - 不再拥有普通意义上的本地用户和本地组
+>     - `DOMAIN\Administrator` 是 AD 中的域账号
+>     - 账号、组、密码摘要等由 AD DS 管理并在 DC 之间复制
+>     - 一个特殊例外是 **DSRM（目录服务还原模式）管理员密码**，它仍与本机 SAM 机制有关，供 AD 无法启动时进行恢复。
+> - SID 相关
+>   - **SID（Security Identifier，并不是 SAM ID）** 是 Windows 用来唯一识别安全主体（用户、组、计算机账户、服务账户、某些内置身份，如 `SYSTEM`、`Everyone` 等）的 ID，被 Windows 真正用于权限判断，而不是用户名。（这样即使用户重命名，SID 不变，原有权限仍然有效。）
+>   - SAM 和 AD 都负责保存账户及其 SID 到对应数据库，ACL 和访问令牌则使用 SID 完成权限判断。
 
 FYI，其他属性如 [`cn/Common-Name`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-cn)、[`sn/Surname`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-sn)、 [`givenName`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-givenname)、[`middleName/Other-Name`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-middlename) 限制为 64 个字符，[`displayName`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-displayname)、[`adminDisplayName`](https://learn.microsoft.com/en-us/windows/win32/adschema/a-admindisplayname) 等限制为 256 个字符。不过，真正 mandatory 的 name 相关的属性只有 `cn` 和 `sAMAccountName` 啦。
 
