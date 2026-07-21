@@ -148,7 +148,7 @@ tags:
 
 ## Q: UTD vector 什么时候会被更新？
 
-> UTD vector 只会在 **cycle 结束 catch up 上**之后才会更新，注意不是每次 sync 拉了一次 change 就会 cycle 结束，得 source DC 上所有 change 都被拉到 target，=> `objectUsn == propertyUsn`。
+> UTD vector 只会在 **cycle 结束 catch up 上**之后才会更新，注意不是每次 sync 拉了一次 change 就会 cycle 结束，得 source DC 上所有 change 都被拉到 target => which means `objectUsn == propertyUsn`。
 >
 > Details see [blog](https://rakhesh.com/windows/notes-on-ad-replication-updates-attributes-usn-high-watermark-vector-up-to-dateness-vector-metadata-etc/) below.
 >
@@ -163,7 +163,7 @@ tags:
 
 > DirSync 的时候 Cookie 中包含 object usn 和 property usn, object usn 会是当前对象所有 property usn 中最大的一个（最后一次被更改），replicate 的时候会按照 object usn 排序，所以很可能两个 object，更早被改过的 property 更晚被 replicate。比如对下面的 case，假设当前 HWM 是 400（上一次 sync 完 object/property usn = 400），可能此次 sync 的只有 object B，而 object A 的 property1 会等到下一次 sync 500 的时候才跟随 property2 被 replicate 出去。
 >
-> Object A (500): property1: 100, property2: 500
+> Object A (500): property1: 420, property2: 500
 >
 > Object B (450): property1: 400, property2: 450
 >
@@ -185,178 +185,787 @@ tags:
 
 > 不会，会一直保留。目前 vector size 可能有 1k+，可是我们实际只有 24 台 DC，目前没发现什么问题，毕竟只是一个 vector。
 
-## Q: 如果 B 的 UTD[A] = 1150，HWM[A] = 1000，实际  A 在处理的时候就是 1150 以下的都会被认为已经 sync 过，返回的都是 1151-1200 吗？HWM 仍然实际没起作用呀？TODO
+## Q: 如果 B 的 UTD[A] = 1150，HWM[A] = 1000，实际  A 在处理的时候就是 1150 以下的都会被认为已经 sync 过，返回的都是 1151-1200 吗？HWM 仍然实际没起作用呀？
 
 > 实际从 A replicate 出去的时候会被跳过。但不确定的是 A 在处理时还是从 1001 开始比，然后在结果集上根据 UTD 筛除，还是在拿到 target B 的 HWM 和 UTD 会比一下取较大值。
 >
 > HWM就没用了吗？也不是，因为 UTD 只会在 cycle 结束后被更新，大多数情况下 HWM 的值大于 UTD。
 
-## Q: UTD vector is just an improvement but AD could also works without it?
+## Q：AD 演进历史？UTD vector 是后来增加的 improvement 吗？
 
-> > **是的，AD 最早期的设计中确实没有完整的 UTD Vector 实现**，
-> > 后来为了效率、去重和拓扑复杂度引入了它。
-> >
-> > **本质上，Active Directory 复制即使没有 UTD Vector，也是能 work 的！**
+
+> Windows 2000 Server 中的第一版 Active Directory 就已经同时具有：
 >
-> > ✅ **准确性不会错（consistency still guaranteed）**
-> > ❌ **效率会大大下降（duplication + wasted work）**
+> 1. **High-Watermark（HWM，高水位标记）**
+> 2. **Up-to-Dateness Vector（UTD Vector，最新度向量）**
 >
-> ------
+> 它们不是后来 Windows Server 2003 才加入的，而是 AD 最初多主复制模型的基本组成部分。两者从一开始就分工不同，HWM 针对直接复制源，UTD Vector 针对所有原始写入者。
 >
-> ## ✅ 没有 UTD 也能复制成功 —— 为什么？
+> - **HWM** 找出 A 上哪些记录值得检查；
+> - **UTD Vector** 判断这些记录的原始变更是否已经通过其他路径收到。
 >
-> 因为：
+> 这就是 AD 的 propagation dampening：既支持任意拓扑、多跳复制，又避免同一原始更新在环形拓扑中不断重复传播。
 >
-> 1. **每次拉增量，都是从 HWM 开始往后扫 changelog**
+> | 版本                     | 关键机制                                                     |
+> | ------------------------ | ------------------------------------------------------------ |
+> | **Windows 2000 / AD v1** | Multi-master、invocationId、originating USN、HWM、[UTD Vector V1](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-drsr/cf88f341-fb49-4cd5-b7e2-6920cbd91f1b)、属性级复制元数据与冲突解决 |
+> | **Windows Server 2003**  | 请求/响应协议扩展、[UTD Vector V2](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-drsr/d3e30021-b6ac-413e-b08a-b69b9b0c6592) （增加字段 `timeLastSyncSuccess` 用于复制延迟报告）、Linked-Value Replication、复制与拓扑等方面的增强 |
+> | **后续版本**             | RODC、AD Recycle Bin、虚拟化安全机制、额外复制元数据和协议扩展等 |
+
+## Q: 假如不用 UTD vector 只用 HWM，AD 能 work 吗？
+
+> **能 work，但会变成“可以收敛、效率很差”的多主复制系统。**
 >
-> 2. 每条变更里都带有 `originatingInvocationId + originatingUSN`
+> UTD Vector 不是 AD 正确性的唯一基础；它主要负责 **跨路径去重（propagation dampening）**。真正保证并发修改能够确定性收敛的，是每个属性携带的复制元数据，例如版本号、originating DC、originating USN 和时间戳。微软的复制模型明确把这些信息组成 attribute stamp；属性的 originating 修改会增加版本号，而单纯复制不会改变 originating version。
 >
-> 3. 如果你已经有这个对象，AD 在应用变更时会比较版本：
+> ## 只有 HWM，没有 UTD 会发生什么
 >
->   > 🧠 如果本地的对象版本更高，AD 会 **丢弃这个变更**（不会覆盖）
+> 假设有三台 DC：
 >
-> 这就是 AD 的 **版本冲突检测机制**。具体见 "Conflict Resolution" 相关段落。
->
-> ------
->
-> ## ❗但为什么还要引入 UTD？
->
-> > 为了提升性能，减少重复复制，提高 bandwidth + CPU 效率。
->
-> 想象一下：
->
-> - 没有 UTD，B 每次从 A 拉数据都要从 **HWM+1 扫到现在**
-> - 即使之前从别的 DC 已经拿过很多相同变更，A 还是会重新发！
-> - B 又要重复做「版本检查」，还要丢弃很多对象，浪费资源
->
-> ------
->
-> ## 🧪 举个极端例子
->
-> ### 有 UTD 的情况：
->
-> - A 看你已经知道 `originatingUSN <= 1150`
-> - 它从 USN=1151 开始扫
-> - 一共发 5 条变更，全部是你真正没见过的
->
-> ### 没有 UTD 的情况：
->
-> - A 不知道你见过啥
-> - 它从 HWM+1 开始扫，一口气发 500 条
-> - 你本地丢弃掉 495 条，因为你早就见过了……
->
-> ------
->
-> ## 🔍 所以我们可以说：
->
-> | 有无 UTD Vector | 能不能复制成功？ | 效率如何？ | 关键用途                         |
-> | --------------- | ---------------- | ---------- | -------------------------------- |
-> | ✅ 有 UTD        | ✅ 100%           | 🚀 高效     | 去重，带宽优化                   |
-> | ❌ 没有 UTD      | ✅ 100%           | 🐢 很慢     | 每次都多发，靠版本冲突避免误更新 |
->
-> ------
->
-> ## 🎓 额外 info：UTD 的历史
->
-> UTD Vector 是在 Active Directory 的多主复制架构中引入的优化机制：
->
-> - 实现增量复制的“**最小集**”
-> - 支持复杂拓扑（如 hub-spoke, ring, partial mesh）
-> - 避免“间接复制”带来的重复发送
->
-> ------
->
-> ## ✅ 终极总结
->
-> > **UTD Vector ≠ 保证复制成功的唯一机制**
-> >
-> > 它是：**一种复制数据去重 + 带宽优化的机制**
-> >
-> > 没有它，AD 复制 **仍然可靠，但很低效**
->
-> ------
->
-> ## 🕰️ Active Directory 复制机制演进简史
->
-> ### 🔹 Windows 2000（AD v1）—— 最初版本
->
-> - 引入 **multi-master replication** 架构（革命性的！）
-> - 已经有：
->   - 每个 DC 的 `invocationId`
->  - 每个变更的 `originatingUSN`
->   - 每个 partner 的 `High Watermark`（HWM）
->
-> ✅ 可用
-> ❌ 但 **没有完整的 UTD Vector 实现**
->  → 每次复制都必须 scan changelog + rely on version checks to avoid overwrite
->
-> ------
->
-> ### 🔹 Windows Server 2003 / 2003 R2
->
-> - 引入了更系统的 **UTD Vector 构造和传输**
-> - 复制请求中开始带上 **“我知道谁的 USN 到哪”** 的信息
-> - 复制源（source DC）可以根据这份 vector **主动过滤掉对象级别的冗余更新**
->
-> 🚀 带宽利用率显著提升
-> 📉 减少冲突检查负担
->
-> > ✅ 到这一步，AD 的复制变成了「增量 + 去重 + 跨路径有效同步」
->
-> ------
->
-> ### 🔹 Windows Server 2008+ & Beyond
->
-> - 引入了更多复制优化（比如：
->  - `Linked-Value Replication (LVR)`
->   - 更智能的 replication topology management
-> - 但 **UTD Vector 机制本身稳定沿用至今**
->
-> ------
->
-> ## 🔍 为啥一开始没设计 UTD？
->
-> 你可以从系统设计者的角度来理解：
->
-> > Windows 2000 是当时微软首次实现“多主复制的企业级目录”
-> > 初始目标是 **可靠性优先**，哪怕慢、冗余——只要别错！
->
-> 所以它先实现了：
->
-> - HWM（游标）+ 每个对象的版本检测
-> - 再在后续版本里逐步引入：
->   - UTD Vector（全局状态感知）
->  - 冲突解析逻辑
->   - 拓扑优化算法
->
-> 这是一种典型的 “先搭稳系统再做优化” 的演进路径。
->
-> ------
->
-> ## 🧠 你可以理解为：
->
-> > **AD 的复制机制 V1 是「log-based, conflict-safe」的**
-> > **V2 开始加入「intelligent deduplication with UTD Vector」**
->
-> ------
->
-> ## 🧪 想试试验证这点？
->
-> 你可以在老版 AD（比如 2000/2003 Forest Functional Level）上：
->
-> ```powershell
-> repadmin /showutdvec
+> ```
+> A ─── B
+>  \   /
+>    C
 > ```
 >
-> 🔸 在 Windows 2000 Forest 上，这个命令可能完全没有，或者返回结果非常有限（甚至报错）
-> 🔸 从 2003 开始就可以看到清晰的 UTD Vector 列表
+> A 产生更新：
 >
-> ------
+> ```
+> X = {
+>     version: 1,
+>     origin: A,
+>     originatingUSN: 100
+> }
+> ```
 >
-> ## 🧭 最后一句总结
+> ### 第一条路径
 >
-> > UTD Vector 不是让 AD “能同步”的前提
-> > 它是让 AD “同步得聪明、高效”的杀手锏。
+> ```
+> A → B
+> ```
+>
+> B 应用更新，并给它分配自己的 local USN：
+>
+> ```
+> B local USN = 500
+> origin 仍然是 A:100
+> version 仍然是 1
+> ```
+>
+> ### 第二条路径
+>
+> ```
+> A → C
+> ```
+>
+> C 也应用同一个更新：
+>
+> ```
+> C local USN = 700
+> origin 仍然是 A:100
+> ```
+>
+> 然后 C 再从 B 拉取。
+>
+> 由于 C 对 B 的 HWM 只知道：
+>
+> ```
+> 我从 B 读到了 local USN 499
+> ```
+>
+> B 上的这个对象现在是 local USN 500，所以 **仅靠 HWM，B 会再次把 X 发给 C**。
+>
+> C 收到后比较复制元数据：
+>
+> ```
+> 本地：origin=A, originatingUSN=100, version=1
+> 收到：origin=A, originatingUSN=100, version=1
+> ```
+>
+> 发现是同一个更新，于是忽略。
+>
+> 所以：
+>
+> ```
+> 没有 UTD：
+> B 会发送重复数据
+> C 收到后才发现重复并丢弃
+> 
+> 有 UTD：
+> C 提前告诉 B：“A:100 我已经见过了”
+> B 根本不发送
+> ```
+>
+> 微软对两者的分工描述也是：
+>
+> - HWM 跟踪从某个**直接复制伙伴**收到的位置；
+> - UTD Vector 跟踪来自所有 originating DC 的最高 originating USN；
+> - 目标 DC 把 UTD Vector 发给源 DC，源 DC 据此缩小需要发送的属性集合。
+>
+> ## 为什么不会无限循环
+>
+> 考虑环形拓扑：
+>
+> ```
+> A → B → C → A
+> ```
+>
+> A 创建更新后：
+>
+> ```
+> A 创建 X
+> A → B：B 应用
+> B → C：C 应用
+> C → A：A 已经有完全相同的 originating stamp，忽略
+> ```
+>
+> 只要“相同或更旧的复制元数据”不会被再次作为新修改应用，它就不会产生新的有效更新，也不会永远循环。
+>
+> 因此，没有 UTD 时，更新大致会：
+>
+> > 沿拓扑中的很多边传播，直到到达一个已经拥有相同或更新版本的 DC，然后被丢弃。
+>
+> UTD 的作用是把“收到后丢弃”提前成“发送前过滤”。
+>
+> 换句话说：
+>
+> ```
+> UTD 不负责判断谁赢
+> UTD 负责判断是否值得发送
+> 
+> 复制元数据负责判断：
+> 收到的属性更新是否比本地更新
+> ```
+>
+> 这也是为什么微软把 UTD 和 HWM称为互补过滤机制：HWM 排除直接伙伴游标之前的对象，UTD 再根据更新的真正来源过滤属性和对象。
+>
+> ## 初始复制本身就证明“没有 UTD 也能复制”
+>
+> 微软的 DRS 协议在[构造复制请求时](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-drsr/6f83be53-23ed-4f07-b836-b8d0e0a93925)明确规定：
+>
+> ```pseudocode
+> if (ObjExists(nc)) then // 如果目标上已经存在该 NC，发送该 NC 的 replUpToDateVector
+>   msgIn.pUpToDateVecDest := 
+>     ConcreteUTDFromAbstractUTD(nc!replUpToDateVector) 
+> else
+>   msgIn.pUpToDateVecDest := null
+> endif
+> ```
+>
+> 也就是说，在目标 DC 尚未拥有该目录分区、执行初始复制时，UTD Vector 可以为空；复制仍然通过 HWM 为零、全量枚举和复制元数据正常完成。
+>
+> 不过这只能证明：
+>
+> > **单次复制协议可以在 UTD 为空的情况下工作。**
+>
+> 它不代表长期运行时不维护 UTD 是一个合理设计。
+>
+> ## 没有 UTD 的代价
+>
+> 在树形拓扑中：
+>
+> ```
+> A → B → C
+> ```
+>
+> 每个更新基本只有一条传播路径，UTD 的价值相对较小。
+>
+> 但在 AD 这种具有冗余路径的拓扑里：
+>
+> ```
+>       B
+>     /   \
+>    A─────C
+>     \   /
+>       D
+> ```
+>
+> 同一个 originating update 可能通过多条路径到达同一 DC。没有 UTD，就会产生：
+>
+> - 更多网络传输；
+> - 更多对象和属性序列化；
+> - 更多数据库读取；
+> - 更多元数据比较；
+> - 更高的 CPU 和磁盘 I/O；
+> - 更长的复制周期；
+> - 大规模 forest 中可能出现严重的重复传播放大。
+>
+> 微软将 UTD 消除多路径冗余的能力称为 **propagation dampening**。
+>
+> ## 最终结论
+>
+> 可以把 AD 的复制正确性拆成三层：
+>
+> ```
+> HWM
+> 解决：从这个直接伙伴的本地日志读到哪里
+> 
+> UTD Vector
+> 解决：这条 originating update 是否已经通过其他路径见过
+> 
+> Attribute/Link replication metadata
+> 解决：收到更新后，应该接受、忽略还是进行冲突裁决
+> ```
+>
+> 所以，**没有 UTD Vector，AD 风格的多主复制理论上仍能完成传播和最终收敛，前提是保留 originating metadata 和确定性的冲突解决机制。**
+>
+> 但是，**它会失去跨路径的发送前去重，同一更新可能沿大量复制路径重复传输，再由接收端丢弃。**
+>
+> 因此 UTD Vector 对“能不能实现多主复制”不是绝对必要条件，但对 **AD 这种存在环路、冗余路径和大量 DC 的实用多主复制系统**，几乎是不可缺少的效率机制。
+
+## Q：那能不能只用 UTD vector 不用 HWM 呢？
+
+> ## AD 为什么需要 HWM
+>
+> AD 更自然的增量枚举方式是根据当前源 DC 的本地变更顺序：
+>
+> ```
+> S local USN:
+> 
+> 5001 → 从 A 收到的更新
+> 5002 → S 本地产生的更新
+> 5003 → 从 B 收到的更新
+> 5004 → 从 C 收到的更新
+> ```
+>
+> 目标 D 对 S 保存：
+>
+> ```
+> HWM(S) = 5000
+> ```
+>
+> 下次只需要扫描：
+>
+> ```
+> S.localUSN > 5000
+> ```
+>
+> 立即得到四个候选更新。
+>
+> 然后再用 UTD 过滤：
+>
+> ```
+> 候选 5001，origin=A:100
+> D.UTD[A] = 100
+> → 已见过，过滤
+> 
+> 候选 5002，origin=S:700
+> D.UTD[S] = 699
+> → 没见过，发送
+> 
+> 候选 5003，origin=B:300
+> D.UTD[B] = 300
+> → 已见过，过滤
+> 
+> 候选 5004，origin=C:900
+> D.UTD[C] = 850
+> → 没见过，发送
+> ```
+>
+> 两层过滤是：
+>
+> ```
+> HWM：
+> 在源 DC 的本地有序空间里，快速找候选集
+> 
+> UTD：
+> 根据更新的真正来源，剔除已经通过其他路径收到的更新
+> ```
+>
+> 微软也将两者描述为互补状态：
+>
+> + HWM 跟踪从某个特定源、特定分区收到的最近变化 => 快速找到候选更新；
+> + UTD 跟踪来自所有 originating DC 的更新，用来过滤要发送的内容 => 从候选更新中排除目标已知的更新。
+>
+> 如果没有 HWM，最大问题是如何找出“可能需要发送的更新”。
+>
+> ## 只用 UTD 的三种实现
+>
+> ### 1. 每次全库扫描
+>
+> 源 DC 扫描所有对象、属性和链接值：
+>
+> ```
+> for each attribute:
+>     stamp = (originDC, originatingUSN)
+> 
+>     if stamp.usn > destinationUTD[stamp.originDC]:
+>         send(attribute)
+> ```
+>
+> 这是正确、可行的，但每次复制可能都需要扫描整个 NC。
+>
+> 微软协议的抽象 [`GetChangesInScope`](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-drsr/94244846-567c-4e08-a7c6-be7d65a8ab1b) 确实是按这种逻辑描述 UTD 过滤的：检查 scope 中对象的属性 stamp 和链接 stamp，并与目标 UTD 比较。
+>
+> 问题是效率可能接近：
+>
+> ```
+> 复制成本 ≈ 整个目录大小 O(对象数 × 平均属性数 + 链接值数)
+> ```
+>
+> 即使一个更新都没有，也可能仍需检查大量状态。
+>
+> HWM 的作用正是将比如一千万个对象缩小成上次复制后 localUSN 发生变化的 100 个对象：
+>
+> ```
+> 复制成本 ≈ 最近发生的变化量
+> ```
+>
+> ### 2. 为每个 origin 建索引或日志，但结构会复杂很多
+>
+> 维护如下索引，然后分别按照 UTD 的每个 cursor 查询。这相当于把一个简单的源本地日志，改造成一组分布式来源日志。
+>
+> ```
+> (originInvocationID, originatingUSN)
+>     → object / attribute / link
+> ```
+>
+> 可以工作，但代价是：
+>
+> - 每个 originating invocation 都需要可查询状态；
+>
+> - 需要合并很多 origin stream；
+>
+> - 要处理 retired invocation ID；
+>
+> - 要保存删除、链接删除等足够长时间；
+>
+> - 索引和垃圾回收更复杂；
+>
+> - 每次请求可能要查询大量 origin。
+>
+> - 分页更加复杂。使用单一源本地顺序时很容易：
+>
+>   ```
+>   本次发送 localUSN 5001..5100
+>   下一次从 5100 继续
+>   ```
+>
+>   仅 UTD 时，你可能同时在读取：
+>
+>   ```
+>   A:1001..1100
+>   B:801..850
+>   C:2501..2600
+>   ```
+>
+>   如果本次响应只能发送其中一部分，就必须记录：
+>
+>   ```
+>   A 已枚举到哪里
+>   B 已枚举到哪里
+>   C 已枚举到哪里
+>   ...
+>   ```
+>
+>   或者服务器保存一个不透明的快照与归并游标。这实际上会重新产生一个“枚举进度结构”。
+>
+> 举例：
+>
+> ```
+> A:1001 → User1.description
+> A:1002 → User2.displayName
+> B:801  → Group1.member + User3
+> C:2501 → User4.isDeleted
+> ```
+>
+> 收到目标 UTD：
+>
+> ```
+> A → 1000
+> B → 800
+> C → 2500
+> ```
+>
+> 分别执行：
+>
+> ```
+> 查询 A 的 originUSN > 1000
+> 查询 B 的 originUSN > 800
+> 查询 C 的 originUSN > 2500
+> ```
+>
+> 然后把所有结果合并。
+>
+> 这在理论上没问题，但你把一个查询：
+>
+> ```
+> S.localUSN > HWM
+> ```
+>
+> 变成了：
+>
+> ```
+> 对每个历史 invocationId 查询
+> +
+> 对所有结果归并
+> +
+> 进行分页
+> +
+> 保证不能漏掉任何 origin 序列
+> ```
+>
+> 如果一个 NC 中存在 `D` 个 originating invocation ID，通常至少需要：
+>
+> ```
+> O(D) 次范围定位 + O(K log D) 的多路归并
+> ```
+>
+> 其中 `K` 是本轮候选更新数。
+>
+> 而 HWM 方案大致是：
+>
+> ```
+> 一次 localUSN 范围扫描
+> +
+> O(K) 的 UTD lookup
+> ```
+>
+> UTD 本身记录的是每个 originating source 已知的最高 USN，因此它的规模随出现过的来源 DC 或 invocation ID 增长。
+>
+> ### 3. 使用 Merkle tree 或状态摘要
+>
+> 也可以完全不用 USN HWM，例如 Cassandra/Dynamo 风格的 anti-entropy：
+>
+> ```
+> 比较分区摘要
+> → 找到不同范围
+> → 比较对象版本
+> → 修复差异
+> ```
+>
+> 这也能工作，但已经不是 AD 当前这种：
+>
+> ```
+> local-USN incremental enumeration
+> +
+> originating-USN deduplication
+> ```
+>
+> 的设计了。
+>
+> ## 网络负载不一定更高，但也不会明显更低
+>
+> ### 理想实现
+>
+> 如果源 DC 有高效的 `(origin, originatingUSN)` 索引，并且在发送前完成 UTD 过滤，那么实际发送的对象和属性可以与 AD 方案近似相同：
+>
+> ```
+> 网络 payload：基本相同
+> ```
+>
+> 删除 HWM 只省掉一个很小的 partner-specific cookie；UTD Vector 仍然需要随请求传输。AD 的请求本来就同时携带 `usnvecFrom` 和 `pUpToDateVecDest`。
+>
+> 所以它几乎不会带来有意义的网络节省。
+>
+> ### 简化实现
+>
+> 如果源无法高效按 UTD 查询，只能：
+>
+> ```
+> 先发送大量候选
+> 目标接收后再过滤
+> ```
+>
+> 那么网络负载会明显增加。
+>
+> ### 全库服务器端扫描
+>
+> 如果源全库扫描，但在发送前过滤：
+>
+> ```
+> 网络负载可能不增加
+> 服务器 CPU / 磁盘 I/O 会大幅增加
+> ```
+>
+> 因此只用 UTD 的主要问题通常首先是 **源端计算和存储访问成本**，不一定首先表现为网络流量。
+>
+> ## HWM 的结构优势
+>
+> 比较一下复制状态的规模。
+>
+> 只有 HWM：
+>
+> ```
+> 每条直接复制关系、每个 NC：
+> 一个 source-local cursor
+> ```
+>
+> 例如：
+>
+> ```
+> D 从 S 复制：
+> HWM = 5000
+> ```
+>
+> 源只需执行一次连续范围查询：
+>
+> ```
+> localUSN > 5000
+> ```
+>
+> 只有 UTD + per-origin log：
+>
+> ```
+> A → 100
+> B → 200
+> C → 300
+> D → 400
+> ...
+> 几百或几千个 invocation ID
+> ```
+>
+> 源可能需要对每个 origin 查询并合并结果。
+>
+> 因此 HWM 把：**很多个来源有序流** 映射为源 DC 上的 **一个本地有序流**，这是它最重要的价值，大幅简化了范围查询、批处理、限流、断点续传和错误恢复。
+>
+> ## 结论
+>
+> 准确来说：
+>
+> > **只用 UTD Vector、不使用 HWM，可以设计出正确的复制系统。**
+>
+> 但必须选择以下至少一种方式：
+>
+> - 每次扫描所有当前状态；
+>
+>   ```
+>   优点：
+>   实现概念简单
+>   不需要 HWM
+>   
+>   缺点：
+>   每轮 CPU、磁盘 I/O 接近全库规模
+>   空闲复制也昂贵
+>   ```
+>
+> - 维护按 `(origin DC, originating USN)` 排序的索引或日志；
+>
+>   ```
+>   优点：
+>   能做到真正增量
+>   网络 payload 可与 AD 接近
+>   
+>   缺点：
+>   额外索引与写放大
+>   多路查询和归并
+>   分页状态复杂
+>   历史 invocation 管理复杂
+>   连续前缀和故障恢复困难
+>   ```
+>
+> - 使用其他 anti-entropy 数据结构。
+>
+> 最简洁的区别是：
+>
+> ```
+> HWM 是 enumeration cursor：
+> 从源的变化流哪里继续读？
+> 
+> UTD 是 knowledge vector：
+> 目标已经知道哪些原始更新？
+> ```
+>
+> UTD 可以替代“过滤逻辑”，但不能在不改变存储和索引设计的情况下替代 HWM 的“候选枚举逻辑”。
+>
+> 因此 AD 同时使用两者的原因不是“缺一不可才能正确”，而是两者正好解决两个正交问题：
+>
+> ```
+> HWM：
+> 用源 DC 的单一 local-USN 顺序，
+> 低成本枚举上次以后发生的候选变化。
+> 
+> UTD：
+> 用 originating DC 的知识向量，
+> 过滤目标已经通过任何路径获得的变化。
+> ```
+>
+> **HWM 使复制成本主要与“最近变化量”相关；UTD 使网络成本主要与“真正未知的变化量”相关。** 同时使用，才能既避免全库扫描，又避免多路径重复传播。
+
+## Q：只用 UTD vector 不用 HWM 的情况下，为什么一定需要按 NC 扫描？UTD vector 里面不是有源自己吗？不能按照 UTD vector[sourceDC] 的值开始复制吗？
+
+> 只是因为 `UTD_D[S] = 700` **不能推出** D 已经处理完 S 上 `localUSN ≤ 700` 的全部变化。因为 `UTD_D[S]=700` 表示的是：
+>
+> > D 已经知道由 S 原始产生、originating USN 不超过 700 的更新。
+>
+> 微软也把 UTD Vector 定义为每个 DC 的最高 **originating write USN**，不是当前复制源本地变化流的消费位置。
+>
+> ## 一个反例
+>
+> 假设 S 的本地变化顺序是：
+>
+> ```
+> S local USN    更新的真正来源
+> 
+> 696            S:696
+> 697            A:50
+> 698            B:80
+> 699            A:51
+> 700            S:700
+> 701            C:90
+> ```
+>
+> 这里：
+>
+> ```
+> S:700
+> ```
+>
+> 表示由 S 原始产生的更新，它在 S 上的 originating USN 是 700。
+>
+> 但是：
+>
+> ```
+> S-local 699 → A:51
+> ```
+>
+> 是 A 原始产生、后来复制进 S 的更新。它在 S 上获得了 local USN 699，但其 originating stamp 仍然是 `A:51`。属性元数据保存的是 originating DC 所分配的 originating USN。
+>
+> 现在目标 D 的 UTD 是：
+>
+> ```
+> S → 700
+> A → 50
+> B → 80
+> C → 89
+> ```
+>
+> 这意味着：
+>
+> - S 原始产生的更新已经知道到 `S:700`；
+> - A 只知道到 `A:50`，还缺 `A:51`；
+> - B 已经知道 `B:80`；
+> - C 还缺 `C:90`。
+>
+> D 完全可能通过其他路径收到了 `S:700`：
+>
+> ```
+> S → X → D
+> ```
+>
+> 但仍未收到 S 本地流中的：
+>
+> ```
+> S-local 699 → A:51
+> ```
+>
+> 如果 D 错误地拿：
+>
+> ```
+> UTD_D[S] = 700
+> ```
+>
+> 当作：
+>
+> ```
+> HWM(D ← S) = 700
+> ```
+>
+> 然后只扫描：
+>
+> ```
+> S.localUSN > 700
+> ```
+>
+> 就会直接跳过：
+>
+> ```
+> S-local 699 → A:51
+> ```
+>
+> 造成漏复制。
+>
+> ## 根本区别
+>
+> 同一个数字 `700`，含义不同：
+>
+> ```
+> UTD_D[S] = 700
+> ```
+>
+> 表示：
+>
+> ```
+> D 对 S 作为 originating writer 的了解程度
+> ```
+>
+> 而：
+>
+> ```
+> HWM(D ← S) = 700
+> ```
+>
+> 表示：
+>
+> ```
+> D 对 S 作为本地变化流提供者的消费位置
+> ```
+>
+> S 上的 local-USN 流混合了所有来源：
+>
+> ```
+> S-local stream =
+>     S 原始产生的变化
+>   + 从 A 复制来的变化
+>   + 从 B 复制来的变化
+>   + 从 C 复制来的变化
+> ```
+>
+> 但 `UTD[S]` 只描述第一类：
+>
+> ```
+> S 原始产生的变化
+> ```
+>
+> ## 什么情况下两者看起来一样
+>
+> 如果 S 从不接收其他 DC 的复制，只产生自己的更新：
+>
+> ```
+> S local 698 → S:698
+> S local 699 → S:699
+> S local 700 → S:700
+> ```
+>
+> 那么：
+>
+> ```
+> UTD[S] = 700
+> ```
+>
+> 确实几乎等价于：
+>
+> ```
+> 已经处理 S.localUSN ≤ 700
+> ```
+>
+> 但这相当于 S 是单主源，或者拓扑中没有转发更新。
+>
+> 在 AD 的多主复制中，S 的 local-USN 序列通常混合来自多个 origin，所以这种等价关系不成立。
+>
+> ## 一句话修正
+>
+> 你说的：
+>
+> > 我知道 S 上 local USN 700 及以前的。
+>
+> 如果这是一个**独立已知事实**，那么可以从 700 开始，而且这个事实就是 HWM。
+>
+> 但如果你的依据只是：
+>
+> ```
+> UTD[S] = 700
+> ```
+>
+> 那么你实际只知道：
+>
+> > 我知道 S 原始产生到 700 的更新。
+>
+> 你并不知道：
+>
+> > 我已经扫描完 S 的本地变化流到 700。
+>
+> 这正是 AD 必须分别保存 `usnvecFrom/usnvecTo` 和 UTD Vector 的原因；协议请求和响应中两者也是独立字段。
 
 ## Q: 什么是 LVR，为什么需要？
 
