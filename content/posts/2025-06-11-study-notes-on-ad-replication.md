@@ -146,6 +146,340 @@ tags:
 > 📌 所以 foreign-originated 变更即使 USN 在 A 很早，也可能需要 replicate！
 > ```
 
+## Q: 假如 DC A 上有如下 changes，格式 (local usn, originiating DC, originating usn)，数据 (1000, A, 1000) (1001, B, 20) (1002, C, 100)，DC A 和 DC D sync complete 完之后，D 上 UTD[A] 是 1000 还是 1002？
+
+> **D 上的 `UTD[A] = 1000`，不是 1002。**
+>
+> 因为 UTD Vector 的索引和值如下，重点在 **originating** 而不是 **local**。[微软文档](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/powershell/introduction-to-active-directory-replication-and-topology-management-using-windows-powershell--level-100-)也明确说明，UTD Vector 保存的是“从每个 DC 看到的最高 originating write USN”。
+>
+> ```
+> originating DC / Invocation ID → 最高 originating USN
+> ```
+>
+> 因此这三条 change 同步到 D 后：
+>
+> ```
+> A 上 local USN   Originating DC   Originating USN
+> 1000             A                1000
+> 1001             B                20
+> 1002             C                100
+> ```
+>
+> D 的 UTD Vector 至少会变成：
+>
+> ```
+> UTD[A] = 1000
+> UTD[B] = 20
+> UTD[C] = 100
+> ```
+>
+> 而 D 针对直接复制伙伴 A 的 **High-Watermark** 才会是：HWM[A] = 1002。
+>
+> 因为 A 的 local USN 1001、1002 表示：
+>
+> > 这些 change 是第 1001、1002 次被写入 A 的本地数据库。
+>
+> 但它们携带的 replication stamp 仍分别是：
+>
+> ```
+> (B invocation ID, 20)
+> (C invocation ID, 100)
+> ```
+>
+> A 不会因为转发了 B、C 的 change，就把它们改写成：
+>
+> ```
+> (A, 1001)
+> (A, 1002)
+> ```
+>
+> 否则 originating 信息就丢失了，也无法进行 propagation dampening。
+>
+> 在复制周期的最终响应中，A 返回的 `pUpToDateVecSrc` 描述的是 A 已经拥有的 originating updates；协议要求它包含 A 自己的 cursor，其中的值是“D 可以确认已应用的、由 A 发起的最高 originating USN”，而不是 A 扫描到的最高 local USN。
+>
+> 所以这个例子非常清楚地展示了两个数字的区别：
+>
+> ```
+> 1002 = D 已经扫描完 A 本地数据库到哪里        → HWM
+> 1000 = D 已经知道多少由 A 真正发起的 change   → UTD[A]
+> ```
+>
+> 当然，前提是题目列出的就是相关 NC 中的完整状态；如果 A 以前还发起过更高的 originating USN，那么 `UTD[A]` 会保留那个更高值。
+
+## Q: 能将 UTD  vector 和 HWM 合并只用一个 vector 吗？UTD 会被更新为 local usn 而不是 per originating usn，每次拉 change 就可以从 UTD 开始，这样会有什么问题吗？还能进行 propagation dampening 吗？
+
+> 可以把字段“合并”，但**不能把两种语义真正合并**。
+>
+> 因为一条 change 同时存在两个不同坐标：
+>
+> ```
+> 它在当前复制源 A 的日志位置：   (A, local USN = 1002)
+> 它在整个复制系统中的身份：      (C, originating USN = 100)
+> ```
+>
+> 前者用于“从 A 的哪里继续扫描”，后者用于“这条 change 我是否已经通过任何路径见过”。一个数无法同时回答这两个问题。
+>
+> ## 你的设计实际就是把 UTD 变成 HWM
+>
+> 假设 D 同步完 A：
+>
+> ```
+> A local USN   Origin
+> 1000          A:1000
+> 1001          B:20
+> 1002          C:100
+> ```
+>
+> 你的合并后状态是：
+>
+> ```
+> cursor[A] = 1002
+> ```
+>
+> 下次从 A 拉取：
+>
+> ```
+> 只扫描 A.localUSN > 1002
+> ```
+>
+> 这完全可行，但它本质上就是现在的：
+>
+> ```
+> HWM[D ← A] = 1002
+> ```
+>
+> 只要 D 永远从同一个 A 拉，并且 A 的 invocation ID 不变，仅靠这个游标确实可以增量复制。
+>
+> 问题出现在**多主、多路径和复制源切换**。
+>
+> ------
+>
+> ## 1. 换一个复制源后，A 的 local USN 没有意义
+>
+> 假设 D 原来从 A 拉，保存：
+>
+> ```
+> cursor[A] = 1002
+> ```
+>
+> 之后拓扑变化，D 改为从 C 拉。C 上可能是：
+>
+> ```
+> C local USN   Origin
+> 80            C:99
+> 81            A:1000
+> 82            C:100
+> 83            C:101
+> ```
+>
+> D 实际上已经通过 A 收到：
+>
+> ```
+> A:1000
+> C:100
+> ```
+>
+> 现在只缺：
+>
+> ```
+> C:101
+> ```
+>
+> 但是 A 的 `1002` 与 C 的 `83` 属于不同 DC 的本地计数器，完全不可比较。
+>
+> 如果错误地对 C 使用：
+>
+> ```
+> C.localUSN > 1002
+> ```
+>
+> 那么 C 不会返回任何 change，D 会漏掉 `C:101`。
+>
+> 所以你必须改成：
+>
+> ```
+> cursor[A] = 1002
+> cursor[C] = ?
+> ```
+>
+> 也就是为每个直接复制源维护独立游标。这仍然是 HWM，而不是全局 UTD。
+>
+> ------
+>
+> ## 2. 新复制源只能从头扫描，大量重复传输
+>
+> 如果 D 从没直接向 C 复制过，那么没有 `cursor[C]`，只能从较低位置开始扫描，例如：
+>
+> ```
+> C.localUSN > 0
+> ```
+>
+> C 会扫描并可能返回：
+>
+> ```
+> C:99
+> A:1000
+> C:100
+> C:101
+> ```
+>
+> 但前三项 D 已经通过 A 获得了。
+>
+> 仅靠 `cursor[A]=1002`，C 无法知道 D 已经拥有这些 change，因为：
+>
+> ```
+> A 的 local USN 1002
+> ```
+>
+> 只在 A 的数据库里有意义。C 不知道：
+>
+> ```
+> A.localUSN 1002 对应的是 C:100
+> ```
+>
+> A 的 local USN 不会作为 change 的全局身份沿复制链传播。
+>
+> UTD 则允许 D 告诉 C：
+>
+> ```
+> UTD[A] = 1000
+> UTD[C] = 100
+> ```
+>
+> 于是 C 可以在发送前判断：
+>
+> ```
+> A:1000  已有
+> C:99    已有
+> C:100   已有
+> C:101   未有
+> ```
+>
+> 最终只发送 `C:101`。[MS-DRSR](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-drsr/94244846-567c-4e08-a7c6-be7d65a8ab1b) 的过滤逻辑确实是根据 change 的 `stamp.uuidOriginating` 找到对应 UTD cursor，再比较 `stamp.usnOriginating`，而不是比较该 change 在当前复制源上的 local USN。
+>
+> ------
+>
+> ## 3. 无法抑制环路中的重复传播
+>
+> 考虑一个环：
+>
+> ```
+> A → B → C → A
+> ```
+>
+> A 产生：
+>
+> ```
+> (A, 100)
+> ```
+>
+> 传播过程可能是：
+>
+> ```
+> A local 100  → B local 500 → C local 900
+> ```
+>
+> 如果只维护直接复制源的 local cursor：
+>
+> ```
+> C 知道它从 B 扫描到了 500
+> ```
+>
+> 但当 C 向 A 复制时，C 无法仅通过这个 cursor 表达：
+>
+> ```
+> 我这里的 change C.localUSN=900，
+> 实际上就是你 A 自己产生的 A:100。
+> ```
+>
+> 于是它可能把 A 的 change 绕一圈再次发回 A。
+>
+> 保留 originating stamp 后，A 的 UTD 中有：
+>
+> ```
+> UTD[A] >= 100
+> ```
+>
+> 所以复制源可以在网络发送前过滤掉这条 change。这就是 UTD 的 propagation dampening 作用。UTD cursor 的正式语义也是：“已经包含 DC x 在 originating USN ≤ y 发起的所有 change”。
+>
+> 仅靠 HWM 不一定会让最终数据错误——版本元数据仍可能让接收方识别旧 change——但会产生大量重复扫描、序列化、网络传输和冲突比较。
+>
+> ------
+>
+> ## 4. local USN 不能表达“间接获得的知识”
+>
+> HWM 表达的是：
+>
+> ```
+> D 从直接伙伴 A 扫描到了 A 的哪个日志位置
+> ```
+>
+> UTD 表达的是：
+>
+> ```
+> D 不管通过哪条路径，已经见过每个 originating DC 的哪些 change
+> ```
+>
+> 例如：
+>
+> ```
+> D ← A ← B
+> ```
+>
+> D 从没直接连接过 B，但通过 A 已获得 `B:20`：
+>
+> ```
+> HWM[D ← A] = 1002
+> UTD[B] = 20
+> ```
+>
+> 仅保存 `A:1002`，其他 DC 无法推导出 D 已经知道 `B:20`。而 UTD 是路径无关的知识描述；微软也将其定义为每个 originating DC 的最高 originating write USN。
+>
+> ------
+>
+> ## 5. 要让合并方案重新具备这些能力，只能把 UTD 再造出来
+>
+> 你可能尝试让每条 change 保存完整路径：
+>
+> ```
+> Origin: C:100
+> 在 A 上是 local 1002
+> 在 B 上是 local 5000
+> 在 E 上是 local 300
+> ...
+> ```
+>
+> 这样其他 DC 才能解释各个 local cursor。
+>
+> 但这会造成：
+>
+> - 元数据随传播路径增长；
+> - 同一 change 经过不同路径会有不同历史；
+> - 拓扑改变后映射复杂；
+> - 本质上仍必须保留稳定的 `(origin invocation ID, originating USN)`。
+>
+> 因此最简单的设计就是 AD 当前的设计：每条 change 只保留一个稳定的 origin stamp，同时为直接复制关系维护一个扫描位置。
+>
+> ## 两者的准确分工
+>
+> ```
+> HWM：
+> (source invocation ID, source local USN)
+> 回答：“下次从这个复制源的哪里继续扫描？”
+> 
+> UTD：
+> (origin invocation ID, originating USN)
+> 回答：“无论从哪条路径收到，我已经知道哪些逻辑 change？”
+> ```
+>
+> 在实际请求中，AD 同时携带直接源游标 `usnvecFrom` 和目标端的 `pUpToDateVecDest`，说明它们是两个独立过滤维度，而不是重复信息。
+>
+> 所以结论是：
+>
+> > **只从固定复制源增量读取时，local-USN cursor 足够；但在 AD 这种多主、可换源、多路径拓扑中，它只能替代 HWM，不能替代 UTD。**
+>
+> 若每个源分别保存 local cursor，系统仍可正确运行，但拓扑切换时会重复扫描和重复传输；若把一个源的 local cursor 用于另一个源，则会直接漏 change。
+
 ## Q: UTD vector 什么时候会被更新？
 
 > UTD vector 只会在 **cycle 结束 catch up 上**之后才会更新，注意不是每次 sync 拉了一次 change 就会 cycle 结束，得 source DC 上所有 change 都被拉到 target => which means `objectUsn == propertyUsn`。
@@ -158,6 +492,232 @@ tags:
 > > - If the received table has an entry that the destination DC’s UTDV table already has, and its USN value is higher than what the destination DC’s table notes – meaning whatever changes this known DC had for this partition has already replicated with the originating DC and thus the destination DC – and so its entry in the UTDV can actually be updated, the UTDV table for that server is updated with the value from the received UTDV table.  
 >>
 > > The UTDV table also records timestamps along with the USN value. This way DCs can quickly identify other DCs that are not replicating. These timestamps record the time the DC last replicated with the other DC – either directly or indirectly. 
+
+## Q: HWM 也只在 cycle 结束后更新吗？还是每一次 sync 都会呢？
+
+> 从 Sync Engine 的角度看，HWM 可以理解为 cookie 的一部分（虽然表面 opaque 😃），每次 sync DC 都会 return data with cookie，new cookie 中会包含新的 HWM 让你下次带上，所以结论是每次 sync 都会更新而不是只在 cycle 结束。
+>
+> > **准确答案是：HWM 的 cookie 在每个成功处理的响应/chunk 后都会更新；UTD Vector 只在整个 replication cycle 完成时更新。**
+> >
+> > 但 HWM 不是一个简单的单一整数，而是 `USN_VECTOR` / `DsReplicaHighWaterMark` 结构，所以还要区分其中的“临时进度”和“完整 cycle 进度”。
+> >
+> > ## 微软协议的明确流程
+> >
+> > 客户端收到每一个 `IDL_DRSGetNCChanges` 响应后，会处理其中的对象和链接更新，然后执行 `UpdateRepsFrom(...)`
+> >
+> > 只有随后满足：
+> > 
+> > ```
+> >ulResult == 0
+> > 并且 fMoreData == false
+> >```
+> > 
+> > 才会执行 `UpdateUTDandPAS(...)`
+> > 
+> > 微软的 [`ProcessGetNCChangesReply`](https://learn.microsoft.com/fr-fr/%20openspecs/windows_protocols/ms-drsr/cb8c3814-8c04-4de9-b553-69db68aeee58) 伪代码明确如此：
+> >
+> > ```
+> >UpdateRepsFrom(...)
+> > 
+> > if success and fMoreData = false:
+> >   UpdateUTDandPAS(...)
+> >```
+> > 
+> >因此两者的更新时机不同：
+> > 
+> > ```
+> > HWM / repsFrom.usnVec：
+> > 每个成功应用的 response 后更新
+> >    
+> > UTD Vector：
+> >仅最后一个 response，也就是 cycle 完成后更新
+> > ```
+> >
+> > [`UpdateRepsFrom`](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-drsr/611801ee-bbca-4ef3-9373-662fa9985dfb) 本身明确把当前响应返回的 `usnvecTo` 写入该直接复制伙伴对应的 `repsFrom`。这里没有要求 `fMoreData=false`；只要求当前响应成功应用。
+> > 
+> > ```
+> > rf.usnVec := msgReplyNative.usnvecTo
+> > ```
+> > 
+> > 而 [`repsFrom.usnVec`](https://learn.microsoft.com/sr-latn-rs/%20openspecs/windows_protocols/ms-drsr/3ef27d3c-b9c9-4404-8e53-ebf3a64a9a10) 的定义也是「保存最近一次发送给该源 DC 的 `IDL_DRSGetNCChanges` 请求所对应响应里的 `usnvecTo`」，不是“最近一次完整 cycle 的最终响应”。
+> >
+> > ## 一个三页 replication cycle
+> >
+> > 假设 B 从 A 拉取，初始 HWM 是：
+> > 
+> > ```
+> >HWM = 1000
+> > ```
+> >
+> > 第一包返回：
+> >
+> > ```
+> >usnvecTo = 1050
+> > fMoreData = true
+> >```
+> > 
+> > B 成功应用后：
+> > 
+> >```
+> > repsFrom[A].usnVec = 1050
+> >```
+> > 
+> > 第二个请求带：
+> > 
+> > ```
+> >usnvecFrom = 1050
+> > ```
+> >
+> > 第二包返回：
+> > 
+> > ```
+> >usnvecTo = 1100
+> > fMoreData = true
+> >```
+> > 
+> > B 成功应用后：
+> > 
+> >```
+> > repsFrom[A].usnVec = 1100
+> >```
+> > 
+> > 第三包返回：
+> > 
+> > ```
+> >usnvecTo = 1150
+> > fMoreData = false
+> >pUpToDateVecSrc = ...
+> > ```
+> > 
+> > B 成功应用后：
+> >
+> > ```
+> >repsFrom[A].usnVec = 1150
+> > UTD_B = merge(pUpToDateVecSrc)
+> > ```
+> > 
+> > 所以时间线是：
+> > 
+> >```
+> > 第一包成功：
+> >HWM 更新，UTD 不更新
+> > 
+> > 第二包成功：
+> > HWM 更新，UTD 不更新
+> > 
+> >最后一包成功：
+> > HWM 更新，UTD 更新
+> >```
+> > 
+> > 微软的 [`GetResponseSubset`](https://learn.microsoft.com/fr-fr/%20openspecs/windows_protocols/ms-drsr/b90a8a5c-19d1-473f-adc9-b40cf1294fc5) 也明确说明，每个响应都会产生一个新的 `msgOut.usnvecTo`，供客户端在下一个请求中作为 `msgIn.usnvecFrom` 使用。
+> > 
+> > ## Samba 代码也是每个 chunk 更新请求 HWM
+> > 
+> > Samba 客户端的[复制循环](https://github.com/samba-team/samba/blob/samba-4.24.4/python/samba/drs_utils.py#L407C13-L408C78)是：
+> > 
+> > ```python
+> > while True:
+> >   level, ctr = get_nc_changes(...)
+> >   process_chunk(...)
+> > 
+> >   if ctr.more_data == 0:
+> >     break
+> >
+> >   # update the request's HWM so we get the next chunk
+> >   drs_copy_highwater_mark(req.highwatermark, ctr.new_highwatermark)
+> > ```
+> > 
+> >    也就是说，只要还有下一包，Samba 就把本包返回的 `new_highwatermark` 复制进下一次请求。
+> >    
+> > 因此至少在“同一个 cycle 内下一次 RPC 使用什么 HWM”这一点上，Samba 非常明确：
+> >    
+> >    > **每个 chunk 都推进 HWM，不等最后一个 chunk。**
+> > 
+> >    ## 但 HWM 结构内部还有两个不同进度
+> >    
+> > Samba 将 [HWM 定义](https://github.com/samba-team/samba/blob/samba-4.24.4/librpc/idl/drsuapi.idl#L289C2-L293C35)为：
+> >
+> > ```c
+> >typedef struct {
+> >     hyper tmp_highest_usn;  /* updated after each object update */
+> >     hyper reserved_usn;
+> >     hyper highest_usn;      /* updated after a full replication cycle */
+> >} drsuapi_DsReplicaHighWaterMark;
+> > ```
+> >
+> > 这意味着不能简单说：
+> >
+> > > HWM 这个整数每一页更新。
+> > 
+> > 更准确地说：
+> > 
+> > - 整个 HWM cookie 每个响应都会被返回、保存并带入下一次请求；
+> > - `tmp_highest_usn` 可以表达 cycle 内部的中间进度；
+> > - `highest_usn` 在 Samba 的定义中表示完整 replication cycle 的稳定边界。
+> >
+> > [微软的 `USN_VECTOR`](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-drsr/595d11b8-6ca7-4a61-bd56-3e6a2b99b76b) 对应包含三个字段：
+> >
+> > ```
+> >USN usnHighObjUpdate;
+> > USN usnReserved;
+> >USN usnHighPropUpdate;
+> > ```
+> > 
+> > 但微软明确说明，出于互操作性考虑，只有结构大小和全零表示是标准化的；具体字段语义属于服务器实现的 cookie 内部细节。
+> >
+> > 因此，跨实现最安全的说法是：
+> >
+> > > HWM cookie 每个成功 response 都更新（笔者注：maybe object usn）；其中用于表示完整 cycle 边界的内部值（笔者注：maybe property usn），可以只在 cycle 完成时推进。
+> > 
+> > ## 为什么中途就更新 HWM 是安全的
+> > 
+> > 因为 B 只有在成功应用本包更新后，才调用 `UpdateRepsFrom`。
+> >
+> > 假设：
+> >
+> > ```
+> >第一包：
+> > 1001～1050
+> >```
+> > 
+> >已经成功写入 B，那么 B 可以安全保存当前 cookie。即使随后第二包失败，下次也可以从该 cookie 表示的状态继续，而不必重做第一包。
+> > 
+> >反过来，如果第一包应用失败：
+> > 
+> >```
+> > ulResult != 0
+> > ```
+> > 
+> > 微软的 `UpdateRepsFrom` 不会把 `rf.usnVec` 更新为响应中的 `usnvecTo`，而只增加失败计数并记录错误。
+> >
+> > 这保证了：
+> >
+> > ```
+> >只有已成功应用的数据
+> > 才能推动持久化 HWM
+> > ```
+> > 
+> >## 为什么 UTD 必须等 cycle 结束
+> > 
+> >UTD 是更强的知识声明，例如 `UTD[A] = 1150` 表示目标已经拥有 A originating 到 1150 的完整前缀。
+> > 
+> >如果一个 cycle 有三包，在只处理完第一包时就把 UTD 推到最终目标，那么第二包失败后，B 会错误地宣称自己已经拥有尚未收到的更新，未来这些更新可能被源端过滤掉。
+> > 
+> > 所以微软明确只在 `fMoreData = false` 时更新 UTD。
+> > 
+> > ## 最终结论
+> >
+> > | 状态                      | 每个成功 chunk | 完整 cycle 结束 |
+> >| ------------------------- | -------------- | --------------- |
+> > | 下一请求使用的 HWM cookie | 更新           | 更新            |
+> >| `repsFrom.usnVec`         | 更新           | 更新            |
+> > | HWM 内部临时进度          | 可推进         | 推进            |
+> > | HWM 内部稳定 cycle 边界   | 不一定推进     | 推进            |
+> > | UTD Vector                | 不更新         | 更新            |
+> >
+> > 因此最准确的一句话是：
+> >
+> > > **AD 在每个成功应用的 `GetNCChanges` 响应后更新直接伙伴的 HWM/cookie，以支持分页和断点续传；只有在最后一包 `fMoreData=false` 后，才更新 UTD Vector。**
 
 ## Q: Replicate 的时候是按照 Object USN 还是 Property USN？
 
@@ -173,11 +733,376 @@ tags:
 >
 > 另外，注要注意的是，Dirsync 在不同 DC 之间 failover 时，比如从 DC1 failover 到 DC2，DC2 上的 AD 会根据 cookie（from DC1）的 UTD vector 数据获取当前 DC2 对应的 usn（同一水位线，DC1/2 在此水位线上已经互相完全同步），并从这个 usn 开始 sync。所以如果 DirSync 没有 catch up 最新的数据（object usn != property usn，UTD vector 没有被更新），failover 之后就可能会拿到重复的已经做过的 change，但这是 by design，AD 为了保证不丢 change。完整文档可参见 [如何跟踪 AD 的 change](/tracking-changes-from-ad)。
 
+## Q: DC failover 的时候是怎么对应水位线的？
+
+> HWM 是 per source DC 的，所以 failover 了就没用了。UTD vector 表达的是对整体的已知，所以会以 UTD[newDC] 作为新的起点拉 changes，然后一样使用 UTD 来过滤减少发送已知项。本质来说，它不是在对应水位线，它只是一种对每台 originating DC 的已知状态。
+>
+> > 这里有一个关键纠正：
+> >
+> > > **DirSync failover 到 DC2 时，DC2 不会根据 cookie 的 UTD vector，反查出某个“等价的 DC2 local USN”，然后从该 local USN 继续。**
+> >
+> > 真实机制是：
+> >
+> > 1. cookie 内同时包含：
+> >    - 生成 cookie 的 DC invocation ID；
+> >    - 该 DC 专用的 local-USN 游标 `usnVector`；
+> >    - 与 DC 无关、按 originating DC 划分的 UTD vector。
+> > 2. DC2 发现 cookie 的 source invocation ID 属于 DC1，不是自己：
+> >    - **丢弃 DC1 的 local-USN 游标**；
+> >    - **保留 cookie 的 UTD vector**。
+> > 3. DC2 用 UTD vector 对自己数据库中的 attribute replication stamp 逐项过滤。
+> >
+> > [微软协议](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-drsr/98781a8b-b51e-4bc7-b43f-ce5855866fa2)明确规定：只有 cookie 的 `uuidSourceDsaInvocationId` 等于当前 DC 的 invocation ID 时，才把 cookie 的 `usnVector` 放入 `usnvecFrom`；UTD vector 则无论是否换 DC 都会复制到 `pUpToDateVecDest`。
+> >
+> > ## “水位线”实际上是一个向量边界
+> >
+> > 你可以把它画成：
+> >
+> > ```
+> >                  已处理水位
+> > I1  ─────────────── 100
+> > I2  ───────────────  20
+> > I3  ───────────────   7
+> > ```
+> >
+> > 对 DC2 上的任意 change：
+> >
+> > ```
+> > I1:99   位于水位线下
+> > I2:20   位于水位线上
+> > I3:8    位于水位线上方
+> > I1:101  位于水位线上方
+> > ```
+> >
+> > 所以 DC2 “找到对应水位线”的准确含义是：
+> >
+> > > **DC2 使用每条 change 自带的 originating stamp，把它放到 cookie 的向量坐标系中判断前后。**
+> >
+> > 而不是：
+> >
+> > > 先找出某一个 DC2 local USN，例如 5005，再执行 `uSNChanged > 5005`。
+> >
+> > 为什么不能可靠地找出单个 DC2 local USN？因此向量边界通常无法压缩成新 DC 上的一个标量 local USN。
+> >
+> > ## local USN 在 failover 后仍有什么作用
+> >
+> > 第一次在 DC2 使用 DC1 cookie 时：
+> >
+> > ```
+> > DC1 local cursor → 不可复用
+> > UTD vector       → 可以复用
+> > ```
+> >
+> > DC2 生成下一份 cookie 后，它会写入：
+> >
+> > ```
+> > sourceInvocationID  = I2
+> > usnVector           = DC2 自己的游标
+> > UTD vector          = 新的向量状态
+> > ```
+> >
+> > 从下一次开始，只要客户端继续连接 DC2：
+> >
+> > ```
+> > cookie.sourceInvocationID == DC2.invocationID
+> > ```
+> >
+> > DC2 就可以同时使用：
+> >
+> > - DC2 local-USN cookie，继续当前 DC2 上的分页/扫描状态；
+> > - UTD vector，过滤已知的 originating updates。
+> >
+> > 协议把这两个阶段明确分开：UTD 决定哪些 replication stamps 属于未见 change，`usnvecFrom/usnvecTo` 则维护[当前服务器上的响应子集和后续 cookie 状态](https://learn.microsoft.com/ja-jp/%20openspecs/windows_protocols/ms-drsr/b13f8ab0-38b4-47db-bb55-e188f776673b)。
+> >
+> > ## 最终结论
+> >
+> > 你的描述可以修正为：
+> >
+> > > DirSync 从 DC1 failover 到 DC2 时，DC2 不会找到与 DC1 HWM 完全等价的 DC2 HWM，也无法将 DC1 cookie 的 UTD vector 换算成一个 DC2 local USN。DC1 的 local-USN cursor 因 invocation ID 不匹配而失效；DC2 保留 UTD vector，并按照每条 change 的 `(originating invocation ID, originating USN)` 判断它位于已知水位线之下还是之上。完成这一轮后，再生成一份包含 DC2 local-USN cursor 的新 cookie。
+> >
+> > [这也是为什么微软说跨 DC 使用 cookie **不会漏 change**，但可能返回重复 change，极端情况下甚至接近一次全量同步。](https://learn.microsoft.com/en-us/windows/win32/ad/polling-for-changes-using-the-dirsync-control)
+
+## Q: 为什么 UTD vector 的更新一定要在 cycle 结束 object usn == property usn 的时候？因为 DC apply changes 的时候为了加快速度本地乱序的吗？
+
+> 假设这些更新都最初由 A 产生：
+>
+> ```
+> A:91
+> A:92
+> ...
+> A:100
+> ```
+>
+> 它们后来被 S 接收，S 上可能形成：
+>
+> ```
+> S local USN    originating stamp
+> 
+> 5001           A:91
+> 5002           A:100
+> 5003           A:92
+> 5004           A:93
+> ...
+> 5010           A:99
+> ```
+>
+> 这两套顺序互相独立。
+>
+> ## 为什么 S 上 originating USN 可能乱序
+>
+> 不是因为 AD 为了性能刻意“并行乱序 apply”。我没有找到微软资料证明这是某种性能优化，不应该这样猜。
+>
+> 准确原因是：
+>
+> > DRS 协议不要求 response 按 originating DC 的 originating USN 顺序组成。
+>
+> 微软的 [`GetResponseSubset`](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-drsr/b90a8a5c-19d1-473f-adc9-b40cf1294fc5) 只要求服务器从 changed objects/links 中选择一个子集，并用 cookie 保证整个 cycle 最终覆盖全部变化；同一对象甚至可以在同一响应或不同响应中重复出现。协议没有规定必须按某个 origin 的 USN 顺序发送。
+>
+> 例如某个中转 DC X 可能分包发送：
+>
+> ```
+> 第 1 包：
+> A:91
+> A:100
+> 
+> 第 2 包：
+> A:92～A:99
+> ```
+>
+> S 按收到并成功应用的顺序分配 local USN，于是就可能形成：
+>
+> ```
+> 5001 → A:91
+> 5002 → A:100
+> 5003 → A:92
+> ...
+> ```
+>
+> 所以 originating sequence 中有洞，不代表 S-local sequence 中有洞。
+>
+> ## Samba 确实按 source-local USN 排序
+>
+> Samba 的服务端实现不是随便取本包最大 local USN。
+>
+> 它会：
+>
+> 1. 根据 source 上的 `uSNChanged` 收集候选对象；
+> 2. 按 `uSNChanged` 排序；
+> 3. 按顺序分页发送；
+> 4. 使用保存的 `num_processed` 等状态继续下一页。
+>
+> [Samba 的比较函数](https://github.com/samba-team/samba/blob/samba-4.24.4/source4/rpc_server/drsuapi/getncchanges.c#L1034C1-L1049C2)明确是：
+>
+> ```c
+> /* sort the objects we send first by uSNChanged */
+> if (m1->usn < m2->usn) {
+>     return -1;
+> }
+> ```
+>
+> 而[临时 HWM 的推进逻辑](https://github.com/samba-team/samba/blob/samba-4.24.4/source4/rpc_server/drsuapi/getncchanges.c#L1952C2-L1956C29)是：
+>
+> ```c
+> if (uSN <= hwm->tmp_highest_usn) {
+>     return;
+> }
+> hwm->tmp_highest_usn = uSN;
+> ```
+>
+> 也就是按照已处理的 source-local 位置推进。
+>
+> 因此在 Samba 正常路径下，如果存在：
+>
+> ```
+> S-local 5001
+> S-local 5002
+> ...
+> S-local 5010
+> ```
+>
+> 第一包不能发送 5001 和 5010， 却把简单 HWM 推进到 5010， 再把 5002～5009 留到后面。
+>
+> ## Windows 协议层更宽松：HWM 是 opaque cookie
+>
+> 微软并未标准化 [`USN_VECTOR`](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-drsr/595d11b8-6ca7-4a61-bd56-3e6a2b99b76b) 三个字段的具体内部含义，只标准化了：
+>
+> - 总大小是 24 字节；
+> - 全零值的表示。
+>
+> 微软明确把它定义为跨 `IDL_DRSGetNCChanges` 调用传递状态的 cookie。
+>
+> 所以 Windows 实现即使不严格按 local USN 排序，也可以让 cookie 表示：
+>
+> ```
+> 已经发送：91、100
+> 仍待发送：92～99
+> ```
+>
+> 而不是简单表达：
+>
+> ```
+> 所有 local USN ≤ 100 都已发送
+> ```
+>
+> `GetResponseSubset` 的规范只要求服务器通过 `usnvecFrom/usnvecTo` 中维护的状态，确定整个 changed set 已经发送、完整 cycle 最终覆盖全部 `changedObjs` 和 `changedLinks` 后，才返回 `fMoreData=false`。
+>
+> 但这只能说明“协议允许更复杂的实现”，**不能证明 Windows 实际会乱序发送**。Samba 的实现则明确选择了 source-local USN 排序。
+>
+> 也就是说，只有以下两种方式之一才安全：
+>
+> ```
+> 方式一：
+> 严格按 source-local USN 前缀发送，
+> HWM 可以是简单的连续位置。
+> 
+> 方式二：
+> 允许非顺序发送，
+> 但 HWM 必须是能记录待处理集合的 opaque cookie。
+> ```
+>
+> 不能：
+>
+> ```
+> 乱序发送
+> +
+> 直接把本包最大的 local USN 当成完整前缀
+> ```
+>
+> （笔者注：理论是这样，但是这个 opaque cookie 就很不 opaque 啊，它规定了总大小 3*8=24 字节，其实就是把字段 + 含义都规定好了。微软内部实现其实也是按照 local usn 顺序取，只是 source DC 打包 / target DC 解包并 apply changes 的时候可能会不按顺序。）
+>
+> ## 那为什么 UTD 仍然只在 cycle 结束时更新？
+>
+> 正确原因不需要假设同一 origin 乱序。
+>
+> 因为最终返回的 UTD Vector 是一个**整个 cycle 的知识目标**，不是当前 page 内容的摘要。
+>
+> 假设 S 在 cycle 开始时的 UTD 是：
+>
+> ```
+> S.UTD:
+> A → 100
+> C → 200
+> ```
+>
+> S 的 local 流严格有序：
+>
+> ```
+> S-local 5001 → A:91
+> S-local 5002 → A:92
+> ...
+> S-local 5010 → A:100
+> 
+> S-local 5011 → C:191
+> S-local 5012 → C:192
+> ...
+> S-local 5020 → C:200
+> ```
+>
+> 分页也完全有序：
+>
+> ```
+> 第一页：S-local 5001～5010
+> 第二页：S-local 5011～5020
+> ```
+>
+> B 处理完第一页后，确实已经获得 `A → 100`，但是尚未获得 `C:191～C:200`，如果 B 在第一页后直接把 **S 的整个 UTD Vector** 合并进来：
+>
+> ```
+> B.UTD:
+> A → 100
+> C → 200
+> ```
+>
+> 那么它会错误宣称已经拥有 `C:200` 的知识。
+>
+> 如果第二页随后失败，B 下一次把 `UTD[C] = 200` 发给其他源，其他源就会把 `C:191～C:200` 当成 B 已知的更新过滤掉。
+>
+> 整个例子中：
+>
+> - S-local 顺序完全连续；
+> - A-origin 顺序完全连续；
+> - C-origin 顺序也完全连续；
+> - 问题只是第一页尚未完成**整个 vector 所代表的 cycle goal**。
+>
+> 微软对 cycle goal 的定义正是：cycle 最终结束时，客户端应拥有服务端在 cycle 开始时已有的全部更新；最终响应里的 `pUpToDateVecSrc` 必须至少覆盖 cycle 开始时源的整个 UTD knowledge。
+>
+> 客户端处理规范也明确：
+>
+> ```
+> 每个成功 response：
+>     UpdateRepsFrom()       // 更新 HWM/cookie
+> 
+> 只有 fMoreData == false：
+>     UpdateUTDandPAS()      // 合并 UTD
+> ```
+>
+> ## 为什么不能每页只更新“本页完成的 UTD entry”
+>
+> 理论上可以设计一种协议，让每个响应额外携带：
+>
+> ```
+> 这一页完成后，可以安全断言：
+> A → 100
+> C → 190
+> D → 50
+> ```
+>
+> 也就是一个 **page-safe UTD Vector**。
+>
+> 但当前 DRS 协议没有把 `pUpToDateVecSrc` 定义成这种逐页确认信息。它描述的是源已经拥有的更新知识，而最终 cycle goal 才保证这些知识已经被客户端完整获得。响应结构本身也把 `pUpToDateVecSrc` 描述成源已应用更新的 stamp filter，而不是“本页已经完整传给客户端的更新”。
+>
+> 仅查看这一页出现的最大 originating USN 也不够，因为客户端不知道：
+>
+> - 此 origin 是否还有内容在后续页；
+> - 某些编号是否是本 NC 的真实空洞；
+> - 后续对象或链接值是否还携带更低但尚未传输的 stamp；
+> - 服务端的 changed set 是否在 cycle 中扩展。
+>
+> 要逐页安全更新 UTD，服务端必须为每个 origin 显式给出一个“已完整交付的连续前缀”，相当于额外维护一个 per-page vector acknowledgement。AD 没有采用这个设计。
+>
+> ## HWM 为什么可以逐页更新
+>
+> HWM/cookie 作出的声明更弱：
+>
+> > 我已经成功处理了当前源在这个复制 cycle 中交付到这个位置的内容；下次请根据这个 cookie 继续。
+>
+> 它没有声明：
+>
+> > 我已经获得源所知道的所有 A、C、D updates。
+>
+> 它只影响当前 source 而不会影响其他 source。
+>
+> ## 最终区别
+>
+> 同一个协议在 A→S 和 S→B 上完全一致：
+>
+> ```
+> 每条复制边：
+>     按该 source 的本地枚举状态分页
+>     每页成功后推进 HWM/cookie
+>     整个 cycle 结束后合并 UTD
+> ```
+>
+> 两者更新时机不同，不是因为一段有序、另一段无序，而是因为声明强度不同：
+>
+> ```
+> HWM：
+> 当前直接源的分页进度。
+> 
+> UTD：
+> 对于所有 originating DC 的完整知识断言。
+> ```
+>
+> 所以正确结论是：
+>
+> > UTD 等到 cycle 结束才更新的真正原因，是源的整个 UTD Vector 代表完整 cycle goal；在任意中间页，客户端尚未获得这个 vector 所覆盖的全部来源更新，即使每条 source-local 流都严格有序。
+>
+
 ## Q: 假设 replication chain 是 A 到 B 到 C，B sync 给 C 的时候有 A 的 source invocation id 和 usn吗？如果没有的话 C 收到之后怎么同时更新对 A/B 的 UTD Vector？
 
 > change 的 metadata 里面总是有 source 相关的信息，所以 C 会收到 A 相关的信息。最后 C 更新 UTD vector 的时机是 C cycle 结束，收到 B 的 UTD vector 后做 merge。B 传给 C 的 UTD vector 里面关于 A 的部分已经在 A sync to B 的时候被更新，所以 C 能接收到 A 的最新值。
 
-## Q: UTD 被更新时只会更新 originating invocationid 那一行吗？还是说 sync source 也会一起更新？
+## Q: UTD 被更新时只会更新 originating invocationId 那一行吗？还是说 sync source 也会一起更新？
 
 > 如上所说，是根据 UTD vector 做 merge，实际被更新的 records 并不确定。
 
@@ -187,11 +1112,169 @@ tags:
 
 ## Q: 如果 B 的 UTD[A] = 1150，HWM[A] = 1000，实际  A 在处理的时候就是 1150 以下的都会被认为已经 sync 过，返回的都是 1151-1200 吗？HWM 仍然实际没起作用呀？
 
-> 实际从 A replicate 出去的时候会被跳过。但不确定的是 A 在处理时还是从 1001 开始比，然后在结果集上根据 UTD 筛除，还是在拿到 target B 的 HWM 和 UTD 会比一下取较大值。
+> 因为 UTD vector 只会在 replication cycle 结束后更新，所以 UTD[A] = 1150 意味着 B 已经知道了 A 上 `local usn <= 1150` 的所有 changes，1000 ~ 1150 的部分在复制时会被跳过、不会被 A replicate 出去。
 >
-> HWM就没用了吗？也不是，因为 UTD 只会在 cycle 结束后被更新，大多数情况下 HWM 的值大于 UTD。
+> 但不确定的是 A 在处理时是 1. 以 HWM 为 baseline 从 1001 开始比，然后在结果集上根据 UTD 筛除，还是 2. 先计算 `max(HWM, UTD[source])` 做 baseline 再枚举。
+>
+> > ## A 实际是否计算 `max(HWM, UTD[A])`
+> >
+> > ### 对 Windows：公开资料不足以证明物理查询顺序
+> >
+> > 微软 OpenSpec 描述的是必须满足的协议语义：
+> >
+> > - UTD 是 stamp filter；
+> > - `usnvecFrom` 是 cycle cookie；
+> > - 最终响应必须满足 cycle goal。
+> >
+> > 它没有公开 Windows NTDS 内部究竟是怎么实现的。
+> >
+> > ### 对 Samba：确实明确取最大值
+> >
+> > Samba 的 AD-compatible DRS [服务端源码](https://github.com/samba-team/samba/blob/samba-4.24.4/source4/rpc_server/drsuapi/getncchanges.c#L3277C4-L3292C5)明确写道：
+> >
+> > ```
+> > getnc_state->min_usn = req10->highwatermark.highest_usn;
+> > 
+> > for each cursor in UTD:
+> >     if cursor.source == current_source_invocation_id:
+> >         if cursor.highest_usn > min_usn:
+> >             min_usn = cursor.highest_usn;
+> > ```
+> >
+> > 也就是：
+> >
+> > ```
+> > min_usn = max(HWM, UTD[current source])
+> > ```
+> >
+> > 随后 Samba 会先过滤：
+> >
+> > ```
+> > object.uSNChanged <= min_usn → 整个对象不用考虑
+> > ```
+> >
+> > 对于留下来的对象，再逐属性根据：
+> >
+> > ```
+> > (originating invocation ID, originating USN)
+> > ```
+> >
+> > 与完整 UTD Vector 比较。链接值也先比较 local USN，再应用 UTD filter。
+> >
+> > 所以对于 Samba，你给出的两个选项中，正确的是 **选项 2**：
+> >
+> > ```
+> > baseline = max(HWM, UTD[A])
+> > ```
+> >
+> > ## 为什么跳过 A-local 1001～1150 不会漏掉其他 origin
+> >
+> > 对于正常、完整、同一 NC、同一 invocation ID 的复制周期，微软的 cycle goal 要求：
+> >
+> > > 周期结束时，客户端必须包含服务端在周期开始时拥有的全部更新。
+> >
+> > 而最终返回的 UTD 必须覆盖源端周期开始时的整个 UTD 知识，不只是当前源自己的 entry。
+> >
+> > 假设 A 的顺序是：
+> >
+> > ```
+> > A-local 1001 → C:400
+> > A-local 1150 → A:1150
+> > ```
+> >
+> > B 若通过 `A → X → B` 的完整复制链获得了 `UTD_B[A]=1150`，那么：
+> >
+> > 1. X 获得 `A:1150` 的完整 cycle 同时必须获得或已经拥有 A 当时知道的 `C:400`；
+> > 2. B 从 X 完成 cycle 时，也必须获得或已经拥有 X 的这部分知识；
+> > 3. B 的整个 UTD 应当同时覆盖对应的 `C` cursor。
+> >
+> > 否则 X 或 B 就不能安全地在最终 UTD 中断言其已经达到相应的 cycle goal。
+> >
+> > 因此，**不能只孤立地看 `UTD[A]` 这个 scalar**。它存在于一个由完整复制周期建立的、具有因果闭包性质的 UTD Vector 中。这也是为什么兼容实现能够安全地把 `UTD[A]` 当成扫描 A-local 流的下界。
+> >
+> > ## 那 HWM 到底还有什么用
+> >
+> > 即使实现使用 `max(HWM, UTD[source])`，HWM 仍然有独立作用。
+> >
+> > ### 直接伙伴专属状态
+> >
+> > HWM 绑定：
+> >
+> > ```
+> > destination
+> > source invocation ID
+> > NC
+> > ```
+> >
+> > UTD 则是这个 NC 的全局 originating knowledge，来源可以直接也可以间接，而 HWM 只会直接。
+> >
+> > ### 分页和中断恢复
+> >
+> > 一个复制周期可能有多页：
+> >
+> > ```
+> > request 1 → fMoreData=true
+> > request 2 → fMoreData=true
+> > request 3 → fMoreData=false
+> > ```
+> >
+> > HWM 是每页间继续的 cookie；UTD 不是这种分页 cookie。[微软](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-drsr/b90a8a5c-19d1-473f-adc9-b40cf1294fc5)明确规定 `GetResponseSubset` 使用 HWM / `usnvecFrom` 判断已经发送了哪些 changed objects/links。
+> >
+> > ### 当 HWM 更大时提供更好的枚举起点
+> >
+> > 如果：
+> >
+> > ```
+> > HWM = 1200
+> > UTD[A] = 1150
+> > ```
+> >
+> > 则使用 1200，避免重新检查 1151～1200。
+> >
+> > ### 当 UTD[A] 更大时利用跨路径知识
+> >
+> > 如果：
+> >
+> > ```
+> > HWM = 1000
+> > UTD[A] = 1150
+> > ```
+> >
+> > 则使用 1150，避免因为直接伙伴 HWM 落后而重复扫描。
+> >
+> > 所以它们不是二选一，而是：
+> >
+> > ```
+> > HWM：
+> > 直接路径已处理到哪里
+> > 
+> > UTD[source]：
+> > 通过所有路径，至少可以安全认为源的知识前缀到了哪里
+> > 
+> > 完整 UTD：
+> > 候选属性/链接是否已经通过任意路径见过
+> > ```
+> >
+> > ## HWM 和 UTD 大小比较
+> >
+> > 三种情况都合法：
+> >
+> > ```
+> > HWM > UTD[A]
+> > 直接从 A 的枚举进度更靠前。
+> > 
+> > HWM < UTD[A]
+> > B 经由其他路径获得了较新的 A 知识。
+> > 
+> > HWM = UTD[A]
+> > 两者刚好收敛到同一安全边界。
+> > ```
+> >
+> > 最终最稳妥的表述是：
+> >
+> > > 微软协议规定 HWM/cookie 和 UTD stamp filter 是两个独立状态，但没有公开 Windows NTDS 的物理查询计划。公开的 Samba AD-compatible 实现会使用 `max(HWM, UTD[source])` 作为 local-USN 候选枚举下界，然后再用完整 UTD Vector 逐属性、逐链接过滤。HWM 仍负责直接伙伴复制周期的状态、分页和续传，而 UTD 提供跨路径的知识与去重。
 
-## Q：AD 演进历史？UTD vector 是后来增加的 improvement 吗？
+## Q: AD 演进历史？UTD vector 是后来增加的 improvement 吗？
 
 
 > Windows 2000 Server 中的第一版 Active Directory 就已经同时具有：
@@ -413,7 +1496,7 @@ tags:
 >
 > 因此 UTD Vector 对“能不能实现多主复制”不是绝对必要条件，但对 **AD 这种存在环路、冗余路径和大量 DC 的实用多主复制系统**，几乎是不可缺少的效率机制。
 
-## Q：那能不能只用 UTD vector 不用 HWM 呢？
+## Q: 那能不能只用 UTD vector 不用 HWM 呢？
 
 > ## AD 为什么需要 HWM
 >
@@ -782,190 +1865,79 @@ tags:
 >
 > **HWM 使复制成本主要与“最近变化量”相关；UTD 使网络成本主要与“真正未知的变化量”相关。** 同时使用，才能既避免全库扫描，又避免多路径重复传播。
 
-## Q：只用 UTD vector 不用 HWM 的情况下，为什么一定需要按 NC 扫描？UTD vector 里面不是有源自己吗？不能按照 UTD vector[sourceDC] 的值开始复制吗？
+## Q: 只用 UTD vector 不用 HWM 的情况下，为什么一定需要按 NC 扫描？UTD vector 里面不是有源自己吗？不能按照 UTD vector[sourceDC] 的值开始复制吗？
 
-> 只是因为 `UTD_D[S] = 700` **不能推出** D 已经处理完 S 上 `localUSN ≤ 700` 的全部变化。因为 `UTD_D[S]=700` 表示的是：
+> 可以，因为 UTD Vector 只在完整 cycle 结束时才安全推进，所以在相同 invocation ID、同一 NC 和相同复制范围下，`UTD[S]` 可以作为扫描 S local-USN 流的一个保守下界。
 >
-> > D 已经知道由 S 原始产生、originating USN 不超过 700 的更新。
->
-> 微软也把 UTD Vector 定义为每个 DC 的最高 **originating write USN**，不是当前复制源本地变化流的消费位置。
->
-> ## 一个反例
->
-> 假设 S 的本地变化顺序是：
+> `S:700` 是 S 在本地 USN 700 时产生的 originating update。在它之前，S 已经处理了：
 >
 > ```
-> S local USN    更新的真正来源
+>S-local 699 → A:51
+> ```
 > 
-> 696            S:696
-> 697            A:50
-> 698            B:80
-> 699            A:51
-> 700            S:700
-> 701            C:90
-> ```
->
-> 这里：
+> 因此可以把 `S:700` 看成某种“因果栅栏”：
 >
 > ```
+>A:51
+> happens-before
 > S:700
-> ```
+>   ```
+> 
+> AD 不允许一个完整复制周期仅传播这个后继知识，却让目标缺少仍然必要的前驱知识。
 >
-> 表示由 S 原始产生的更新，它在 S 上的 originating USN 是 700。
+> 这不是单靠 `UTD[S]=700` 这个数学字段的定义实现的，而是因为复制周期结束时，源返回的是一个 [cycle goal](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-drsr/4f2df31d-6cee-45ef-a86b-463a3ba83e1f)：该 vector 必须只断言那些源能够保证目标已经应用的更新。微软对 cycle goal 的定义明确要求，周期结束时客户端包含源在周期开始时已有的全部更新。
 >
-> 但是：
+> 但是，它不能高效替代真正的 HWM，原因：S 可能长期不产生自己的写入。
 >
-> ```
-> S-local 699 → A:51
-> ```
->
-> 是 A 原始产生、后来复制进 S 的更新。它在 S 上获得了 local USN 699，但其 originating stamp 仍然是 `A:51`。属性元数据保存的是 originating DC 所分配的 originating USN。
->
-> 现在目标 D 的 UTD 是：
+> 假设 S 自己最后一次 originating write 是：
 >
 > ```
-> S → 700
-> A → 50
-> B → 80
-> C → 89
+>S:700
 > ```
->
-> 这意味着：
->
-> - S 原始产生的更新已经知道到 `S:700`；
-> - A 只知道到 `A:50`，还缺 `A:51`；
-> - B 已经知道 `B:80`；
-> - C 还缺 `C:90`。
->
-> D 完全可能通过其他路径收到了 `S:700`：
+> 
+> 之后 S 从其他 DC 接收了大量更新：
 >
 > ```
-> S → X → D
+>S-local 701     → A:100
+> S-local 702     → B:200
+> ...
+> S-local 100000  → C:90000
 > ```
->
-> 但仍未收到 S 本地流中的：
->
-> ```
-> S-local 699 → A:51
-> ```
->
-> 如果 D 错误地拿：
+> 
+> D 已经从 S 完整复制到了 local USN 100000，但：
 >
 > ```
-> UTD_D[S] = 700
+>UTD_D[S] = 700
 > ```
+> 
+> 可能仍然不变，因为 701～100000 都不是由 S originating 的更新。
 >
-> 当作：
->
-> ```
-> HWM(D ← S) = 700
-> ```
->
-> 然后只扫描：
+> 于是：
 >
 > ```
-> S.localUSN > 700
+>实际 HWM(D ← S) = 100000
+> UTD_D[S]         = 700
 > ```
+> 
+> 下一次复制：
 >
-> 就会直接跳过：
+> - 使用 HWM：只扫描 `localUSN > 100000`；
+>- 仅使用 `UTD[S]`：又从 `localUSN > 700` 开始，重复扫描近十万条候选，然后再用完整 UTD 过滤掉。
+> 
+> ## 最终修正
 >
-> ```
-> S-local 699 → A:51
-> ```
->
-> 造成漏复制。
->
-> ## 根本区别
->
-> 同一个数字 `700`，含义不同：
+> 真正的问题不是**安全性**，而主要是**精确度和性能**：
 >
 > ```
-> UTD_D[S] = 700
+> UTD[S]：
+> 只有 S 自己产生 originating update 时才容易前进
+> 
+> HWM：
+> S 接收任何来源的更新、local-USN 流向前推进时都能前进
 > ```
 >
-> 表示：
+> 因此只靠 `UTD[S]` 可能提供一个安全但非常陈旧的 source-local 下界，但可能反复扫描大量已经处理过的 S-local 记录；HWM 则精确记录 D 对 S 本地枚举流的实际消费位置，准确记录了这条直接复制关系真正扫描到了哪里。
 >
-> ```
-> D 对 S 作为 originating writer 的了解程度
-> ```
->
-> 而：
->
-> ```
-> HWM(D ← S) = 700
-> ```
->
-> 表示：
->
-> ```
-> D 对 S 作为本地变化流提供者的消费位置
-> ```
->
-> S 上的 local-USN 流混合了所有来源：
->
-> ```
-> S-local stream =
->     S 原始产生的变化
->   + 从 A 复制来的变化
->   + 从 B 复制来的变化
->   + 从 C 复制来的变化
-> ```
->
-> 但 `UTD[S]` 只描述第一类：
->
-> ```
-> S 原始产生的变化
-> ```
->
-> ## 什么情况下两者看起来一样
->
-> 如果 S 从不接收其他 DC 的复制，只产生自己的更新：
->
-> ```
-> S local 698 → S:698
-> S local 699 → S:699
-> S local 700 → S:700
-> ```
->
-> 那么：
->
-> ```
-> UTD[S] = 700
-> ```
->
-> 确实几乎等价于：
->
-> ```
-> 已经处理 S.localUSN ≤ 700
-> ```
->
-> 但这相当于 S 是单主源，或者拓扑中没有转发更新。
->
-> 在 AD 的多主复制中，S 的 local-USN 序列通常混合来自多个 origin，所以这种等价关系不成立。
->
-> ## 一句话修正
->
-> 你说的：
->
-> > 我知道 S 上 local USN 700 及以前的。
->
-> 如果这是一个**独立已知事实**，那么可以从 700 开始，而且这个事实就是 HWM。
->
-> 但如果你的依据只是：
->
-> ```
-> UTD[S] = 700
-> ```
->
-> 那么你实际只知道：
->
-> > 我知道 S 原始产生到 700 的更新。
->
-> 你并不知道：
->
-> > 我已经扫描完 S 的本地变化流到 700。
->
-> 这正是 AD 必须分别保存 `usnvecFrom/usnvecTo` 和 UTD Vector 的原因；协议请求和响应中两者也是独立字段。
 
 ## Q: 什么是 LVR，为什么需要？
 
@@ -1197,6 +2169,210 @@ tags:
 > > - 每个属性的版本号判断确保最终一致性
 > > - replication 引擎保证同一个对象不会被两个线程同时 apply（锁定）TODO replication engine single thread?
 
+## Q: Samba 在本地 apply changes 的时候是顺序的吗？
+
+> **是的，但要精确到“哪个层级的顺序”。**
+>
+> ## 结论
+>
+> 在 Samba 当前实现中：
+>
+> > **同一个 DRS response chunk 里的普通对象，是按接收到的对象数组顺序，一个接一个串行 apply 的，不是并行乱序 apply。**
+>
+> 但：
+>
+> - 它保证的是**对象 apply 顺序**；
+> - 不保证 originating USN 逐号出现；
+> - linked-value updates 是特殊路径，会延后到 transaction 的 `prepare_commit` 阶段处理；
+> - 整个 chunk 在一个数据库事务中提交。
+>
+> ## 1. 普通对象确实逐个 apply
+>
+> Samba 接收到 DRS 对象链表后，[`dsdb_replicated_objects_convert()`](https://github.com/samba-team/samba/blob/samba-4.24.4/source4/dsdb/repl/replicated_objects.c#L135C2-L144C3) 按 `first_object -> next_object` 的顺序遍历，并依次写入：
+>
+> ```
+> out->objects[0]
+> out->objects[1]
+> out->objects[2]
+> ...
+> ```
+>
+> 这里没有重新按 originating USN 排序。
+>
+> 真正 apply 时，Samba 使用：
+>
+> ```
+> ar->index_current
+> ```
+>
+> 指向当前对象。[`replmd_replicated_apply_next()`](https://github.com/samba-team/samba/blob/samba-4.24.4/source4/dsdb/samdb/ldb_modules/repl_meta_data.c#L6980) 只处理：
+>
+> ```
+> ar->objs->objects[ar->index_current]
+> ```
+>
+> 当前对象处理完成后，代码才执行：
+>
+> ```
+> ar->index_current++;
+> return replmd_replicated_apply_next(ar);
+> ```
+>
+> 进入下一个对象。也就是说它是 callback 驱动的串行链，而不是一次把多个对象并发提交。
+>
+> 逻辑相当于：
+>
+> ```
+> apply object[0]
+> 等待成功
+> apply object[1]
+> 等待成功
+> apply object[2]
+> 等待成功
+> ...
+> ```
+>
+> ## 2. local USN 也按实际 apply 顺序分配
+>
+> 当某个复制对象确实有远端属性胜出、需要修改本地数据库时，Samba 调用：
+>
+> ```
+> ldb_sequence_number(ldb, LDB_SEQ_NEXT, &ar->seq_num);
+> ```
+>
+> 取得新的本地 sequence number，然后把它写入：
+>
+> ```
+> uSNChanged = ar->seq_num
+> metadata.local_usn = ar->seq_num
+> ```
+>
+> 因此，对实际被接受并写入的对象更新而言，接收 DC 的 local USN 按 apply 顺序单调增加。
+>
+> 例如收到顺序是：
+>
+> ```
+> object X，含 origin=A:91
+> object Y，含 origin=A:92
+> object Z，含 origin=A:100
+> ```
+>
+> 可能在 S 上得到：
+>
+> ```
+> S-local 5001 → object X / A:91
+> S-local 5002 → object Y / A:92
+> S-local 5003 → object Z / A:100
+> ```
+>
+> 但若某个 incoming update 比本地旧、所有属性都被冲突规则忽略，它可能不会产生新的 local USN。所以不能认为“每个收到的 DRS 对象必定消耗一个 USN”。
+>
+> ## 3. 但不能把 DRS 看成逐 USN 的 changelog replay
+>
+> 这里是前面讨论最容易出错的地方。
+>
+> Samba 源端正常复制时，确实把**候选对象**按对象的 `uSNChanged` 排序，然后通过 `num_processed` 顺序分页。
+>
+> 但一个 DRS object 可能包含多个属性，例如：
+>
+> ```
+> Object X:
+>     attr1 origin=A:91
+>     attr2 origin=A:100
+>     attr3 origin=C:40
+> ```
+>
+> 这个对象只有一个当前的：
+>
+> ```
+> uSNChanged = 100
+> ```
+>
+> 源端枚举的是：
+>
+> ```
+> uSNChanged > baseline 的对象
+> ```
+>
+> 然后再检查该对象每个属性的 originating metadata，决定哪些属性需要发送。Samba 代码也是先检查对象的 `uSNChanged`，再逐属性应用 UTD filter。
+>
+> 因此，不能假设数据库里一定有如下一一对应的十条可重放记录。
+>
+> ```
+> A-local 91  → A:91
+> A-local 92  → A:92
+> ...
+> A-local 100 → A:100
+> ```
+>
+> 可能实际只有：
+>
+> ```
+> Object X 当前 uSNChanged = 100
+> 其中保存：
+>     attr1 stamp=A:91
+>     attr2 stamp=A:100
+> ```
+>
+> 中间历史对象版本已经被当前状态覆盖，并不会像 WAL 一样逐条发送。**（笔者注：再次强调 AD 是 state based 模型，不是 log based，所以 replicate 的时候按照 object state，两台 DC 上的 changes / usn 就可能完全不一样。）**
+>
+> ## 4. 整个 chunk 是一个事务
+>
+> `dsdb_replicated_objects_commit()` 在 apply chunk 前调用：
+>
+> ```
+> ldb_transaction_start()
+> ```
+>
+> 然后对整个 replicated-object set 执行 extended operation，所有对象处理完成后才 `prepare_commit` 和正式提交；发生错误则取消整个事务。
+>
+> 所以可以理解为：
+>
+> ```
+> chunk 内：
+>     对象逐个计算、逐个写入事务
+> 
+> chunk 结束：
+>     整个事务统一 commit
+> ```
+>
+> 这不是并行 apply。
+>
+> ## 5. Linked attributes 是例外
+>
+> 链接值更新不会完全按照普通对象顺序立即落库。
+>
+> Samba 会先把收到的 linked attributes 保存起来，并按 source object 和 attribute 分组；普通对象全部处理完后，链接更新在 transaction 的 `prepare_commit` 阶段处理。代码注释明确说这样做是为了允许链接在相关对象创建之前到达。
+>
+> 所以准确表述是：
+>
+> ```
+> 普通 replicated objects：
+> 按接收数组顺序串行 apply
+> 
+> linked-value updates：
+> 收集、分组，在事务后段处理
+> ```
+>
+> ## 回到 A → S → B 的问题
+>
+> 在 Samba 的普通复制路径中：
+>
+> ```
+> A → S：
+> A 按 A-local uSNChanged 排序候选对象；
+> S 按收到的对象顺序串行 apply，
+> 为真正生效的本地对象修改分配 S-local USN。
+> 
+> S → B：
+> S 再按 S-local uSNChanged 排序候选对象；
+> B 同样串行 apply。
+> ```
+>
+> 因此，**前面用“为了加速，S 乱序 apply A:100，然后才 apply A:92～99”来解释是不对的。**
+>
+> 更根本的原因是：DRS 复制的是**对象当前状态及属性级复制元数据**，不是把 originating USN 当成逐条日志严格 replay。对象 apply 是串行的，但对象携带的各个属性 stamp 不需要按 originating USN 连续排列。
+
 ## Q: Replication 的数据是怎么 batching 的？batch 大小怎么定？传输的数据里含不含 before value？
 
 > ## 🧠 目录同步数据的分批策略（batching）
@@ -1427,10 +2603,10 @@ tags:
 
 > LVR works like sequense, full sync will replicate all value data
 >
-> > ```log
->> member;range=1-1=<GUID=d6b51da7-69e1-4a4f-aba5-b8b5eeb01462>;<SID=S-1-5-21-888882438-985158672-1989895028-2018>;CN=MB12,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=4ba6974e-85b7-4d91-a5c4-0cccb15d3d0b>;<SID=S-1-5-21-888882438-985158672-1989895028-2017>;CN=MB11,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=eb9677fc-73d2-4022-89de-aa0ddbc1c24c>;<SID=S-1-5-21-888882438-985158672-1989895028-2020>;CN=U12,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=763a3dce-f2d0-437c-8fca-25e053605884>;<SID=S-1-5-21-888882438-985158672-1989895028-2023>;CN=U15,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=7399c7bf-18c7-41c1-92fb-a375fc5a14c3>;<SID=S-1-5-21-888882438-985158672-1989895028-2024>;CN=U16,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=4ae9b4b5-d518-411e-9a3b-2b01d81065ed>;<SID=S-1-5-21-888882438-985158672-1989895028-2005>;CN=U10,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=574863a4-e60e-47ed-9e27-d311e1f7c8d8>;<SID=S-1-5-21-888882438-985158672-1989895028-2019>;CN=U11,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=acf68373-2861-4329-9b71-d134f591232d>;<SID=S-1-5-21-888882438-985158672-1989895028-2022>;CN=U14,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=c1440758-da9b-45ea-abf9-8595ba4f6fe5>;<SID=S-1-5-21-888882438-985158672-1989895028-2021>;CN=U13,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=f0912ed3-ea1e-4b4d-aa54-8af2b9805a25>;<SID=S-1-5-21-888882438-985158672-1989895028-2001>;CN=U6,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=e6eb5fcb-c4fc-41d2-9244-4e7ce8953cd2>;<SID=S-1-5-21-888882438-985158672-1989895028-2003>;CN=U8,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=077ed197-e41f-440c-9049-ef613a4fba23>;<SID=S-1-5-21-888882438-985158672-1989895028-2004>;CN=U9,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=f54c7b41-0c55-4462-ae2a-72841937f061>;<SID=S-1-5-21-888882438-985158672-1989895028-2000>;CN=U5,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=8f227922-1411-44a5-aaf1-82c78a66aa4f>;<SID=S-1-5-21-888882438-985158672-1989895028-2002>;CN=U7,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com
-> > member;range=0-0=<GUID=159c87f7-5401-41f2-97be-aa8bddfdebd9>;<SID=S-1-5-21-888882438-985158672-1989895028-1999>;CN=U4,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=a0cde7f2-37e8-483e-a54f-792bb46fadfa>;<SID=S-1-5-21-888882438-985158672-1989895028-1998>;CN=U3,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=6fba86e8-f415-4d1b-b425-b6a68252779d>;<SID=S-1-5-21-888882438-985158672-1989895028-1996>;CN=U1,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=6c4c8ce7-cccb-4322-b859-44aff8b9b337>;<SID=S-1-5-21-888882438-985158672-1989895028-1997>;CN=U2,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com
-> > ```
+> ```log
+>member;range=1-1=<GUID=d6b51da7-69e1-4a4f-aba5-b8b5eeb01462>;<SID=S-1-5-21-888882438-985158672-1989895028-2018>;CN=MB12,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=4ba6974e-85b7-4d91-a5c4-0cccb15d3d0b>;<SID=S-1-5-21-888882438-985158672-1989895028-2017>;CN=MB11,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=eb9677fc-73d2-4022-89de-aa0ddbc1c24c>;<SID=S-1-5-21-888882438-985158672-1989895028-2020>;CN=U12,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=763a3dce-f2d0-437c-8fca-25e053605884>;<SID=S-1-5-21-888882438-985158672-1989895028-2023>;CN=U15,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=7399c7bf-18c7-41c1-92fb-a375fc5a14c3>;<SID=S-1-5-21-888882438-985158672-1989895028-2024>;CN=U16,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=4ae9b4b5-d518-411e-9a3b-2b01d81065ed>;<SID=S-1-5-21-888882438-985158672-1989895028-2005>;CN=U10,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=574863a4-e60e-47ed-9e27-d311e1f7c8d8>;<SID=S-1-5-21-888882438-985158672-1989895028-2019>;CN=U11,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=acf68373-2861-4329-9b71-d134f591232d>;<SID=S-1-5-21-888882438-985158672-1989895028-2022>;CN=U14,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=c1440758-da9b-45ea-abf9-8595ba4f6fe5>;<SID=S-1-5-21-888882438-985158672-1989895028-2021>;CN=U13,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=f0912ed3-ea1e-4b4d-aa54-8af2b9805a25>;<SID=S-1-5-21-888882438-985158672-1989895028-2001>;CN=U6,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=e6eb5fcb-c4fc-41d2-9244-4e7ce8953cd2>;<SID=S-1-5-21-888882438-985158672-1989895028-2003>;CN=U8,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=077ed197-e41f-440c-9049-ef613a4fba23>;<SID=S-1-5-21-888882438-985158672-1989895028-2004>;CN=U9,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=f54c7b41-0c55-4462-ae2a-72841937f061>;<SID=S-1-5-21-888882438-985158672-1989895028-2000>;CN=U5,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=8f227922-1411-44a5-aaf1-82c78a66aa4f>;<SID=S-1-5-21-888882438-985158672-1989895028-2002>;CN=U7,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com
+> member;range=0-0=<GUID=159c87f7-5401-41f2-97be-aa8bddfdebd9>;<SID=S-1-5-21-888882438-985158672-1989895028-1999>;CN=U4,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=a0cde7f2-37e8-483e-a54f-792bb46fadfa>;<SID=S-1-5-21-888882438-985158672-1989895028-1998>;CN=U3,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=6fba86e8-f415-4d1b-b425-b6a68252779d>;<SID=S-1-5-21-888882438-985158672-1989895028-1996>;CN=U1,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com,<GUID=6c4c8ce7-cccb-4322-b859-44aff8b9b337>;<SID=S-1-5-21-888882438-985158672-1989895028-1997>;CN=U2,OU=test_domain0521003912.com,OU=Microsoft Exchange Hosted Organizations,DC=SG2TDSO100009ED,DC=extest,DC=microsoft,DC=com
+> ```
 
 ## Q: 对非 LVR 的复制来说，如果要删除一个property 是怎么做的呢？
 
