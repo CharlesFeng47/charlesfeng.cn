@@ -673,6 +673,10 @@ blockquote {
   line-height: 1.6;
   font-size: 1rem;
 
+  blockquote {
+    border: 2px solid rgba(0, 0, 0, 0.14);
+  }
+
   &.success {
     border: none;
     background: lighten($green, 48%);
@@ -719,61 +723,6 @@ blockquote {
 
     cite {
       font-size: 2rem;
-    }
-  }
-}
-
-.quotations {
-  display: flex;
-  flex-wrap: wrap;
-
-  .quotation {
-    padding: 1rem;
-    margin: 0 0 1rem;
-    flex: 1 1 calc(50% - 2rem);
-    border: none;
-    background: #f0f0f0;
-    padding: 1rem 1rem 3.5rem !important;
-    border-radius: $border-radius;
-    position: relative;
-
-    p {
-      font-size: 1rem;
-    }
-
-    &:nth-of-type(2n) {
-      margin-left: 1rem;
-    }
-
-    cite {
-      display: block;
-      position: absolute;
-      bottom: 1rem;
-      right: 1.5rem;
-      color: rgba(0, 0, 0, 0.6);
-      margin-top: 1rem;
-      font-size: 1.3rem;
-      text-align: right;
-      font-family: $font-family;
-      color: rgba(0, 0, 0, 0.4);
-    }
-  }
-}
-
-@include small-breakpoint {
-  .quotations {
-    .quotation {
-      padding: 2.5rem 2.5rem 5.5rem !important;
-
-      p {
-        font-size: 1.2rem;
-      }
-
-      cite {
-        position: absolute;
-        bottom: 1.5rem;
-        right: 2.5rem;
-      }
     }
   }
 }

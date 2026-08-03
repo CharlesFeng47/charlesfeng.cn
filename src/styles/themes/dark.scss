@@ -245,7 +245,14 @@ $dark-border: darken($background, 3%);
     color: $comment;
   }
 
+  table {
+    // background: lighten($background, 3%);
+    border: 1px solid lighten($background, 12%);
+    // border-radius: $border-radius;
+  }
+
   th {
+    color: lighten($foreground, 8%);
     border-bottom: 2px solid darken($background, 5%);
   }
 
@@ -255,11 +262,12 @@ $dark-border: darken($background, 3%);
   }
 
   td {
+    color: $foreground;
     border-bottom: 2px solid darken($background, 8%);
   }
 
-  tbody tr:nth-child(even) {
-    background-color: lighten($background, 5%);
+  tbody tr:nth-child(odd) {
+    background-color: lighten($background, 9%);
   }
 
   pre code {
@@ -267,8 +275,11 @@ $dark-border: darken($background, 3%);
   }
 
   blockquote {
-    border: 2px solid #393939;
     background: rgba(0, 0, 0, 0.2);
+
+    blockquote {
+      border: 2px solid #393939;
+    }
 
     p {
       color: $yellow;
@@ -284,15 +295,6 @@ $dark-border: darken($background, 3%);
       }
     }
 
-    &.quotation {
-      border-color: #3a3a3a;
-      background: rgba(0, 0, 0, 0.2);
-      color: $yellow;
-
-      cite {
-        color: rgba(255, 255, 255, 0.6);
-      }
-    }
   }
 
   cite {
