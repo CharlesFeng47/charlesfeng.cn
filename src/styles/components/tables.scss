@@ -5,10 +5,12 @@
 table {
   border-collapse: collapse;
   border-spacing: 0;
-  width: 100%;
+  width: max-content;
   max-width: 100%;
   overflow-x: auto;
   display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 // Extra border underneath header
