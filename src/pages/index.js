@@ -128,6 +128,7 @@ export const pageQuery = graphql`
                 gatsbyImageData(width: 150, height: 150, layout: FIXED, placeholder: BLURRED)
               }
             }
+            thumbnailEmoji
             thumbnailRound
             date
             template
@@ -158,6 +159,7 @@ export const pageQuery = graphql`
                 gatsbyImageData(width: 150, height: 150, layout: FIXED, placeholder: BLURRED)
               }
             }
+            thumbnailEmoji
             thumbnailRound
             date
             template

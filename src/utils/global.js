@@ -10,17 +10,21 @@ const editOnGithub = post => {
 }
 
 // Prefer Gatsby's optimized image data, and keep the original file URL as a fallback for formats like SVG.
-const getThumbnailData = thumbnail => {
+const getThumbnailData = (thumbnail, thumbnailEmoji = '') => {
+  // Emoji input does not resolve to a File node `thumbnail`, so only the derived emoji value is available.
   if (!thumbnail) {
     return {
       optimizedImageData: null,
       publicUrl: '',
+      emoji: thumbnailEmoji,
     }
   }
 
+  // Image (PNG/JPEG) files use Sharp data when available; SVG and unsupported formats fall back to publicURL.
   return {
     optimizedImageData: thumbnail.childImageSharp ? thumbnail.childImageSharp.gatsbyImageData : null,
     publicUrl: thumbnail.publicURL || '',
+    emoji: '',
   }
 }
 

@@ -172,20 +172,37 @@
   object-fit: contain;
 }
 
+.thumbnail-emoji {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
 .single {
   .gatsby-image-wrapper,
-  .thumbnail-image {
+  .thumbnail-image,
+  .thumbnail-emoji {
     height: 50px !important;
     width: 50px !important;
+  }
+
+  .thumbnail-emoji {
+    font-size: 45px;
   }
 }
 
 @include small-breakpoint {
   .single {
     .gatsby-image-wrapper,
-    .thumbnail-image {
+    .thumbnail-image,
+    .thumbnail-emoji {
       height: 150px !important;
       width: 150px !important;
+    }
+
+    .thumbnail-emoji {
+      font-size: 135px;
     }
   }
 }
@@ -266,10 +283,15 @@
   }
 
   .gatsby-image-wrapper,
-  .thumbnail-image {
+  .thumbnail-image,
+  .thumbnail-emoji {
     margin-top: 0;
     height: 30px !important;
     width: 30px !important;
+  }
+
+  .thumbnail-emoji {
+    font-size: 27px;
   }
 
   &.simple {
@@ -346,10 +368,15 @@
         }
 
         .gatsby-image-wrapper,
-        .thumbnail-image {
+        .thumbnail-image,
+        .thumbnail-emoji {
           margin-top: 0;
           height: 50px !important;
           width: 50px !important;
+        }
+
+        .thumbnail-emoji {
+          font-size: 45px;
         }
       }
     }
@@ -376,9 +403,14 @@
           }
 
           .gatsby-image-wrapper,
-          .thumbnail-image {
+          .thumbnail-image,
+          .thumbnail-emoji {
             height: 30px !important;
             width: 30px !important;
+          }
+
+          .thumbnail-emoji {
+            font-size: 27px;
           }
         }
       }

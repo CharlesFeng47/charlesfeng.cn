@@ -11,7 +11,7 @@ export default class SEO extends Component {
     const { postNode, postPath, postSEO } = this.props
     let title
     let description
-    let image = ''
+    let image = config.siteLogo
     let postURL
 
     if (postSEO) {
@@ -19,7 +19,7 @@ export default class SEO extends Component {
       title = postMeta.title
       description = postMeta.description ? postMeta.description : postNode.excerpt
       if (postMeta.thumbnail) {
-        const thumbnail = getThumbnailData(postMeta.thumbnail)
+        const thumbnail = getThumbnailData(postMeta.thumbnail, postMeta.thumbnailEmoji)
         image = getSrc(thumbnail.optimizedImageData) || thumbnail.publicUrl
       }
       postURL = urlJoin(config.siteUrl, replacePath(postPath))

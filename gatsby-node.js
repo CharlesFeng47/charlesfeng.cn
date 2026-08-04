@@ -7,6 +7,13 @@ sharp.simd(false)
 sharp.cache(false)
 
 const postNodes = []
+const emojiThumbnailPattern = /[\p{Extended_Pictographic}\p{Regional_Indicator}\u20e3]/u
+
+const getThumbnailEmoji = thumbnail => {
+  if (typeof thumbnail !== 'string' || !emojiThumbnailPattern.test(thumbnail)) return null
+
+  return thumbnail
+}
 
 function addSiblingNodes(createNodeField) {
   postNodes.sort(({ frontmatter: { date: date1 } }, { frontmatter: { date: date2 } }) => {
@@ -50,6 +57,32 @@ function addSiblingNodes(createNodeField) {
       value: prevNode.fields.slug,
     })
   }
+}
+
+exports.createSchemaCustomization = ({ actions }) => {
+  const { createTypes } = actions
+
+  // Specifically define field `thumbnail` as a File type 
+  // to enable image processing with gatsby-plugin-sharp and distinguish between emoji and image.
+  createTypes(`
+    type MarkdownRemarkFrontmatter {
+      thumbnail: File @fileByRelativePath
+      thumbnailEmoji: String
+    }
+  `)
+}
+
+// Field `thumbnailEmoji` is not stored in YAML.
+// Derive it from the raw thumbnail value when `thumbnail` contains an emoji.
+exports.createResolvers = ({ createResolvers }) => {
+  createResolvers({
+    MarkdownRemarkFrontmatter: {
+      thumbnailEmoji: {
+        type: 'String',
+        resolve: source => getThumbnailEmoji(source.thumbnail),
+      },
+    },
+  })
 }
 
 exports.onCreateNode = ({ node, actions, getNode }) => {

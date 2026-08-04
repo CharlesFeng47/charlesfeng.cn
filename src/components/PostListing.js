@@ -12,6 +12,7 @@ export default class PostListing extends Component {
         path: postEdge.node.fields.slug,
         tags: postEdge.node.frontmatter.tags,
         thumbnail: postEdge.node.frontmatter.thumbnail,
+        thumbnailEmoji: postEdge.node.frontmatter.thumbnailEmoji,
         thumbnailRound: postEdge.node.frontmatter.thumbnailRound,
         title: postEdge.node.frontmatter.title,
         date: postEdge.node.fields.date,
@@ -32,7 +33,10 @@ export default class PostListing extends Component {
       <section className={`posts ${simple ? 'simple' : ''}`}>
         {
           postList.map(post => {
-            const { optimizedImageData, publicUrl } = getThumbnailData(post.thumbnail)
+            const { optimizedImageData, publicUrl, emoji } = getThumbnailData(
+              post.thumbnail,
+              post.thumbnailEmoji
+            )
 
             const popular = post.categories.includes('Popular')
             const date = formatDate(post.date)
@@ -50,6 +54,8 @@ export default class PostListing extends Component {
                   loading="lazy"
                 />
               )
+            } else if (emoji) {
+              thumbnailNode = <span className="thumbnail-emoji" aria-hidden="true">{emoji}</span>
             }
 
             return (
