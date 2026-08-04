@@ -6,6 +6,7 @@ thumbnail: '../thumbnails/active-directory.svg'
 slug: study-notes-on-ad-replication
 categories:
   - Tech
+  - Popular
 tags:
   - Active Directory
   - Server

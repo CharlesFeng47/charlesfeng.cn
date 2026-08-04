@@ -6,6 +6,7 @@ thumbnail: '../thumbnails/microsoft.svg'
 slug: how-to-create-a-fluent-api
 categories:
   - Tech
+  - Popular
 tags:
   - csharp
   - Fluent API
@@ -19,7 +20,7 @@ tags:
 
 #### What's a Fluent API
 
-[Fluent API](https://en.wikipedia.org/wiki/Fluent_interface) 是由 [Eric Evans](https://en.wikipedia.org/w/index.php?title=Eric_Evans_(technologist)&action=edit&redlink=1) 和 [Martin Fowler](https://en.wikipedia.org/wiki/Martin_Fowler_(software_engineer)) 在 2005 年提出的，它是一种面向对象的 API，其设计广泛地依赖于 method chaining。它的目标是通过创建**特定于某个领域的语言（[domain-specific language](https://en.wikipedia.org/wiki/Domain-specific_language), DSL）**来提高代码的可读性。
+[Fluent API](https://en.wikipedia.org/wiki/Fluent_interface) 是由 [Eric Evans](https://en.wikipedia.org/w/index.php?title=Eric_Evans_(technologist)&action=edit&redlink=1) 和 [Martin Fowler](https://en.wikipedia.org/wiki/Martin_Fowler_(software_engineer)) 在 2005 年提出的，它是一种面向对象的 API，其设计广泛地依赖于 method chaining。它的目标是通过创建 **特定于某个领域的语言（[domain-specific language](https://en.wikipedia.org/wiki/Domain-specific_language), DSL）** 来提高代码的可读性。
 
 Java 8 中的 [Stream](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html) 和 C# 中的 [LINQ](https://docs.microsoft.com/en-us/dotnet/standard/using-linq) 都是 Fluent API，另一个比较好的例子是 [Azure Fluent API](https://github.com/Azure/azure-libraries-for-net)，可以参见[最后的一点分析](#azure-fluent-api-insights)。
 

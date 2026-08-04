@@ -7,7 +7,6 @@ slug: why-grpc-uses-http2
 categories:
   - Tech
   - Thinking
-  - Popular
 tags:
   - gRPC
   - RPC
