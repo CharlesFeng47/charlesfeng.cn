@@ -2,7 +2,7 @@
 date: 2026-04-24
 title: "逻辑时钟算法 Logical clock algorithms：从 why 到 how"
 template: post
-thumbnail: "../thumbnails/sync.png"
+thumbnail: "../thumbnails/world-map.svg"
 slug: logical-clock-algorithms
 categories:
   - Tech
@@ -85,7 +85,7 @@ Causality（因果关系）在这里不是「业务上 A 必然导致 B」，而
 看一个贯穿全文的例子：
 
 ```text
-Process A                         Process B
+Process A                        Process B
 
 a: write(x = 1)                  c: write(y = 1)
        |                                |
@@ -158,7 +158,7 @@ Lamport Clock 为每个进程维护一个整数：
 把它应用到上面的例子：
 
 ```text
-Process A                         Process B
+Process A                        Process B
 
 a: L=1                           c: L=1
 b: L=2  -----------------------> d: max(1, 2) + 1 = 3
@@ -237,7 +237,7 @@ Vector Clock 不再用一个整数表示历史，而是为每个进程保留一�
 仍然使用同一组事件：
 
 ```text
-Process A                         Process B
+Process A                        Process B
 
 a: [1, 0]                        c: [0, 1]
 b: [2, 0] ---------------------> d: max([0, 1], [2, 0])
